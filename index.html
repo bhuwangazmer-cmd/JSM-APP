@@ -21,11 +21,11 @@
             -webkit-tap-highlight-color: transparent;
             overflow-x: hidden;
             overscroll-behavior-y: none;
-            transition: background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1), color 0.3s ease;
+            transition: background-color 0.38s cubic-bezier(0.32, 0.72, 0, 1), color 0.3s ease;
         }
         input, select, textarea {
             font-size: 15px !important;
-            transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, transform 0.2s ease;
         }
         input:focus, select:focus, textarea:focus {
             outline: none;
@@ -37,83 +37,90 @@
         .shadow-2xs { box-shadow: 0 1px 2px 0 rgba(20, 20, 26, 0.04); }
         .shadow-xs { box-shadow: 0 2px 6px -1px rgba(20, 20, 26, 0.06), 0 1px 2px -1px rgba(20, 20, 26, 0.04); }
         .backdrop-blur-xs {
-            -webkit-backdrop-filter: blur(5px);
-            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
         }
 
-        /* Keyframe Animations */
+        /* Buttery-Smooth iOS/Android Spring Keyframes */
         @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translate3d(0, 12px, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
+            0% { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.99); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes slideInRight {
-            from { opacity: 0; transform: translate3d(32px, 0, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
+            0% { opacity: 0; transform: translate3d(42px, 0, 0) scale(0.99); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes slideInLeft {
-            from { opacity: 0; transform: translate3d(-32px, 0, 0); }
-            to { opacity: 1; transform: translate3d(0, 0, 0); }
+            0% { opacity: 0; transform: translate3d(-42px, 0, 0) scale(0.99); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes modalSheetUp {
-            from { opacity: 0; transform: translate3d(0, 36px, 0) scale(0.97); }
-            to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+            0% { opacity: 0; transform: translate3d(0, 44px, 0) scale(0.96); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
         }
         @keyframes modalSheetDown {
-            from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
-            to { opacity: 0; transform: translate3d(0, 32px, 0) scale(0.97); }
+            0% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+            100% { opacity: 0; transform: translate3d(0, 36px, 0) scale(0.96); }
         }
         @keyframes drawerSlideIn {
-            from { transform: translate3d(100%, 0, 0); }
-            to { transform: translate3d(0, 0, 0); }
+            0% { transform: translate3d(100%, 0, 0); }
+            100% { transform: translate3d(0, 0, 0); }
         }
         @keyframes drawerSlideOut {
-            from { transform: translate3d(0, 0, 0); }
-            to { transform: translate3d(100%, 0, 0); }
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(100%, 0, 0); }
         }
         @keyframes backdropFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
         @keyframes backdropFadeOut {
-            from { opacity: 1; }
-            to { opacity: 0; }
+            0% { opacity: 1; }
+            100% { opacity: 0; }
         }
         @keyframes pinShake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-8px); }
-            40%, 80% { transform: translateX(8px); }
+            0%, 100% { transform: translate3d(0, 0, 0); }
+            20%, 60% { transform: translate3d(-8px, 0, 0); }
+            40%, 80% { transform: translate3d(8px, 0, 0); }
         }
 
         .animate-view {
-            animation: fadeSlideUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: fadeSlideUp 0.36s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+            backface-visibility: hidden;
             will-change: transform, opacity;
         }
         .animate-swipe-next {
-            animation: slideInRight 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: slideInRight 0.34s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+            backface-visibility: hidden;
             will-change: transform, opacity;
         }
         .animate-swipe-prev {
-            animation: slideInLeft 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: slideInLeft 0.34s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+            backface-visibility: hidden;
             will-change: transform, opacity;
         }
         .animate-sheet {
-            animation: modalSheetUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: modalSheetUp 0.36s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+            backface-visibility: hidden;
             will-change: transform, opacity;
         }
         .animate-sheet-out {
-            animation: modalSheetDown 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+            animation: modalSheetDown 0.24s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+            backface-visibility: hidden;
             will-change: transform, opacity;
         }
         .animate-drawer-in {
-            animation: drawerSlideIn 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: drawerSlideIn 0.38s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+            backface-visibility: hidden;
             will-change: transform;
         }
         .animate-drawer-out {
-            animation: drawerSlideOut 0.24s cubic-bezier(0.4, 0, 1, 1) forwards;
+            animation: drawerSlideOut 0.26s cubic-bezier(0.32, 0, 0.67, 0) forwards;
+            backface-visibility: hidden;
             will-change: transform;
         }
         .animate-backdrop-in {
-            animation: backdropFadeIn 0.24s ease forwards;
+            animation: backdropFadeIn 0.26s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
         .animate-backdrop-out {
             animation: backdropFadeOut 0.22s ease forwards;
@@ -122,36 +129,71 @@
             animation: pinShake 0.36s cubic-bezier(0.36, 0.07, 0.19, 0.97);
         }
 
+        /* Instant-Press + Spring-Overshoot Release for All Taps */
         .touch-item {
             -webkit-user-select: none;
             user-select: none;
             -webkit-touch-callout: none;
-            transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.18s ease, background-color 0.2s ease;
+            transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+            backface-visibility: hidden;
+            transition: transform 0.38s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        background-color 0.22s ease,
+                        border-color 0.22s ease,
+                        box-shadow 0.22s ease,
+                        opacity 0.2s ease;
         }
         .touch-item:active {
-            transform: scale(0.96);
+            transform: translate3d(0, 0, 0) scale3d(0.94, 0.94, 1) !important;
+            transition: transform 0.07s cubic-bezier(0.2, 0, 0, 1),
+                        background-color 0.07s ease !important;
         }
+
+        /* Bottom Capsule Dock Spring Button */
         .dock-btn {
-            transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            transform: translate3d(0, 0, 0) scale3d(1, 1, 1);
+            backface-visibility: hidden;
+            transition: transform 0.42s cubic-bezier(0.34, 1.56, 0.64, 1),
+                        background-color 0.28s cubic-bezier(0.32, 0.72, 0, 1),
+                        color 0.22s ease,
+                        box-shadow 0.28s ease;
         }
+        .dock-btn:active {
+            transform: translate3d(0, 0, 0) scale3d(0.88, 0.88, 1) !important;
+            transition: transform 0.07s ease-out !important;
+        }
+
+        /* Gliding Pill in Student Profile Segmented Bar */
+        #psecSliderPill {
+            transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.25s ease;
+            will-change: transform;
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Pull-to-Refresh Indicator & Main Rubber-Band */
+        /* Pull-to-Refresh & Real-Time Swipe Containers */
         #ptrIndicator {
             transform: translate3d(-50%, -80px, 0);
-            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
+            transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
             will-change: transform, opacity;
         }
         #ptrIndicator.ptr-dragging {
             transition: none !important;
         }
         #appMainContainer {
-            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: transform 0.36s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease;
+            backface-visibility: hidden;
             will-change: transform;
         }
-        #appMainContainer.ptr-dragging {
+        #appMainContainer.ptr-dragging,
+        .swipe-dragging {
             transition: none !important;
+            animation: none !important;
+        }
+        .swipe-spring-back {
+            transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease !important;
         }
 
         /* ================= THEME 1: MODERN (VIBRANT BENTO PASTELS) ================= */
@@ -248,7 +290,8 @@
             background: linear-gradient(135deg, #1E2436 0%, #171B26 100%) !important;
             border-color: #2B3348 !important;
         }
-        body[data-theme="dark"] .bg-white {
+        body[data-theme="dark"] .bg-white,
+        body[data-theme="dark"] #psecSliderPill {
             background-color: #161A23 !important;
             color: #F3F4F6 !important;
         }
@@ -554,11 +597,13 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-4 gap-1 bg-zinc-200/70 p-1 rounded-2xl">
-            <button type="button" onclick="switchProfileSection('att')" id="psec-btn-att" class="touch-item h-9 rounded-xl text-xs font-bold bg-white text-zinc-900 shadow-2xs transition-all duration-200">Attend</button>
-            <button type="button" onclick="switchProfileSection('cls')" id="psec-btn-cls" class="touch-item h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-all duration-200">Class</button>
-            <button type="button" onclick="switchProfileSection('fee')" id="psec-btn-fee" class="touch-item h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-all duration-200">Fees</button>
-            <button type="button" onclick="switchProfileSection('not')" id="psec-btn-not" class="touch-item h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-all duration-200">Notes</button>
+        <!-- Gliding Segmented Control -->
+        <div class="relative grid grid-cols-4 bg-zinc-200/70 p-1 rounded-2xl overflow-hidden">
+            <div id="psecSliderPill" class="absolute top-1 bottom-1 left-1 w-[calc(25%-2px)] bg-white rounded-xl shadow-2xs pointer-events-none"></div>
+            <button type="button" onclick="switchProfileSection('att')" id="psec-btn-att" class="touch-item relative z-10 h-9 rounded-xl text-xs font-bold text-zinc-900 transition-colors duration-200">Attend</button>
+            <button type="button" onclick="switchProfileSection('cls')" id="psec-btn-cls" class="touch-item relative z-10 h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-colors duration-200">Class</button>
+            <button type="button" onclick="switchProfileSection('fee')" id="psec-btn-fee" class="touch-item relative z-10 h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-colors duration-200">Fees</button>
+            <button type="button" onclick="switchProfileSection('not')" id="psec-btn-not" class="touch-item relative z-10 h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-colors duration-200">Notes</button>
         </div>
 
         <div id="psec-att" class="space-y-4 animate-view">
@@ -1060,13 +1105,17 @@
     var subLongPressTriggered = false;
     var skipNoteBlur = false;
 
-    // Pull-to-Refresh & Horizontal Swipe State
+    // 60fps Pull-to-Refresh & Real-Time Interactive Swipe State
     var gestureStartX = 0;
     var gestureStartY = 0;
+    var gestureStartTime = 0;
     var isPtrEligible = false;
     var isPtrDragging = false;
     var isPtrRefreshing = false;
     var isSwipeEligible = false;
+    var isHorizontalDragging = false;
+    var activeSwipeEl = null;
+    var rafGestureId = null;
 
     function toLocalIso(d) {
         var dt = d || new Date();
@@ -1133,10 +1182,10 @@
             modal.classList.replace('flex', 'hidden');
             modal.classList.remove('animate-backdrop-out');
             if (sheet) sheet.classList.remove('animate-sheet-out');
-        }, 200);
+        }, 220);
     }
 
-    // --- GLOBAL PULL-TO-REFRESH & HORIZONTAL SWIPE ENGINE ---
+    // --- GLOBAL 60FPS PULL-TO-REFRESH & REAL-TIME FINGER-FOLLOWING SWIPE ENGINE ---
     function isAnyOverlayModalOpen() {
         var modalIds = [
             'pinLockScreen', 'addSubjectModal', 'studentModal', 'quickAttModal',
@@ -1148,6 +1197,41 @@
             if (el && !el.classList.contains('hidden')) return true;
         }
         return false;
+    }
+
+    function getActiveSwipeTargetElement() {
+        if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
+            return document.getElementById('psec-' + activeProfileSec);
+        }
+        return document.getElementById('tab-' + currentMainTab);
+    }
+
+    function canSwipeInDirection(direction) {
+        if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
+            var pIdx = PROFILE_SECS_ORDER.indexOf(activeProfileSec);
+            return direction === 'next' ? (pIdx < PROFILE_SECS_ORDER.length - 1) : (pIdx > 0);
+        }
+        var idx = MAIN_TABS_ORDER.indexOf(currentMainTab);
+        return direction === 'next' ? (idx < MAIN_TABS_ORDER.length - 1) : (idx > 0);
+    }
+
+    function resetActiveSwipeElement(el, withSpring) {
+        if (!el) return;
+        el.classList.remove('swipe-dragging');
+        if (withSpring) {
+            el.classList.add('swipe-spring-back');
+            el.style.transform = 'translate3d(0, 0, 0)';
+            el.style.opacity = '1';
+            setTimeout(function() {
+                el.classList.remove('swipe-spring-back');
+                el.style.transform = '';
+                el.style.opacity = '';
+            }, 320);
+        } else {
+            el.classList.remove('swipe-spring-back');
+            el.style.transform = '';
+            el.style.opacity = '';
+        }
     }
 
     function initTouchGestures() {
@@ -1166,6 +1250,7 @@
             if (!sessionPin || isAnyOverlayModalOpen()) {
                 isPtrEligible = false;
                 isSwipeEligible = false;
+                isHorizontalDragging = false;
                 return;
             }
 
@@ -1174,11 +1259,14 @@
 
             gestureStartX = e.touches[0].clientX;
             gestureStartY = e.touches[0].clientY;
+            gestureStartTime = Date.now();
 
             var atTop = (window.scrollY || document.documentElement.scrollTop || 0) <= 2;
             isPtrEligible = atTop && !isPtrRefreshing && !insideInteractive;
             isSwipeEligible = !insideInteractive;
             isPtrDragging = false;
+            isHorizontalDragging = false;
+            activeSwipeEl = null;
         }, { passive: true });
 
         document.addEventListener('touchmove', function(e) {
@@ -1192,6 +1280,38 @@
                 cancelSubLongPress();
             }
 
+            // 1. Check for Real-Time Horizontal Finger-Following Swipe
+            if (!isPtrDragging && isSwipeEligible) {
+                if (!isHorizontalDragging && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.35) {
+                    isHorizontalDragging = true;
+                    isPtrEligible = false;
+                    activeSwipeEl = getActiveSwipeTargetElement();
+                    if (activeSwipeEl) {
+                        activeSwipeEl.classList.remove('animate-view', 'animate-swipe-next', 'animate-swipe-prev', 'swipe-spring-back');
+                        activeSwipeEl.classList.add('swipe-dragging');
+                    }
+                }
+
+                if (isHorizontalDragging && activeSwipeEl) {
+                    if (e.cancelable) e.preventDefault();
+                    var dir = dx < 0 ? 'next' : 'prev';
+                    var hasNeighbor = canSwipeInDirection(dir);
+                    // Rubber-band resistance at first/last tab, smooth follow in between
+                    var dampedX = hasNeighbor ? (dx * 0.52) : (dx * 0.16);
+                    var fadeAlpha = Math.max(0.76, 1 - Math.abs(dampedX) / 420);
+
+                    if (rafGestureId) cancelAnimationFrame(rafGestureId);
+                    rafGestureId = requestAnimationFrame(function() {
+                        if (activeSwipeEl && isHorizontalDragging) {
+                            activeSwipeEl.style.transform = 'translate3d(' + dampedX.toFixed(1) + 'px, 0, 0)';
+                            activeSwipeEl.style.opacity = fadeAlpha.toFixed(2);
+                        }
+                    });
+                    return;
+                }
+            }
+
+            // 2. Check for Vertical Pull-to-Refresh
             if (!isPtrEligible) return;
 
             if (!isPtrDragging && (Math.abs(dx) > Math.abs(dy) || dy < 0)) {
@@ -1208,15 +1328,23 @@
                 ptrEl.classList.add('ptr-dragging');
                 if (mainEl) mainEl.classList.add('ptr-dragging');
 
-                ptrEl.style.opacity = String(Math.min(1, pullDist / 42));
-                ptrEl.style.transform = 'translate3d(-50%, ' + Math.round(pullDist - 52) + 'px, 0)';
-                ptrSpin.style.transform = 'rotate(' + Math.round(pullDist * 4.2) + 'deg)';
-                if (mainEl) mainEl.style.transform = 'translate3d(0, ' + Math.round(pullDist * 0.38) + 'px, 0)';
-                ptrTxt.textContent = pullDist >= 64 ? 'Release to sync' : 'Pull to sync';
+                if (rafGestureId) cancelAnimationFrame(rafGestureId);
+                rafGestureId = requestAnimationFrame(function() {
+                    ptrEl.style.opacity = String(Math.min(1, pullDist / 42));
+                    ptrEl.style.transform = 'translate3d(-50%, ' + Math.round(pullDist - 52) + 'px, 0)';
+                    ptrSpin.style.transform = 'rotate(' + Math.round(pullDist * 4.2) + 'deg)';
+                    if (mainEl) mainEl.style.transform = 'translate3d(0, ' + Math.round(pullDist * 0.38) + 'px, 0)';
+                    ptrTxt.textContent = pullDist >= 64 ? 'Release to sync' : 'Pull to sync';
+                });
             }
         }, { passive: false });
 
         document.addEventListener('touchend', function(e) {
+            if (rafGestureId) {
+                cancelAnimationFrame(rafGestureId);
+                rafGestureId = null;
+            }
+
             if (isPtrDragging) {
                 ptrEl.classList.remove('ptr-dragging');
                 if (mainEl) mainEl.classList.remove('ptr-dragging');
@@ -1234,17 +1362,26 @@
                 return;
             }
 
-            if (!isSwipeEligible || !e.changedTouches || !e.changedTouches[0]) return;
-            var endX = e.changedTouches[0].clientX;
-            var endY = e.changedTouches[0].clientY;
-            var deltaX = endX - gestureStartX;
-            var deltaY = endY - gestureStartY;
+            if (isHorizontalDragging) {
+                var endX = (e.changedTouches && e.changedTouches[0]) ? e.changedTouches[0].clientX : gestureStartX;
+                var deltaX = endX - gestureStartX;
+                var elapsed = Math.max(1, Date.now() - gestureStartTime);
+                var velocityX = Math.abs(deltaX) / elapsed; // px per ms
+                var dir = deltaX < 0 ? 'next' : 'prev';
 
-            if (Math.abs(deltaX) >= 62 && Math.abs(deltaY) < Math.abs(deltaX) * 0.58) {
-                cancelStuLongPress();
-                cancelSubLongPress();
-                handleHorizontalSwipe(deltaX < 0 ? 'next' : 'prev');
+                // Trigger switch if dragged >= 52px OR quick flick (velocity > 0.38px/ms & >= 28px)
+                if ((Math.abs(deltaX) >= 52 || (velocityX > 0.38 && Math.abs(deltaX) >= 28)) && canSwipeInDirection(dir)) {
+                    resetActiveSwipeElement(activeSwipeEl, false);
+                    handleHorizontalSwipe(dir);
+                } else {
+                    resetActiveSwipeElement(activeSwipeEl, true);
+                }
+                isHorizontalDragging = false;
+                isSwipeEligible = false;
+                activeSwipeEl = null;
+                return;
             }
+
             isSwipeEligible = false;
         }, { passive: true });
     }
@@ -1537,7 +1674,7 @@
             modal.classList.replace('flex', 'hidden');
             modal.classList.remove('animate-backdrop-out');
             if (panel) panel.classList.remove('animate-drawer-out');
-        }, 220);
+        }, 240);
     }
 
     function openLiveSheetViewer() {
@@ -1840,7 +1977,7 @@
         }, 400);
     }
 
-    // --- NAVIGATION & CAPSULE DOCK (WITH DIRECTIONAL SWIPE ANIMATION) ---
+    // --- NAVIGATION & CAPSULE DOCK (WITH DIRECTIONAL SWIPE & SPRING DOCK) ---
     function showMainTab(tab, swipeDir) {
         var prevIdx = MAIN_TABS_ORDER.indexOf(currentMainTab);
         var nextIdx = MAIN_TABS_ORDER.indexOf(tab);
@@ -1854,7 +1991,9 @@
 
         for (var i = 0; i < MAIN_TABS_ORDER.length; i++) {
             var t = MAIN_TABS_ORDER[i];
-            document.getElementById('tab-' + t).classList.add('hidden');
+            var el = document.getElementById('tab-' + t);
+            resetActiveSwipeElement(el, false);
+            el.classList.add('hidden');
             var btn = document.getElementById('bnav-' + t);
             if (btn) {
                 btn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center text-zinc-400 font-medium relative";
@@ -1889,9 +2028,15 @@
         }
 
         activeProfileSec = sec;
+        var slider = document.getElementById('psecSliderPill');
+        if (slider && nextIdx !== -1) {
+            slider.style.transform = 'translate3d(' + (nextIdx * 100) + '%, 0, 0)';
+        }
+
         for (var i = 0; i < PROFILE_SECS_ORDER.length; i++) {
             var k = PROFILE_SECS_ORDER[i];
             var secEl = document.getElementById('psec-' + k);
+            resetActiveSwipeElement(secEl, false);
             if (k === sec) {
                 secEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next', 'animate-swipe-prev');
                 void secEl.offsetWidth;
@@ -1904,8 +2049,8 @@
             var btn = document.getElementById('psec-btn-' + k);
             if (btn) {
                 btn.className = (k === sec)
-                    ? "touch-item h-9 rounded-xl text-xs font-bold bg-white text-zinc-900 shadow-2xs transition-all duration-200"
-                    : "touch-item h-9 rounded-xl text-xs font-semibold text-zinc-600 transition-all duration-200";
+                    ? "touch-item relative z-10 h-9 rounded-xl text-xs font-extrabold text-zinc-900 transition-colors duration-200"
+                    : "touch-item relative z-10 h-9 rounded-xl text-xs font-semibold text-zinc-500 transition-colors duration-200";
             }
         }
     }
@@ -1970,7 +2115,7 @@
         handleFeeStatusUI();
     }
 
-    // --- RECENT ACTIVITY (OPTIMIZED SINGLE-WRITE DOM) ---
+    // --- RECENT ACTIVITY ---
     function renderRecentActivity() {
         var box = document.getElementById('recentActivityList');
         if (!box) return;
@@ -2118,6 +2263,12 @@
 
     function setSubjectFilter(sub) {
         selectedSubjectFilter = sub;
+        var grid = document.getElementById('studentGrid');
+        if (grid) {
+            grid.classList.remove('animate-view');
+            void grid.offsetWidth;
+            grid.classList.add('animate-view');
+        }
         renderStudents();
     }
 
@@ -2146,7 +2297,7 @@
                 'class="touch-item ' + modClass + ' bg-white border border-zinc-200/80 p-4 rounded-[26px] cursor-pointer flex flex-col justify-between min-h-[122px] shadow-2xs">' +
                 '<div class="flex justify-between items-center gap-1">' +
                     '<span class="px-2.5 py-0.5 rounded-full bg-white/65 text-[10px] font-bold text-zinc-800">' + count + ' ' + (count === 1 ? 'Student' : 'Students') + '</span>' +
-                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="w-7 h-7 rounded-full bg-white/50 text-zinc-700 flex items-center justify-center text-xs font-bold">⋮</button>' +
+                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="touch-item w-7 h-7 rounded-full bg-white/50 text-zinc-700 flex items-center justify-center text-xs font-bold">⋮</button>' +
                 '</div>' +
                 '<div class="mt-3 flex items-end justify-between gap-2">' +
                     '<h3 class="font-extrabold text-zinc-900 text-base leading-snug truncate">' + escHtml(sub) + '</h3>' +
@@ -2159,7 +2310,7 @@
     // --- STUDENTS ---
     function onSearchStudents() {
         clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(renderStudents, 80);
+        searchDebounceTimer = setTimeout(renderStudents, 70);
     }
 
     function openStudentModal() {
@@ -2304,7 +2455,7 @@
         if (!s) return;
 
         if (action === 'edit') {
-            setTimeout(function() { openEditStudentModal(stuId); }, 210);
+            setTimeout(function() { openEditStudentModal(stuId); }, 220);
         } else if (action === 'trash') {
             appData.students = appData.students.filter(function(st) { return st.id !== stuId; });
             moveToTrash('Student', s.id, s.name, 'Subject: ' + s.subject + ' | Book: ' + s.book, s);
@@ -2388,12 +2539,12 @@
                     '</div>' +
                     '<p class="text-xs text-zinc-400 truncate mt-0.5">' + escHtml(s.subject) + ' · Book: ' + escHtml(s.book) + '</p>' +
                 '</div>' +
-                '<button type="button" onclick="event.stopPropagation(); openStudentActionModal(\'' + s.id + '\');" class="w-8 h-8 rounded-full text-zinc-400 flex items-center justify-center text-sm shrink-0">⋮</button>' +
+                '<button type="button" onclick="event.stopPropagation(); openStudentActionModal(\'' + s.id + '\');" class="touch-item w-8 h-8 rounded-full text-zinc-400 flex items-center justify-center text-sm shrink-0">⋮</button>' +
             '</div>';
         }).join('');
     }
 
-    // --- STUDENT PROFILE (SEPARATED INITIAL OPEN VS IN-PLACE REFRESH) ---
+    // --- STUDENT PROFILE ---
     function getActiveStudent() {
         return appData.students.find(function(s) { return s.id === currentStudentId; });
     }
@@ -2433,9 +2584,9 @@
             document.getElementById('tab-' + t).classList.add('hidden');
         });
         var profEl = document.getElementById('profileScreen');
-        profEl.classList.remove('hidden', 'animate-view');
+        profEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next');
         void profEl.offsetWidth;
-        profEl.classList.add('animate-view');
+        profEl.classList.add('animate-swipe-next');
 
         document.getElementById('stuAttDate').value = todayStr;
         selectStuAttPill('Present');
@@ -2535,7 +2686,7 @@
             setTimeout(function() {
                 toast.classList.replace('flex', 'hidden');
                 toast.classList.remove('animate-sheet-out');
-            }, 200);
+            }, 220);
         }, 6000);
     }
 
@@ -2668,7 +2819,7 @@
 
             if (isSelected) {
                 html.push(
-                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md">' +
+                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md scale-105">' +
                         '<span class="w-1 h-1 rounded-full bg-white"></span>' +
                         '<span class="text-[10px] opacity-80">' + dayNames[d.getDay()] + '</span>' +
                         '<span class="text-xs font-extrabold">' + d.getDate() + '</span>' +
@@ -2691,6 +2842,12 @@
         selectedAttDate = dateVal;
         document.getElementById('regAttDate').value = dateVal;
         renderWeekStrip();
+        var list = document.getElementById('masterAttList');
+        if (list) {
+            list.classList.remove('animate-view');
+            void list.offsetWidth;
+            list.classList.add('animate-view');
+        }
         renderMasterAttendance();
     }
 
@@ -2711,6 +2868,12 @@
                 ? 'touch-item h-8 px-3.5 rounded-full text-xs font-bold bg-zinc-900 text-white shrink-0'
                 : 'touch-item h-8 px-3.5 rounded-full text-xs font-semibold bg-white border border-zinc-200 text-zinc-600 shrink-0';
         });
+        var list = document.getElementById('masterAttList');
+        if (list) {
+            list.classList.remove('animate-view');
+            void list.offsetWidth;
+            list.classList.add('animate-view');
+        }
         renderMasterAttendance();
     }
 
