@@ -207,6 +207,12 @@
             transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease !important;
         }
 
+        /* Active Theme Selection Ring in Side Menu */
+        .theme-btn-active {
+            border-width: 2px !important;
+            border-color: #14141A !important;
+        }
+
         /* ================= THEME 1: PASTEL BENTO ================= */
         body[data-theme="modern"] {
             background-color: #F6F5FA !important;
@@ -341,11 +347,24 @@
             background-color: #1E2433 !important;
             border: 1px solid #2E364A !important;
         }
+        body[data-theme="dark"] #bottomCapsuleDock .bg-white {
+            background-color: #D8C896 !important;
+            color: #0D0F14 !important;
+        }
+        body[data-theme="dark"] .theme-btn-active {
+            border-color: #D8C896 !important;
+        }
         body[data-theme="dark"] input,
         body[data-theme="dark"] select,
         body[data-theme="dark"] textarea {
             color: #F3F4F6 !important;
             border-color: #2E3646 !important;
+        }
+        body[data-theme="dark"] input:focus,
+        body[data-theme="dark"] select:focus,
+        body[data-theme="dark"] textarea:focus {
+            border-color: #D8C896 !important;
+            box-shadow: 0 0 0 3px rgba(216, 200, 150, 0.16) !important;
         }
 
         /* ================= THEME 3: NEON PULSE (WITH HIGH-CONTRAST PILL FIXES) ================= */
@@ -485,6 +504,9 @@
             background-color: #95F267 !important;
             color: #0B0B0E !important;
         }
+        body[data-theme="neon"] .theme-btn-active {
+            border-color: #95F267 !important;
+        }
         /* Keypad Backspace Button in Electric Violet */
         body[data-theme="neon"] #pinBackspaceBtn {
             background-color: #8E63F9 !important;
@@ -587,14 +609,14 @@
                     <h2 class="notice-label text-xl font-extrabold tracking-tight leading-snug mt-0.5">Daily Notice</h2>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button type="button" onmousedown="skipNoteBlur=true" onclick="saveNoticeBoard(true)" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">Save</button>
-                    <button type="button" onmousedown="skipNoteBlur=true" onclick="trashNoticeBoard()" class="notice-sub-btn touch-item h-8 px-3 rounded-full bg-white/75 text-zinc-900 text-xs font-bold shadow-2xs" title="Move to Trash">Clear</button>
+                    <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="saveNoticeBoard(true)" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">Save</button>
+                    <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="trashNoticeBoard()" class="notice-sub-btn touch-item h-8 px-3 rounded-full bg-white/75 text-zinc-900 text-xs font-bold shadow-2xs" title="Move to Trash">Clear</button>
                 </div>
             </div>
             <textarea id="noticeBoardInput" onblur="if(!skipNoteBlur) saveNoticeBoard(); skipNoteBlur=false;" rows="2" class="w-full bg-white/55 backdrop-blur-xs border-0 rounded-2xl p-3 text-zinc-900 text-xs font-medium leading-relaxed placeholder-zinc-500 focus:ring-0" placeholder="Tap to write announcements, book orders, or reminders..."></textarea>
             <div class="flex justify-between items-center pt-0.5">
                 <span class="notice-label text-[10px] font-semibold opacity-55">Locked height · Tap to expand</span>
-                <button type="button" id="noticeExpandBtn" onmousedown="skipNoteBlur=true" onclick="toggleNoticeBoardExpand(event)" class="notice-sub-btn touch-item h-7 px-3 rounded-full bg-white/75 text-zinc-900 text-[11px] font-bold flex items-center gap-1 shadow-2xs">
+                <button type="button" id="noticeExpandBtn" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="toggleNoticeBoardExpand(event)" class="notice-sub-btn touch-item h-7 px-3 rounded-full bg-white/75 text-zinc-900 text-[11px] font-bold flex items-center gap-1 shadow-2xs">
                     <span id="noticeExpandLabel">Expand</span>
                     <span id="noticeExpandIcon" class="text-[10px] leading-none">▾</span>
                 </button>
@@ -820,8 +842,8 @@
                 <div class="flex justify-between items-center">
                     <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">Student Notes</span>
                     <div class="flex items-center gap-1.5">
-                        <button type="button" onmousedown="skipNoteBlur=true" onclick="saveStudentNotes(true)" class="touch-item h-7 bg-zinc-900 text-white px-3 rounded-full text-xs font-bold">Save</button>
-                        <button type="button" onmousedown="skipNoteBlur=true" onclick="trashStudentNotes()" class="touch-item h-7 bg-zinc-100 text-zinc-600 px-2.5 rounded-full text-xs font-semibold">Clear</button>
+                        <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="saveStudentNotes(true)" class="touch-item h-7 bg-zinc-900 text-white px-3 rounded-full text-xs font-bold">Save</button>
+                        <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="trashStudentNotes()" class="touch-item h-7 bg-zinc-100 text-zinc-600 px-2.5 rounded-full text-xs font-semibold">Clear</button>
                     </div>
                 </div>
                 <textarea id="stuNotes" onblur="if(!skipNoteBlur) saveStudentNotes(); skipNoteBlur=false;" rows="6" placeholder="Write practice notes or reminders..." class="w-full border-0 p-0 bg-transparent text-zinc-800 text-sm leading-relaxed focus:ring-0 focus:shadow-none"></textarea>
@@ -1271,6 +1293,7 @@
     var subPressTimer = null;
     var subLongPressTriggered = false;
     var skipNoteBlur = false;
+    var skipNoteBlurTimer = null;
     var isNoticeExpanded = false;
 
     // 60fps Pull-to-Refresh & Real-Time Interactive Swipe State
@@ -1303,6 +1326,33 @@
             .replace(/'/g, '&#39;');
     }
 
+    // Self-resetting blur guard so unfocused button taps never lock out future auto-saves
+    function armSkipNoteBlur() {
+        skipNoteBlur = true;
+        clearTimeout(skipNoteBlurTimer);
+        skipNoteBlurTimer = setTimeout(function() {
+            skipNoteBlur = false;
+        }, 350);
+    }
+
+    // Deterministic sorting by date (newest first) with timestamp/ID tie-breaker
+    function getRecordOrderValue(item) {
+        if (!item) return 0;
+        if (typeof item.createdAt === 'number') return item.createdAt;
+        if (typeof item.id === 'number') return item.id;
+        var digits = String(item.id || '').replace(/\D/g, '');
+        return digits ? Number(digits) : 0;
+    }
+
+    function sortByDateDesc(arr) {
+        if (!Array.isArray(arr)) return [];
+        return arr.sort(function(a, b) {
+            var cmp = (b.date || '').localeCompare(a.date || '');
+            if (cmp !== 0) return cmp;
+            return getRecordOrderValue(b) - getRecordOrderValue(a);
+        });
+    }
+
     var todayStr = toLocalIso();
     var currentMonthStr = todayStr.slice(0, 7);
 
@@ -1323,9 +1373,10 @@
         checkSessionOnStartup();
     };
 
-    // --- NOTICE BOARD intentional EXPAND / COLLAPSE TOGGLE ---
+    // --- NOTICE BOARD INTENTIONAL EXPAND / COLLAPSE TOGGLE ---
     function toggleNoticeBoardExpand(e) {
         if (e) e.stopPropagation();
+        skipNoteBlur = false;
         if (isHorizontalDragging || isPtrDragging) return;
         isNoticeExpanded = !isNoticeExpanded;
         var box = document.getElementById('noticeBoardInput');
@@ -1731,6 +1782,14 @@
         updatePinDotsUI();
     }
 
+    function normalizeAllStudentsData() {
+        (appData.students || []).forEach(function(s) {
+            sortByDateDesc(s.attendance);
+            sortByDateDesc(s.classes);
+            syncStudentFeeSummary(s);
+        });
+    }
+
     function verifyPinWithServer(candidatePin) {
         if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) {
             alert('Please paste your SHEET_API_URL inside index.html first.');
@@ -1780,7 +1839,11 @@
                 try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
             }
             purgeExpiredTrash();
-            document.getElementById('noticeBoardInput').value = appData.noticeBoard || '';
+            normalizeAllStudentsData();
+            var nbEl = document.getElementById('noticeBoardInput');
+            if (nbEl && document.activeElement !== nbEl) {
+                nbEl.value = appData.noticeBoard || '';
+            }
             refreshActiveViews();
             setBadge('Synced', 'bg-emerald-500');
 
@@ -1814,7 +1877,7 @@
             if (chk) chk.classList.toggle('hidden', t !== chosen);
             if (btn) {
                 btn.className = (t === chosen)
-                    ? "touch-item w-full p-3 rounded-2xl border-2 border-zinc-900 bg-zinc-50 flex items-center justify-between text-left transition"
+                    ? "touch-item theme-btn-active w-full p-3 rounded-2xl border-2 bg-zinc-50 flex items-center justify-between text-left transition"
                     : "touch-item w-full p-3 rounded-2xl border border-zinc-200 flex items-center justify-between text-left transition";
             }
         });
@@ -1900,6 +1963,7 @@
                 };
             }
             purgeExpiredTrash();
+            normalizeAllStudentsData();
             refreshActiveViews();
             renderNativeSheetTable(currentNativeSheetTab);
             if (st) st.textContent = '🔒 View-Only · Verified Live from Google Sheets';
@@ -2104,7 +2168,11 @@
                 try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
             }
             purgeExpiredTrash();
-            document.getElementById('noticeBoardInput').value = appData.noticeBoard || '';
+            normalizeAllStudentsData();
+            var nbEl = document.getElementById('noticeBoardInput');
+            if (nbEl && document.activeElement !== nbEl) {
+                nbEl.value = appData.noticeBoard || '';
+            }
             refreshActiveViews();
             setBadge('Synced', 'bg-emerald-500');
         })
@@ -2381,14 +2449,25 @@
         closeAddSubjectModal();
     }
 
+    function getAllKnownSubjects() {
+        var list = (appData.subjects || []).slice();
+        (appData.students || []).forEach(function(s) {
+            if (s.subject && list.indexOf(s.subject) === -1) {
+                list.push(s.subject);
+            }
+        });
+        return list;
+    }
+
     function populateSubjectDropdowns() {
         var modalSel = document.getElementById('newStuSubject');
         if (!modalSel) return;
-        if (!appData.subjects.length) {
+        var list = getAllKnownSubjects();
+        if (!list.length) {
             modalSel.innerHTML = '<option value="General Music">General Music</option>';
             return;
         }
-        modalSel.innerHTML = appData.subjects.map(function(sub) {
+        modalSel.innerHTML = list.map(function(sub) {
             return '<option value="' + escHtml(sub) + '">' + escHtml(sub) + '</option>';
         }).join('');
     }
@@ -2416,6 +2495,7 @@
     }
 
     function openSubjectActionModal(idx) {
+        cancelSubLongPress();
         var sub = appData.subjects[idx];
         if (!sub) return;
         actionSubjectIdx = idx;
@@ -2427,6 +2507,7 @@
     }
 
     function closeSubjectActionModal() {
+        subLongPressTriggered = false;
         closeSheetModal('subjectActionModal', 'subjectActionSheet');
     }
 
@@ -2465,7 +2546,7 @@
             var modClass = 'mod-sub-' + (idx % 4);
             return '<div ' +
                 'onclick="handleSubCardClick(' + idx + ')" ' +
-                'oncontextmenu="event.preventDefault(); cancelSubLongPress(); openSubjectActionModal(' + idx + ');" ' +
+                'oncontextmenu="event.preventDefault(); openSubjectActionModal(' + idx + ');" ' +
                 'onmousedown="startSubLongPress(' + idx + ')" ' +
                 'onmouseup="cancelSubLongPress()" ' +
                 'onmouseleave="cancelSubLongPress()" ' +
@@ -2581,13 +2662,15 @@
         var stuId = document.getElementById('quickAttStuSelect').value;
         var s = appData.students.find(function(x) { return x.id === stuId; });
         if (!s) return;
+        var nowMs = Date.now();
         s.attendance.unshift({
-            id: Date.now(),
+            id: nowMs,
+            createdAt: nowMs,
             date: document.getElementById('quickAttDate').value,
             status: document.getElementById('quickAttStatus').value,
             remarks: document.getElementById('quickAttRemarks').value.trim()
         });
-        s.attendance.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+        sortByDateDesc(s.attendance);
         closeQuickAttendanceModal();
         saveAllData();
         if (currentMainTab === 'attendance') renderMasterAttendance();
@@ -2615,6 +2698,7 @@
     }
 
     function openStudentActionModal(stuId) {
+        cancelStuLongPress();
         var s = appData.students.find(function(x) { return x.id === stuId; });
         if (!s) return;
         actionStudentId = stuId;
@@ -2624,6 +2708,7 @@
     }
 
     function closeStudentActionModal() {
+        longPressTriggered = false;
         closeSheetModal('studentActionModal', 'studentActionSheet');
     }
 
@@ -2642,13 +2727,19 @@
         }
     }
 
-    // --- STATUS BADGES ---
+    // --- STATUS BADGES & CUMULATIVE FEE SUMMARY ---
     function feeStatusBadge(status, dueAmt) {
         if (!status || status === 'None') return '';
-        var hasDue = dueAmt && Number(dueAmt) > 0;
-        if (status === 'Paid' && !hasDue) return '<span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">Paid</span>';
-        if (status === 'Pending') return '<span class="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Pending</span>';
-        if (status === 'Remaining Due' || hasDue) return '<span class="text-[10px] bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-bold">Due ₹' + escHtml(dueAmt || 0) + '</span>';
+        var numDue = Number(dueAmt || 0);
+        if (numDue > 0) {
+            return '<span class="text-[10px] bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-bold">Due ₹' + escHtml(numDue) + '</span>';
+        }
+        if (status === 'Pending' || status === 'Remaining Due') {
+            return '<span class="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Pending</span>';
+        }
+        if (status === 'Paid') {
+            return '<span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">Paid</span>';
+        }
         return '';
     }
 
@@ -2663,30 +2754,55 @@
         return '<span class="px-2 py-0.5 rounded-full border font-bold text-[10px] ' + cls + '">' + escHtml(st) + '</span>';
     }
 
+    // Sums unpaid dues across all fee entries so older debts are never hidden by newer payments
     function syncStudentFeeSummary(s) {
         if (!s.fees || !s.fees.length) {
             s.feeStatus = 'None';
             s.dueAmount = '';
             return;
         }
-        s.fees.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
-        var latest = s.fees[0];
-        s.feeStatus = latest.status || 'Paid';
-        s.dueAmount = latest.dueAmount || '';
+        sortByDateDesc(s.fees);
+        var totalDue = 0;
+        var hasPending = false;
+        s.fees.forEach(function(f) {
+            var d = Number(f.dueAmount || 0);
+            if (d > 0) totalDue += d;
+            if (f.status === 'Pending' || (f.status === 'Remaining Due' && d <= 0)) {
+                hasPending = true;
+            }
+        });
+        totalDue = Math.round(totalDue * 100) / 100;
+
+        if (totalDue > 0) {
+            s.feeStatus = 'Remaining Due';
+            s.dueAmount = String(totalDue);
+        } else if (hasPending) {
+            s.feeStatus = 'Pending';
+            s.dueAmount = '';
+        } else {
+            s.feeStatus = s.fees[0].status || 'Paid';
+            s.dueAmount = '';
+        }
     }
 
     function renderStudents() {
         document.getElementById('stuCount').textContent = appData.students.length;
         var q = document.getElementById('stuSearch').value.toLowerCase();
+        var filterSubjects = getAllKnownSubjects();
+
+        if (selectedSubjectFilter && filterSubjects.indexOf(selectedSubjectFilter) === -1) {
+            selectedSubjectFilter = '';
+        }
 
         var pillBox = document.getElementById('studentSubjectPills');
         if (pillBox) {
             var allActive = !selectedSubjectFilter ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
             pillBox.innerHTML = '<button type="button" onclick="setSubjectFilter(\'\')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + allActive + '">All</button>' +
-                appData.subjects.map(function(sub, idx) {
+                filterSubjects.map(function(sub) {
                     var isAct = selectedSubjectFilter === sub;
                     var cls = isAct ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
-                    return '<button type="button" onclick="setSubjectFilter(appData.subjects[' + idx + '])" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + cls + '">' + escHtml(sub) + '</button>';
+                    var safeArg = JSON.stringify(sub).replace(/"/g, '&quot;');
+                    return '<button type="button" onclick="setSubjectFilter(' + safeArg + ')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + cls + '">' + escHtml(sub) + '</button>';
                 }).join('');
         }
 
@@ -2702,7 +2818,7 @@
         grid.innerHTML = filtered.map(function(s) {
             return '<div ' +
                 'onclick="handleStuCardClick(\'' + s.id + '\')" ' +
-                'oncontextmenu="event.preventDefault(); cancelStuLongPress(); openStudentActionModal(\'' + s.id + '\');" ' +
+                'oncontextmenu="event.preventDefault(); openStudentActionModal(\'' + s.id + '\');" ' +
                 'onmousedown="startStuLongPress(\'' + s.id + '\')" ' +
                 'onmouseup="cancelStuLongPress()" ' +
                 'onmouseleave="cancelStuLongPress()" ' +
@@ -2733,6 +2849,8 @@
         var s = getActiveStudent();
         if (!s) return;
 
+        syncStudentFeeSummary(s);
+
         document.getElementById('profAvatar').textContent = getSubjectIcon(s.subject);
         document.getElementById('profName').textContent = s.name;
         document.getElementById('profSubject').textContent = s.subject;
@@ -2741,9 +2859,10 @@
             document.getElementById('stuNotes').value = s.notes || '';
         }
 
-        var totalAtt = (s.attendance || []).length;
-        var presentAtt = (s.attendance || []).filter(function(a) { return a.status === 'Present' || a.status === 'Tardy'; }).length;
-        var attPct = totalAtt ? Math.round((presentAtt / totalAtt) * 100) + '%' : '100%';
+        // Exclude Rescheduled classes from attendance denominator so rescheduling is mathematically neutral
+        var nonRescheduledAtt = (s.attendance || []).filter(function(a) { return a.status !== 'Rescheduled'; });
+        var presentAtt = nonRescheduledAtt.filter(function(a) { return a.status === 'Present' || a.status === 'Tardy'; }).length;
+        var attPct = nonRescheduledAtt.length ? Math.round((presentAtt / nonRescheduledAtt.length) * 100) + '%' : '100%';
         document.getElementById('profStatAtt').textContent = attPct;
         document.getElementById('profStatCls').textContent = (s.classes || []).length;
         var feeLabel = (!s.feeStatus || s.feeStatus === 'None') ? 'No Entry' : (s.dueAmount && Number(s.dueAmount) > 0 ? 'Due ₹' + s.dueAmount : s.feeStatus);
@@ -2783,6 +2902,7 @@
 
     // --- NOTES & NOTICE BOARD ---
     function saveStudentNotes(force) {
+        skipNoteBlur = false;
         var s = getActiveStudent();
         if (!s) return;
         var newVal = document.getElementById('stuNotes').value;
@@ -2792,6 +2912,7 @@
     }
 
     function trashStudentNotes() {
+        skipNoteBlur = false;
         var s = getActiveStudent();
         if (!s) return;
         var val = document.getElementById('stuNotes').value.trim();
@@ -2803,6 +2924,7 @@
     }
 
     function saveNoticeBoard(force) {
+        skipNoteBlur = false;
         var newVal = document.getElementById('noticeBoardInput').value;
         if (!force && appData.noticeBoard === newVal) return;
         appData.noticeBoard = newVal;
@@ -2810,6 +2932,7 @@
     }
 
     function trashNoticeBoard() {
+        skipNoteBlur = false;
         var val = document.getElementById('noticeBoardInput').value.trim();
         if (!val) return alert('Notice Board is already empty.');
         if (!confirm('Move Notice Board content to the 30-Day Trash?')) return;
@@ -2838,10 +2961,19 @@
         saveAllData();
     }
 
+    // Handles both local deletedAtMs numbers and cloud-synced date strings so 30-day auto-purge works reliably
     function purgeExpiredTrash() {
         if (!appData.trash) appData.trash = [];
         var now = Date.now();
-        appData.trash = appData.trash.filter(function(t) { return (now - (t.deletedAtMs || now)) < THIRTY_DAYS_MS; });
+        appData.trash = appData.trash.filter(function(t) {
+            if (t.expiresDate) {
+                var expMs = Date.parse(t.expiresDate + 'T23:59:59');
+                if (!isNaN(expMs)) return now <= expMs;
+            }
+            var delMs = Number(t.deletedAtMs) || (t.deletedDate ? Date.parse(t.deletedDate) : 0);
+            if (!delMs || isNaN(delMs)) return true;
+            return (now - delMs) < THIRTY_DAYS_MS;
+        });
     }
 
     function updateTrashCount() {
@@ -2896,11 +3028,11 @@
             }
             if (item.kind === 'Attendance') {
                 stu.attendance.unshift(item.data);
-                stu.attendance.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+                sortByDateDesc(stu.attendance);
             }
             if (item.kind === 'Class') {
                 stu.classes.unshift(item.data);
-                stu.classes.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+                sortByDateDesc(stu.classes);
             }
             if (item.kind === 'Fee') {
                 stu.fees.unshift(item.data);
@@ -3059,13 +3191,15 @@
     function addStudentAttendance(e) {
         e.preventDefault();
         var s = getActiveStudent();
+        var nowMs = Date.now();
         s.attendance.unshift({
-            id: Date.now(),
+            id: nowMs,
+            createdAt: nowMs,
             date: document.getElementById('stuAttDate').value,
             status: document.getElementById('stuAttStatus').value,
             remarks: document.getElementById('stuAttRemarks').value.trim()
         });
-        s.attendance.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+        sortByDateDesc(s.attendance);
         document.getElementById('stuAttRemarks').value = '';
         saveAllData();
         refreshStudentProfileData(s.id);
@@ -3097,7 +3231,7 @@
             a.date = document.getElementById('editAttDate').value;
             a.status = document.getElementById('editAttStatus').value;
             a.remarks = document.getElementById('editAttRemarks').value.trim();
-            s.attendance.sort(function(x, y) { return (y.date || '').localeCompare(x.date || ''); });
+            sortByDateDesc(s.attendance);
         }
         closeEditAttModal();
         saveAllData();
@@ -3144,11 +3278,11 @@
         appData.students.forEach(function(s) {
             (s.attendance || []).forEach(function(a) {
                 if ((!selectedAttDate || a.date === selectedAttDate) && (!selectedAttStatus || a.status === selectedAttStatus)) {
-                    rows.push({ id: a.id, date: a.date, status: a.status, remarks: a.remarks, stuName: s.name, stuSub: s.subject, stuId: s.id });
+                    rows.push({ id: a.id, createdAt: a.createdAt, date: a.date, status: a.status, remarks: a.remarks, stuName: s.name, stuSub: s.subject, stuId: s.id });
                 }
             });
         });
-        rows.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+        sortByDateDesc(rows);
 
         if (!rows.length) {
             list.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">No attendance records found.</div>';
@@ -3176,14 +3310,16 @@
     function addStudentClass(e) {
         e.preventDefault();
         var s = getActiveStudent();
+        var nowMs = Date.now();
         s.classes.unshift({
-            id: Date.now(),
+            id: nowMs,
+            createdAt: nowMs,
             date: document.getElementById('clsDate').value,
             technique: document.getElementById('clsTech').value.trim(),
             lesson: document.getElementById('clsLesson').value.trim(),
             repertoire: document.getElementById('clsRep').value.trim()
         });
-        s.classes.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+        sortByDateDesc(s.classes);
         document.getElementById('clsTech').value = '';
         document.getElementById('clsLesson').value = '';
         document.getElementById('clsRep').value = '';
@@ -3219,7 +3355,7 @@
             c.technique = document.getElementById('editClsTech').value.trim();
             c.lesson = document.getElementById('editClsLesson').value.trim();
             c.repertoire = document.getElementById('editClsRep').value.trim();
-            s.classes.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+            sortByDateDesc(s.classes);
         }
         closeEditClassModal();
         saveAllData();
@@ -3321,9 +3457,16 @@
 
         var editFeeId = document.getElementById('editFeeId').value;
         var type = document.getElementById('feeTypeSelect').value;
-        var dueVal = document.getElementById('feeDueInput').value.trim();
+        var rawDue = document.getElementById('feeDueInput').value.trim();
+        var numDue = Number(rawDue || 0);
+        var dueVal = numDue > 0 ? String(numDue) : '';
         var status = document.getElementById('feeStatusSelect').value;
-        if (dueVal && Number(dueVal) > 0 && status === 'Paid') status = 'Remaining Due';
+
+        if (numDue > 0) {
+            status = 'Remaining Due';
+        } else if (status === 'Remaining Due') {
+            status = Number(amount) > 0 ? 'Paid' : 'Pending';
+        }
 
         var targetFeeId = editFeeId;
 
@@ -3374,7 +3517,7 @@
             var latest = s.fees[0];
             banner.innerHTML =
                 '<div class="flex items-center gap-2">' +
-                    '<span class="text-zinc-400">Latest:</span>' +
+                    '<span class="text-zinc-400">Summary:</span>' +
                     '<strong class="text-zinc-900 font-bold">' + escHtml(latest.type) + '</strong>' +
                     feeStatusBadge(s.feeStatus, s.dueAmount) +
                 '</div>';
@@ -3405,13 +3548,13 @@
         appData.students.forEach(function(s) {
             (s.fees || []).forEach(function(f) {
                 allFees.push({
-                    id: f.id, type: f.type, status: f.status, month: f.month, date: f.date,
+                    id: f.id, createdAt: f.createdAt, type: f.type, status: f.status, month: f.month, date: f.date,
                     mode: f.mode, amount: f.amount, dueAmount: f.dueAmount, remarks: f.remarks,
                     stuName: s.name, stuSub: s.subject, stuId: s.id
                 });
             });
         });
-        allFees.sort(function(a, b) { return (b.date || '').localeCompare(a.date || ''); });
+        sortByDateDesc(allFees);
 
         if (!allFees.length) {
             box.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">No fees recorded yet.</div>';
@@ -3439,7 +3582,7 @@
         }).join('');
     }
 
-    // --- PDF RECEIPT GENERATOR ---
+    // --- PDF RECEIPT GENERATOR (WITH ANTI-COLLISION SPACING & WORD WRAP) ---
     function downloadReceipt(stuId, feeId) {
         var s = appData.students.find(function(st) { return st.id === stuId; });
         if (!s) return;
@@ -3479,15 +3622,17 @@
         doc.text('Date: ' + f.date, 194, 48, { align: 'right' });
         doc.line(16, 52, 194, 52);
 
-        var y = 60;
+        var y = 58;
         var drawRow = function(label, value) {
             doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9.5);
             doc.setTextColor(11, 37, 69);
             doc.text(label, 22, y);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(30, 30, 30);
-            doc.text(String(value), 80, y);
-            y += 8.5;
+            var wrapped = doc.splitTextToSize(String(value || '-'), 112).slice(0, 2);
+            doc.text(wrapped, 78, y);
+            y += (wrapped.length > 1 ? 10.5 : 7.2);
         };
 
         drawRow('Student Name:', s.name);
