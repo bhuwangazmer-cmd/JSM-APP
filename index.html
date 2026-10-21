@@ -46,6 +46,11 @@
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
         }
+        .modal-scroll-2d {
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-x pan-y;
+        }
 
         /* Locked Notice Board Height & Smooth Expand Transition */
         #noticeBoardInput {
@@ -1261,14 +1266,14 @@
     </div>
 </div>
 
-<!-- FULL-SCREEN NATIVE VIEW-ONLY DATABASE VIEWER -->
+<!-- FULL-SCREEN NATIVE VIEW-ONLY DATABASE VIEWER (WITH 2D VERTICAL + HORIZONTAL SCROLLING) -->
 <div id="liveSheetModal" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] hidden flex-col z-50 animate-view">
-    <div class="px-4 py-3 bg-white border-b border-zinc-200 flex justify-between items-center shadow-2xs">
+    <div class="px-4 py-3 bg-white border-b border-zinc-200 flex justify-between items-center shadow-2xs shrink-0">
         <div class="flex items-center gap-2.5">
             <button type="button" onclick="closeLiveSheetViewer()" class="touch-item h-9 px-3.5 rounded-full bg-zinc-100 text-zinc-800 font-bold text-xs">← Back</button>
             <div>
                 <h3 class="font-extrabold text-sm text-zinc-900">Live Sheet Database</h3>
-                <p id="nativeSheetStatus" class="text-[10px] text-emerald-600 font-semibold">🔒 View-Only · Synced with Google Sheets</p>
+                <p id="nativeSheetStatus" class="text-[10px] text-emerald-600 font-semibold">🔒 View-Only · Swipe table ↕ ↔</p>
             </div>
         </div>
         <button type="button" onclick="reloadLiveSheet()" class="touch-item h-9 px-4 rounded-full bg-zinc-900 text-white font-bold text-xs shadow-2xs flex items-center gap-1.5">
@@ -1285,10 +1290,10 @@
         <button type="button" onclick="switchNativeSheetTab('Trash_30_Days')" id="nstab-Trash_30_Days" class="touch-item h-9 px-4 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 shrink-0 transition">Trash_30_Days</button>
     </div>
 
-    <div class="modal-sheet-box flex-1 w-full overflow-auto p-4">
-        <div id="nativeSheetCard" class="bg-white border border-zinc-200/80 rounded-[20px] shadow-2xs overflow-x-auto animate-view">
-            <table class="w-full text-left border-collapse">
-                <thead id="nativeSheetHead" class="bg-zinc-50 border-b border-zinc-200 text-[11px] font-extrabold uppercase tracking-wider text-zinc-500"></thead>
+    <div class="flex-1 min-h-0 w-full p-3 sm:p-4 flex flex-col overflow-hidden">
+        <div id="nativeSheetCard" class="modal-scroll-2d flex-1 min-h-0 w-full bg-white border border-zinc-200/80 rounded-[20px] shadow-2xs overflow-auto animate-view">
+            <table class="w-full min-w-max text-left border-collapse">
+                <thead id="nativeSheetHead" class="bg-zinc-50 border-b border-zinc-200 text-[11px] font-extrabold uppercase tracking-wider text-zinc-500 sticky top-0 z-10"></thead>
                 <tbody id="nativeSheetBody" class="divide-y divide-zinc-100 text-xs font-medium text-zinc-800"></tbody>
             </table>
         </div>
@@ -1507,7 +1512,7 @@
         setInterval(updateDynamicGreeting, 60000);
     };
 
-    // --- SAFE BACKGROUND SCROLL LOCK ---
+    // --- SAFE BACKGROUND SCROLL LOCK & 2D TABLE SCROLL SUPPORT ---
     function syncBodyScrollLock() {
         var shouldLock = isAnyOverlayModalOpen();
         document.documentElement.classList.toggle('scroll-locked', shouldLock);
@@ -1515,9 +1520,11 @@
     }
 
     function initModalScrollGuard() {
+        var modalTouchStartX = 0;
         var modalTouchStartY = 0;
         document.addEventListener('touchstart', function(e) {
             if (e.touches && e.touches.length === 1) {
+                modalTouchStartX = e.touches[0].clientX;
                 modalTouchStartY = e.touches[0].clientY;
             }
         }, { passive: true });
@@ -1525,6 +1532,18 @@
         document.addEventListener('touchmove', function(e) {
             if (!isAnyOverlayModalOpen()) return;
             var target = e.target;
+
+            // Allow 2D (vertical + horizontal) scrolling inside the Live Sheet Viewer table & horizontal tab bars
+            var box2d = target.closest('.modal-scroll-2d, .no-scrollbar');
+            if (box2d) {
+                var canScrollY = box2d.scrollHeight > box2d.clientHeight + 1;
+                var canScrollX = box2d.scrollWidth > box2d.clientWidth + 1;
+                if (!canScrollY && !canScrollX) {
+                    if (e.cancelable) e.preventDefault();
+                }
+                return;
+            }
+
             var scrollBox = target.closest('.modal-sheet-box, textarea, select');
             if (!scrollBox) {
                 if (e.cancelable) e.preventDefault();
@@ -2295,6 +2314,8 @@
         });
         var card = document.getElementById('nativeSheetCard');
         if (card) {
+            card.scrollTop = 0;
+            card.scrollLeft = 0;
             card.classList.remove('animate-view');
             void card.offsetWidth;
             card.classList.add('animate-view');
@@ -2359,7 +2380,7 @@
         }
 
         thead.innerHTML = '<tr>' + headers.map(function(h) {
-            return '<th class="px-4 py-3 whitespace-nowrap">' + escHtml(h) + '</th>';
+            return '<th class="px-4 py-3 whitespace-nowrap bg-zinc-50">' + escHtml(h) + '</th>';
         }).join('') + '</tr>';
 
         if (!rows.length) {
