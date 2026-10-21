@@ -586,7 +586,7 @@
 <div id="pinLockScreen" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] z-[100] flex flex-col items-center justify-center p-6 select-none">
     <div class="modal-sheet-box w-full max-w-xs text-center space-y-6 animate-view">
         <div class="w-16 h-16 rounded-full bg-white border border-zinc-200 mx-auto flex items-center justify-center overflow-hidden shadow-sm">
-            <img id="lockLogoImg" class="w-full h-full object-contain" alt="JSM" onerror="handleLockLogoFallback(this)">
+            <img id="lockLogoImg" referrerpolicy="no-referrer" class="w-full h-full object-contain" alt="JSM" onerror="handleLockLogoFallback(this)">
             <span id="lockLogoFallback" class="text-2xl hidden">🎼</span>
         </div>
 
@@ -624,7 +624,7 @@
 <!-- CENTERED EDITORIAL HEADER -->
 <header class="w-full max-w-2xl mx-auto px-5 pt-4 pb-3 flex justify-between items-center sticky top-0 z-30">
     <div onclick="showMainTab('home')" class="w-11 h-11 rounded-full bg-white border border-zinc-200/80 shadow-2xs flex items-center justify-center overflow-hidden cursor-pointer shrink-0 touch-item">
-        <img id="headerLogoImg" class="w-full h-full object-contain" alt="JSM" onerror="handleLogoFallback(this)">
+        <img id="headerLogoImg" referrerpolicy="no-referrer" class="w-full h-full object-contain" alt="JSM" onerror="handleLogoFallback(this)">
         <span id="headerLogoFallback" class="text-base hidden">🎼</span>
     </div>
 
@@ -1306,6 +1306,7 @@
     var DRIVE_LOGO_ID = "1k0m6PTwF8_W-dVDrtp1Ru_71d_uO34Cl";
     var DRIVE_LOGO_URL_PRIMARY = "https://lh3.googleusercontent.com/d/" + DRIVE_LOGO_ID;
     var DRIVE_LOGO_URL_FALLBACK = "https://drive.google.com/thumbnail?id=" + DRIVE_LOGO_ID + "&sz=w500";
+    var DRIVE_LOGO_URL_SECONDARY = "https://drive.google.com/uc?export=view&id=" + DRIVE_LOGO_ID;
     var cachedPdfLogoDataUrl = "";
 
     var DEFAULT_SUBJECTS = ['Piano', 'Acoustic Guitar', 'Violin', 'Music Theory'];
@@ -2034,7 +2035,7 @@
             var dot = document.getElementById('pindot-' + i);
             if (!dot) continue;
             if (i < enteredPinBuffer.length) {
-                dot.className = 'w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-zinc-900 transition-all duration-200 scale-110';
+                dot.className = 'w-3.5 h-3.5 rounded-full bg-zinc-900 border-2 border-current transition-all duration-200 scale-110';
             } else {
                 dot.className = 'w-3.5 h-3.5 rounded-full border-2 border-zinc-400 transition-all duration-200';
             }
@@ -2099,6 +2100,13 @@
                     void dotsBox.offsetWidth;
                     dotsBox.classList.add('animate-shake');
                 }
+                return;
+            }
+            if (remote && remote.status === 'error') {
+                enteredPinBuffer = '';
+                updatePinDotsUI();
+                st.textContent = 'Server busy. Please tap your PIN again.';
+                st.className = 'text-xs text-amber-600 font-semibold mt-1';
                 return;
             }
             sessionPin = candidatePin;
@@ -2248,6 +2256,10 @@
         .then(function(res) { return res.json(); })
         .then(function(remote) {
             if (remote && remote.authError) return lockAppNow();
+            if (remote && remote.status === 'error') {
+                if (st) st.textContent = '⚠️ Sheet busy — Showing cached data';
+                return;
+            }
             if (remote && Array.isArray(remote.students)) {
                 appData = {
                     theme: remote.theme || appData.theme || 'modern',
@@ -2299,9 +2311,18 @@
         var rows = [];
 
         if (tabName === 'Students') {
-            headers = ['#', 'Student ID', 'Name', 'Subject', 'Book', 'Class Notes'];
+            headers = ['#', 'Student ID', 'Name', 'Subject', 'Book', 'Fee Status', 'Total Due (₹)', 'Class Notes'];
             (appData.students || []).forEach(function(s, i) {
-                rows.push([i + 1, s.id, s.name, s.subject, s.book, s.notes || '-']);
+                rows.push([
+                    i + 1,
+                    s.id,
+                    s.name,
+                    s.subject,
+                    s.book,
+                    s.feeStatus || 'None',
+                    '₹' + (s.dueAmount && Number(s.dueAmount) > 0 ? s.dueAmount : '0'),
+                    s.notes || '-'
+                ]);
             });
         } else if (tabName === 'Daily_Classes') {
             headers = ['#', 'Date', 'Student Name', 'Technique', 'Lesson', 'Repertoire'];
@@ -2364,6 +2385,7 @@
 
         var offImg = new Image();
         offImg.crossOrigin = "Anonymous";
+        offImg.referrerPolicy = "no-referrer";
         offImg.onload = function() {
             try {
                 var canvas = document.createElement('canvas');
@@ -2377,8 +2399,10 @@
     }
 
     function handleLogoFallback(imgEl) {
-        if (imgEl.src !== DRIVE_LOGO_URL_FALLBACK) {
+        if (imgEl.src === DRIVE_LOGO_URL_PRIMARY) {
             imgEl.src = DRIVE_LOGO_URL_FALLBACK;
+        } else if (imgEl.src === DRIVE_LOGO_URL_FALLBACK) {
+            imgEl.src = DRIVE_LOGO_URL_SECONDARY;
         } else {
             imgEl.classList.add('hidden');
             document.getElementById('headerLogoFallback').classList.remove('hidden');
@@ -2386,8 +2410,10 @@
     }
 
     function handleLockLogoFallback(imgEl) {
-        if (imgEl.src !== DRIVE_LOGO_URL_FALLBACK) {
+        if (imgEl.src === DRIVE_LOGO_URL_PRIMARY) {
             imgEl.src = DRIVE_LOGO_URL_FALLBACK;
+        } else if (imgEl.src === DRIVE_LOGO_URL_FALLBACK) {
+            imgEl.src = DRIVE_LOGO_URL_SECONDARY;
         } else {
             imgEl.classList.add('hidden');
             document.getElementById('lockLogoFallback').classList.remove('hidden');
@@ -2468,9 +2494,16 @@
         .then(function(res) { return res.json(); })
         .then(function(resp) {
             if (resp && resp.authError) lockAppNow();
-            else setBadge('Synced', 'bg-emerald-500');
+            else if (resp && resp.status === 'ok') setBadge('Synced', 'bg-emerald-500');
+            else {
+                hasPendingSave = true;
+                setBadge('Retry', 'bg-red-500');
+            }
         })
-        .catch(function() { setBadge('Retry', 'bg-red-500'); })
+        .catch(function() {
+            hasPendingSave = true;
+            setBadge('Retry', 'bg-red-500');
+        })
         .finally(function() {
             if (typeof onFlushed === 'function') onFlushed();
         });
@@ -2483,7 +2516,11 @@
         }
         if (hasPendingSave) {
             flushPendingSaveNow(false, function() {
-                syncFromSheet(doneCallback);
+                if (!hasPendingSave) {
+                    syncFromSheet(doneCallback);
+                } else if (typeof doneCallback === 'function') {
+                    doneCallback();
+                }
             });
             return;
         }
@@ -2501,6 +2538,10 @@
         .then(function(remote) {
             if (remote && remote.authError) {
                 lockAppNow();
+                return;
+            }
+            if (remote && remote.status === 'error') {
+                setBadge('Retry', 'bg-amber-500');
                 return;
             }
             if (remote && Array.isArray(remote.students)) {
@@ -2551,6 +2592,19 @@
     }
 
     // --- NAVIGATION & CAPSULE DOCK (WITH DIRECTIONAL SWIPE & SPRING DOCK) ---
+    function setDockActiveButton(tabName) {
+        for (var i = 0; i < MAIN_TABS_ORDER.length; i++) {
+            var t = MAIN_TABS_ORDER[i];
+            var btn = document.getElementById('bnav-' + t);
+            if (!btn) continue;
+            if (t === tabName) {
+                btn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center bg-white text-zinc-900 font-extrabold shadow-md scale-105 relative";
+            } else {
+                btn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center text-zinc-400 font-medium relative";
+            }
+        }
+    }
+
     function showMainTab(tab, swipeDir) {
         dismissActiveKeyboard();
         closeAllTransientModals();
@@ -2576,10 +2630,6 @@
             var el = document.getElementById('tab-' + t);
             resetActiveSwipeElement(el, false);
             el.classList.add('hidden');
-            var btn = document.getElementById('bnav-' + t);
-            if (btn) {
-                btn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center text-zinc-400 font-medium relative";
-            }
         }
 
         var targetEl = document.getElementById('tab-' + tab);
@@ -2589,10 +2639,7 @@
         else if (swipeDir === 'prev') targetEl.classList.add('animate-swipe-prev');
         else targetEl.classList.add('animate-view');
 
-        var activeBtn = document.getElementById('bnav-' + tab);
-        if (activeBtn) {
-            activeBtn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center bg-white text-zinc-900 font-extrabold shadow-md scale-105 relative";
-        }
+        setDockActiveButton(tab);
 
         if (tab === 'home') { renderCategories(); renderRecentActivity(); }
         if (tab === 'students') renderStudents();
@@ -2815,6 +2862,11 @@
             appData.subjects[editIdx] = sub;
             (appData.students || []).forEach(function(s) {
                 if (s.subject === oldSub) s.subject = sub;
+            });
+            (appData.trash || []).forEach(function(t) {
+                if (t.kind === 'Student' && t.data && t.data.subject === oldSub) {
+                    t.data.subject = sub;
+                }
             });
             if (selectedSubjectFilter === oldSub) selectedSubjectFilter = sub;
         } else {
@@ -3268,6 +3320,7 @@
 
     function openStudentProfile(id) {
         dismissActiveKeyboard();
+        closeAllTransientModals();
         var isNewProfile = currentStudentId !== id;
         currentStudentId = id;
         var s = getActiveStudent();
@@ -3278,6 +3331,8 @@
         MAIN_TABS_ORDER.forEach(function(t) {
             document.getElementById('tab-' + t).classList.add('hidden');
         });
+        setDockActiveButton('students');
+
         var profEl = document.getElementById('profileScreen');
         resetActiveSwipeElement(profEl, false);
         profEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next');
