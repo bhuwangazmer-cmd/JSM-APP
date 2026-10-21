@@ -23,6 +23,11 @@
             overscroll-behavior-y: none;
             transition: background-color 0.38s cubic-bezier(0.32, 0.72, 0, 1), color 0.3s ease;
         }
+        html.scroll-locked,
+        body.scroll-locked {
+            overflow: hidden !important;
+            overscroll-behavior: none !important;
+        }
         input, select, textarea {
             font-size: 15px !important;
             transition: border-color 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease, transform 0.2s ease;
@@ -35,13 +40,11 @@
 
         /* Prevent Scroll Bleeding Inside Modals & Drawers */
         .modal-backdrop {
-            overscroll-behavior: none;
-            touch-action: none;
+            overscroll-behavior: contain;
         }
         .modal-sheet-box {
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
         }
 
         /* Locked Notice Board Height & Smooth Expand Transition */
@@ -581,9 +584,9 @@
 
 <!-- ================= MASTER PIN LOCK SCREEN (2-HOUR SESSION TIMEOUT) ================= -->
 <div id="pinLockScreen" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] z-[100] flex flex-col items-center justify-center p-6 select-none">
-    <div class="w-full max-w-xs text-center space-y-6 animate-view">
+    <div class="modal-sheet-box w-full max-w-xs text-center space-y-6 animate-view">
         <div class="w-16 h-16 rounded-full bg-white border border-zinc-200 mx-auto flex items-center justify-center overflow-hidden shadow-sm">
-            <img id="lockLogoImg" class="w-full h-full object-contain" alt="JSM" onerror="this.classList.add('hidden'); document.getElementById('lockLogoFallback').classList.remove('hidden');">
+            <img id="lockLogoImg" class="w-full h-full object-contain" alt="JSM" onerror="handleLockLogoFallback(this)">
             <span id="lockLogoFallback" class="text-2xl hidden">🎼</span>
         </div>
 
@@ -1343,10 +1346,6 @@
     var skipNoteBlurTimer = null;
     var isNoticeExpanded = false;
     var isFormSubmittingLock = false;
-
-    // Background Scroll Lock State
-    var isBodyScrollLocked = false;
-    var savedWindowScrollY = 0;
     var isHandlingPopState = false;
 
     // 60fps Pull-to-Refresh & Real-Time Interactive Swipe State
@@ -1422,7 +1421,7 @@
         }
     }
 
-    // Scrambled PIN Storage Helpers (Replaces Plain-Text PIN Storage)
+    // Scrambled PIN Storage Helpers
     function encodePinForStorage(pinStr) {
         try {
             var out = [];
@@ -1459,7 +1458,6 @@
         return '';
     }
 
-    // Self-resetting blur guard so unfocused button taps never lock out future auto-saves
     function armSkipNoteBlur() {
         skipNoteBlur = true;
         clearTimeout(skipNoteBlurTimer);
@@ -1468,7 +1466,6 @@
         }, 350);
     }
 
-    // Deterministic sorting by date (newest first) with timestamp/ID tie-breaker
     function getRecordOrderValue(item) {
         if (!item) return 0;
         if (typeof item.createdAt === 'number') return item.createdAt;
@@ -1509,26 +1506,11 @@
         setInterval(updateDynamicGreeting, 60000);
     };
 
-    // --- BACKGROUND SCROLL LOCK & MODAL TOUCH BLEED GUARD ---
+    // --- SAFE BACKGROUND SCROLL LOCK ---
     function syncBodyScrollLock() {
         var shouldLock = isAnyOverlayModalOpen();
-        if (shouldLock && !isBodyScrollLocked) {
-            savedWindowScrollY = window.scrollY || document.documentElement.scrollTop || 0;
-            document.body.style.position = 'fixed';
-            document.body.style.top = '-' + savedWindowScrollY + 'px';
-            document.body.style.left = '0';
-            document.body.style.right = '0';
-            document.body.style.width = '100%';
-            isBodyScrollLocked = true;
-        } else if (!shouldLock && isBodyScrollLocked) {
-            document.body.style.position = '';
-            document.body.style.top = '';
-            document.body.style.left = '';
-            document.body.style.right = '';
-            document.body.style.width = '';
-            isBodyScrollLocked = false;
-            window.scrollTo(0, savedWindowScrollY);
-        }
+        document.documentElement.classList.toggle('scroll-locked', shouldLock);
+        document.body.classList.toggle('scroll-locked', shouldLock);
     }
 
     function initModalScrollGuard() {
@@ -1542,7 +1524,7 @@
         document.addEventListener('touchmove', function(e) {
             if (!isAnyOverlayModalOpen()) return;
             var target = e.target;
-            var scrollBox = target.closest('.modal-sheet-box, textarea');
+            var scrollBox = target.closest('.modal-sheet-box, textarea, select');
             if (!scrollBox) {
                 if (e.cancelable) e.preventDefault();
                 return;
@@ -1581,7 +1563,7 @@
                     pushAppHistoryState();
                     return;
                 }
-                varclosableModals = [
+                var closableModals = [
                     { id: 'editClassModal', close: closeEditClassModal },
                     { id: 'editAttModal', close: closeEditAttModal },
                     { id: 'feeModal', close: closeFeeModal },
@@ -1593,10 +1575,10 @@
                     { id: 'liveSheetModal', close: closeLiveSheetViewer },
                     { id: 'sideMenuModal', close: closeSideMenu }
                 ];
-                for (var i = 0; i < varclosableModals.length; i++) {
-                    var m = document.getElementById(varclosableModals[i].id);
+                for (var i = 0; i < closableModals.length; i++) {
+                    var m = document.getElementById(closableModals[i].id);
                     if (m && !m.classList.contains('hidden')) {
-                        varclosableModals[i].close();
+                        closableModals[i].close();
                         return;
                     }
                 }
@@ -1703,7 +1685,7 @@
     function canSwipeInDirection(direction) {
         if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
             var pIdx = PROFILE_SECS_ORDER.indexOf(activeProfileSec);
-            if (direction === 'prev') return true; // Can always swipe right (either prev sub-tab or exit profile back to Students)
+            if (direction === 'prev') return true;
             return pIdx < PROFILE_SECS_ORDER.length - 1;
         }
         var idx = MAIN_TABS_ORDER.indexOf(currentMainTab);
@@ -2233,4 +2215,1903 @@
         modal.classList.add('flex', 'animate-view');
         syncBodyScrollLock();
         if (wasHidden) pushAppHistoryState();
-        switchNativeSheetTab(currentNativeSheetTab ||
+        switchNativeSheetTab(currentNativeSheetTab || 'Students');
+    }
+
+    function closeLiveSheetViewer() {
+        var modal = document.getElementById('liveSheetModal');
+        if (!modal || modal.classList.contains('hidden')) return;
+        modal.classList.remove('animate-view');
+        modal.classList.add('animate-backdrop-out');
+        setTimeout(function() {
+            modal.classList.replace('flex', 'hidden');
+            modal.classList.remove('animate-backdrop-out');
+            syncBodyScrollLock();
+        }, 200);
+    }
+
+    function reloadLiveSheet() {
+        if (!sessionPin) return lockAppNow();
+        if (hasPendingSave) {
+            flushPendingSaveNow(false, function() { reloadLiveSheet(); });
+            return;
+        }
+        var st = document.getElementById('nativeSheetStatus');
+        var icon = document.getElementById('liveSheetRefreshIcon');
+        if (st) st.textContent = '🔄 Fetching live data from Google Sheets...';
+        if (icon) icon.classList.add('animate-spin');
+
+        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(sessionPin) + '&t=' + Date.now(), {
+            method: 'GET',
+            redirect: 'follow'
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(remote) {
+            if (remote && remote.authError) return lockAppNow();
+            if (remote && Array.isArray(remote.students)) {
+                appData = {
+                    theme: remote.theme || appData.theme || 'modern',
+                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
+                    students: remote.students || [],
+                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
+                    trash: remote.trash || []
+                };
+            }
+            purgeExpiredTrash();
+            normalizeAllStudentsData();
+            refreshActiveViews();
+            renderNativeSheetTable(currentNativeSheetTab);
+            if (st) st.textContent = '🔒 View-Only · Verified Live from Google Sheets';
+        })
+        .catch(function() {
+            if (st) st.textContent = '⚠️ Offline — Showing last synced data';
+        })
+        .finally(function() {
+            if (icon) icon.classList.remove('animate-spin');
+        });
+    }
+
+    function switchNativeSheetTab(tabName) {
+        currentNativeSheetTab = tabName;
+        var tabs = ['Students', 'Fee_Register', 'Attendance_Register', 'Daily_Classes', 'Notice_Board', 'Trash_30_Days'];
+        tabs.forEach(function(t) {
+            var btn = document.getElementById('nstab-' + t);
+            if (!btn) return;
+            btn.className = (t === tabName)
+                ? "touch-item h-9 px-4 rounded-full text-xs font-bold bg-zinc-900 text-white shrink-0 transition shadow-2xs"
+                : "touch-item h-9 px-4 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 shrink-0 transition";
+        });
+        var card = document.getElementById('nativeSheetCard');
+        if (card) {
+            card.classList.remove('animate-view');
+            void card.offsetWidth;
+            card.classList.add('animate-view');
+        }
+        renderNativeSheetTable(tabName);
+    }
+
+    function renderNativeSheetTable(tabName) {
+        var thead = document.getElementById('nativeSheetHead');
+        var tbody = document.getElementById('nativeSheetBody');
+        if (!thead || !tbody) return;
+
+        var headers = [];
+        var rows = [];
+
+        if (tabName === 'Students') {
+            headers = ['#', 'Student ID', 'Name', 'Subject', 'Book', 'Class Notes'];
+            (appData.students || []).forEach(function(s, i) {
+                rows.push([i + 1, s.id, s.name, s.subject, s.book, s.notes || '-']);
+            });
+        } else if (tabName === 'Daily_Classes') {
+            headers = ['#', 'Date', 'Student Name', 'Technique', 'Lesson', 'Repertoire'];
+            var cIdx = 1;
+            (appData.students || []).forEach(function(s) {
+                (s.classes || []).forEach(function(c) {
+                    rows.push([cIdx++, c.date, s.name, c.technique || '-', c.lesson || '-', c.repertoire || '-']);
+                });
+            });
+        } else if (tabName === 'Attendance_Register') {
+            headers = ['#', 'Date', 'Student Name', 'Subject', 'Status', 'Remarks'];
+            var aIdx = 1;
+            (appData.students || []).forEach(function(s) {
+                (s.attendance || []).forEach(function(a) {
+                    rows.push([aIdx++, a.date, s.name, s.subject, a.status, a.remarks || '-']);
+                });
+            });
+        } else if (tabName === 'Fee_Register') {
+            headers = ['#', 'Receipt No', 'Date', 'Student Name', 'Fee Type', 'Month', 'Mode', 'Status', 'Paid (₹)', 'Due (₹)', 'Remarks'];
+            var fIdx = 1;
+            (appData.students || []).forEach(function(s) {
+                (s.fees || []).forEach(function(f) {
+                    rows.push([fIdx++, f.id, f.date, s.name, f.type, f.month || '-', f.mode, f.status || 'Paid', '₹' + f.amount, '₹' + (f.dueAmount || '0'), f.remarks || '-']);
+                });
+            });
+        } else if (tabName === 'Notice_Board') {
+            headers = ['Notice Content'];
+            rows.push([appData.noticeBoard || 'No notice pinned.']);
+        } else if (tabName === 'Trash_30_Days') {
+            headers = ['#', 'Item Type', 'Name / Title', 'Deleted On', 'Expires On', 'Summary'];
+            (appData.trash || []).forEach(function(t, i) {
+                rows.push([i + 1, t.kind, t.title, t.deletedDate, t.expiresDate, t.summary]);
+            });
+        }
+
+        thead.innerHTML = '<tr>' + headers.map(function(h) {
+            return '<th class="px-4 py-3 whitespace-nowrap">' + escHtml(h) + '</th>';
+        }).join('') + '</tr>';
+
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="' + headers.length + '" class="px-4 py-8 text-center text-zinc-400">No rows recorded in ' + escHtml(tabName) + ' yet.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = rows.map(function(r) {
+            return '<tr>' + r.map(function(cell, idx) {
+                var weight = idx === 0 ? 'text-zinc-400 font-bold' : 'text-zinc-800';
+                return '<td class="px-4 py-3.5 whitespace-nowrap ' + weight + '">' + escHtml(cell) + '</td>';
+            }).join('') + '</tr>';
+        }).join('');
+    }
+
+    function initDriveLogo() {
+        var imgEl = document.getElementById('headerLogoImg');
+        var lockImgEl = document.getElementById('lockLogoImg');
+        if (DRIVE_LOGO_ID) {
+            if (imgEl) imgEl.src = DRIVE_LOGO_URL_PRIMARY;
+            if (lockImgEl) lockImgEl.src = DRIVE_LOGO_URL_PRIMARY;
+        }
+
+        var offImg = new Image();
+        offImg.crossOrigin = "Anonymous";
+        offImg.onload = function() {
+            try {
+                var canvas = document.createElement('canvas');
+                canvas.width = offImg.width || 240;
+                canvas.height = offImg.height || 240;
+                canvas.getContext('2d').drawImage(offImg, 0, 0);
+                cachedPdfLogoDataUrl = canvas.toDataURL('image/png');
+            } catch (err) {}
+        };
+        offImg.src = DRIVE_LOGO_URL_PRIMARY;
+    }
+
+    function handleLogoFallback(imgEl) {
+        if (imgEl.src !== DRIVE_LOGO_URL_FALLBACK) {
+            imgEl.src = DRIVE_LOGO_URL_FALLBACK;
+        } else {
+            imgEl.classList.add('hidden');
+            document.getElementById('headerLogoFallback').classList.remove('hidden');
+        }
+    }
+
+    function handleLockLogoFallback(imgEl) {
+        if (imgEl.src !== DRIVE_LOGO_URL_FALLBACK) {
+            imgEl.src = DRIVE_LOGO_URL_FALLBACK;
+        } else {
+            imgEl.classList.add('hidden');
+            document.getElementById('lockLogoFallback').classList.remove('hidden');
+        }
+    }
+
+    function updateDynamicGreeting() {
+        var now = new Date();
+        todayStr = toLocalIso(now);
+        currentMonthStr = todayStr.slice(0, 7);
+        var hr = now.getHours();
+        var greet = 'Hello, Joy';
+        if (hr < 12) greet = 'Good morning, Joy';
+        else if (hr < 17) greet = 'Good afternoon, Joy';
+        else greet = 'Good evening, Joy';
+        var gEl = document.getElementById('dynamicGreeting');
+        if (gEl) gEl.textContent = greet;
+
+        var opts = { day: 'numeric', month: 'short' };
+        var dEl = document.getElementById('dynamicDateSub');
+        if (dEl) dEl.textContent = 'Today ' + now.toLocaleDateString('en-IN', opts);
+    }
+
+    function getSubjectIcon(sub) {
+        var s = (sub || '').toLowerCase();
+        if (s.indexOf('piano') !== -1 || s.indexOf('keyboard') !== -1) return '🎹';
+        if (s.indexOf('guitar') !== -1 || s.indexOf('ukulele') !== -1) return '🎸';
+        if (s.indexOf('violin') !== -1 || s.indexOf('string') !== -1) return '🎻';
+        if (s.indexOf('theory') !== -1) return '🎼';
+        if (s.indexOf('drum') !== -1) return '🥁';
+        if (s.indexOf('vocal') !== -1 || s.indexOf('sing') !== -1) return '🎤';
+        return '🎵';
+    }
+
+    // --- CLOUD SYNC & PENDING SAVE PROTECTION ---
+    function setBadge(text, dotColor) {
+        var dot = document.getElementById('syncDot');
+        if (dot) dot.className = 'w-1.5 h-1.5 rounded-full transition-colors duration-300 ' + dotColor;
+    }
+
+    function refreshActiveViews() {
+        populateSubjectDropdowns();
+        renderCategories();
+        renderRecentActivity();
+        renderStudents();
+        updateTrashCount();
+        if (currentStudentId) {
+            refreshStudentProfileData(currentStudentId);
+        } else {
+            if (currentMainTab === 'attendance') { renderWeekStrip(); renderMasterAttendance(); }
+            if (currentMainTab === 'fees') renderMasterFees();
+            if (currentMainTab === 'trash') renderTrash();
+        }
+    }
+
+    function flushPendingSaveNow(useKeepAlive, onFlushed) {
+        if (!hasPendingSave || !sessionPin || !SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) {
+            if (typeof onFlushed === 'function') onFlushed();
+            return;
+        }
+        clearTimeout(saveDebounceTimer);
+        hasPendingSave = false;
+        var payloadToSave = {
+            pin: sessionPin,
+            theme: appData.theme,
+            subjects: appData.subjects,
+            students: appData.students,
+            noticeBoard: appData.noticeBoard,
+            trash: appData.trash
+        };
+        fetch(SHEET_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payloadToSave),
+            keepalive: !!useKeepAlive,
+            redirect: 'follow'
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(resp) {
+            if (resp && resp.authError) lockAppNow();
+            else setBadge('Synced', 'bg-emerald-500');
+        })
+        .catch(function() { setBadge('Retry', 'bg-red-500'); })
+        .finally(function() {
+            if (typeof onFlushed === 'function') onFlushed();
+        });
+    }
+
+    function syncFromSheet(doneCallback) {
+        if (!sessionPin) {
+            if (typeof doneCallback === 'function') doneCallback();
+            return lockAppNow();
+        }
+        if (hasPendingSave) {
+            flushPendingSaveNow(false, function() {
+                syncFromSheet(doneCallback);
+            });
+            return;
+        }
+        if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) {
+            setBadge('No Link', 'bg-red-500');
+            if (typeof doneCallback === 'function') doneCallback();
+            return;
+        }
+        setBadge('Syncing', 'bg-amber-500 animate-pulse');
+        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(sessionPin) + '&t=' + Date.now(), {
+            method: 'GET',
+            redirect: 'follow'
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(remote) {
+            if (remote && remote.authError) {
+                lockAppNow();
+                return;
+            }
+            if (remote && Array.isArray(remote.students)) {
+                appData = {
+                    theme: remote.theme || appData.theme || 'modern',
+                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
+                    students: remote.students || [],
+                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
+                    trash: remote.trash || []
+                };
+                applyThemeUI(appData.theme);
+                try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
+            }
+            purgeExpiredTrash();
+            normalizeAllStudentsData();
+            var nbEl = document.getElementById('noticeBoardInput');
+            if (nbEl && document.activeElement !== nbEl) {
+                nbEl.value = appData.noticeBoard || '';
+            }
+            refreshActiveViews();
+            setBadge('Synced', 'bg-emerald-500');
+        })
+        .catch(function() {
+            setBadge('Offline', 'bg-red-500');
+        })
+        .finally(function() {
+            if (typeof doneCallback === 'function') doneCallback();
+        });
+    }
+
+    function saveAllData() {
+        if (!sessionPin) return lockAppNow();
+        recordUserActivity();
+        purgeExpiredTrash();
+        renderCategories();
+        renderRecentActivity();
+        renderStudents();
+        updateTrashCount();
+
+        if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) return;
+        setBadge('Saving', 'bg-amber-500 animate-pulse');
+        hasPendingSave = true;
+
+        clearTimeout(saveDebounceTimer);
+        saveDebounceTimer = setTimeout(function() {
+            flushPendingSaveNow(false);
+        }, 400);
+    }
+
+    // --- NAVIGATION & CAPSULE DOCK (WITH DIRECTIONAL SWIPE & SPRING DOCK) ---
+    function showMainTab(tab, swipeDir) {
+        dismissActiveKeyboard();
+        closeAllTransientModals();
+
+        var prevIdx = MAIN_TABS_ORDER.indexOf(currentMainTab);
+        var nextIdx = MAIN_TABS_ORDER.indexOf(tab);
+        if (!swipeDir && currentMainTab !== tab && !currentStudentId && prevIdx !== -1 && nextIdx !== -1) {
+            swipeDir = nextIdx > prevIdx ? 'next' : 'prev';
+        }
+
+        if (currentMainTab !== tab || currentStudentId) {
+            pushAppHistoryState();
+        }
+
+        currentMainTab = tab;
+        currentStudentId = null;
+        var profScreen = document.getElementById('profileScreen');
+        resetActiveSwipeElement(profScreen, false);
+        profScreen.classList.add('hidden');
+
+        for (var i = 0; i < MAIN_TABS_ORDER.length; i++) {
+            var t = MAIN_TABS_ORDER[i];
+            var el = document.getElementById('tab-' + t);
+            resetActiveSwipeElement(el, false);
+            el.classList.add('hidden');
+            var btn = document.getElementById('bnav-' + t);
+            if (btn) {
+                btn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center text-zinc-400 font-medium relative";
+            }
+        }
+
+        var targetEl = document.getElementById('tab-' + tab);
+        targetEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next', 'animate-swipe-prev');
+        void targetEl.offsetWidth;
+        if (swipeDir === 'next') targetEl.classList.add('animate-swipe-next');
+        else if (swipeDir === 'prev') targetEl.classList.add('animate-swipe-prev');
+        else targetEl.classList.add('animate-view');
+
+        var activeBtn = document.getElementById('bnav-' + tab);
+        if (activeBtn) {
+            activeBtn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center bg-white text-zinc-900 font-extrabold shadow-md scale-105 relative";
+        }
+
+        if (tab === 'home') { renderCategories(); renderRecentActivity(); }
+        if (tab === 'students') renderStudents();
+        if (tab === 'attendance') { renderWeekStrip(); renderMasterAttendance(); }
+        if (tab === 'fees') renderMasterFees();
+        if (tab === 'trash') renderTrash();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchProfileSection(sec, swipeDir) {
+        dismissActiveKeyboard();
+        var prevIdx = PROFILE_SECS_ORDER.indexOf(activeProfileSec);
+        var nextIdx = PROFILE_SECS_ORDER.indexOf(sec);
+        if (!swipeDir && activeProfileSec !== sec && prevIdx !== -1 && nextIdx !== -1) {
+            swipeDir = nextIdx > prevIdx ? 'next' : 'prev';
+        }
+
+        activeProfileSec = sec;
+        var slider = document.getElementById('psecSliderPill');
+        if (slider && nextIdx !== -1) {
+            slider.style.transform = 'translate3d(' + (nextIdx * 100) + '%, 0, 0)';
+        }
+
+        for (var i = 0; i < PROFILE_SECS_ORDER.length; i++) {
+            var k = PROFILE_SECS_ORDER[i];
+            var secEl = document.getElementById('psec-' + k);
+            resetActiveSwipeElement(secEl, false);
+            if (k === sec) {
+                secEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next', 'animate-swipe-prev');
+                void secEl.offsetWidth;
+                if (swipeDir === 'next') secEl.classList.add('animate-swipe-next');
+                else if (swipeDir === 'prev') secEl.classList.add('animate-swipe-prev');
+                else secEl.classList.add('animate-view');
+            } else {
+                secEl.classList.add('hidden');
+            }
+            var btn = document.getElementById('psec-btn-' + k);
+            if (btn) {
+                btn.className = (k === sec)
+                    ? "touch-item relative z-10 h-9 rounded-xl text-xs font-extrabold text-zinc-900 transition-colors duration-200"
+                    : "touch-item relative z-10 h-9 rounded-xl text-xs font-semibold text-zinc-500 transition-colors duration-200";
+            }
+        }
+    }
+
+    // --- PILL SELECTORS ---
+    function selectStuAttPill(status) {
+        document.getElementById('stuAttStatus').value = status;
+        ['Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(st) {
+            var btn = document.getElementById('sap-' + st);
+            if (!btn) return;
+            btn.className = (st === status)
+                ? "touch-item h-9 rounded-xl font-bold text-xs bg-zinc-900 text-white"
+                : "touch-item h-9 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
+        });
+    }
+
+    function selectQuickAttPill(status) {
+        document.getElementById('quickAttStatus').value = status;
+        ['Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(st) {
+            var btn = document.getElementById('qap-' + st);
+            if (!btn) return;
+            btn.className = (st === status)
+                ? "touch-item h-10 rounded-xl font-bold text-xs bg-zinc-900 text-white"
+                : "touch-item h-10 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
+        });
+    }
+
+    function selectFeeTypePill(type) {
+        document.getElementById('feeTypeSelect').value = type;
+        var map = { 'Monthly Fee': 'ftp-Monthly', 'Admission Fee': 'ftp-Admission', 'Book Fee': 'ftp-Book' };
+        Object.keys(map).forEach(function(k) {
+            var btn = document.getElementById(map[k]);
+            if (!btn) return;
+            btn.className = (k === type)
+                ? "touch-item h-9 rounded-xl font-bold text-xs bg-zinc-900 text-white"
+                : "touch-item h-9 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
+        });
+        toggleFeeMonth();
+    }
+
+    function selectFeeModePill(mode) {
+        document.getElementById('feeModeSelect').value = mode;
+        ['UPI', 'Cash'].forEach(function(m) {
+            var btn = document.getElementById('fmp-' + m);
+            if (!btn) return;
+            btn.className = (m === mode)
+                ? "touch-item h-10 rounded-xl font-bold text-xs bg-zinc-900 text-white"
+                : "touch-item h-10 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
+        });
+    }
+
+    function selectFeeStatusPill(status) {
+        document.getElementById('feeStatusSelect').value = status;
+        var map = { 'Paid': 'fsp-Paid', 'Remaining Due': 'fsp-Due', 'Pending': 'fsp-Pending' };
+        Object.keys(map).forEach(function(k) {
+            var btn = document.getElementById(map[k]);
+            if (!btn) return;
+            btn.className = (k === status)
+                ? "touch-item h-9 rounded-xl font-bold text-xs bg-zinc-900 text-white"
+                : "touch-item h-9 rounded-xl font-semibold text-xs bg-white border border-zinc-200 text-zinc-600";
+        });
+        handleFeeStatusUI();
+    }
+
+    // --- RECENT ACTIVITY ---
+    function renderRecentActivity() {
+        var box = document.getElementById('recentActivityList');
+        if (!box) return;
+        var events = [];
+
+        appData.students.forEach(function(s) {
+            if (s.createdAt) {
+                events.push({
+                    ts: s.createdAt,
+                    dateStr: toLocalIso(new Date(s.createdAt)),
+                    title: 'Added ' + s.name,
+                    sub: s.subject,
+                    stuId: s.id
+                });
+            }
+            (s.fees || []).forEach(function(f) {
+                var dueInfo = f.dueAmount && Number(f.dueAmount) > 0 ? ' · Due ₹' + f.dueAmount : '';
+                events.push({
+                    ts: f.createdAt || Number(String(f.id).replace(/\D/g, '')) || Date.parse(f.date) || 0,
+                    dateStr: f.date || '',
+                    title: s.name + ' · ₹' + f.amount,
+                    sub: f.type + dueInfo,
+                    stuId: s.id
+                });
+            });
+            (s.attendance || []).forEach(function(a) {
+                events.push({
+                    ts: a.createdAt || a.id || Date.parse(a.date) || 0,
+                    dateStr: a.date || '',
+                    title: s.name + ' · ' + a.status,
+                    sub: s.subject + (a.remarks ? ' — ' + a.remarks : ''),
+                    stuId: s.id
+                });
+            });
+            (s.classes || []).forEach(function(c) {
+                events.push({
+                    ts: c.createdAt || c.id || Date.parse(c.date) || 0,
+                    dateStr: c.date || '',
+                    title: 'Class · ' + s.name,
+                    sub: c.lesson || c.repertoire || c.technique || 'Logged',
+                    stuId: s.id
+                });
+            });
+        });
+
+        events.sort(function(a, b) { return b.ts - a.ts; });
+        var top5 = events.slice(0, 5);
+
+        if (!top5.length) {
+            box.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No recent activity yet.</div>';
+            return;
+        }
+
+        box.innerHTML = top5.map(function(ev) {
+            return '<div onclick="openStudentProfile(\'' + ev.stuId + '\')" class="touch-item px-4 py-3.5 flex items-center justify-between gap-3 cursor-pointer">' +
+                '<div class="min-w-0">' +
+                    '<h4 class="text-xs font-bold text-zinc-900 truncate">' + escHtml(ev.title) + '</h4>' +
+                    '<p class="text-[11px] text-zinc-400 truncate mt-0.5">' + escHtml(ev.sub) + '</p>' +
+                '</div>' +
+                '<span class="text-[11px] font-semibold text-zinc-400 shrink-0">' + escHtml(ev.dateStr.slice(5)) + '</span>' +
+            '</div>';
+        }).join('');
+    }
+
+    // --- SUBJECTS (WITH RENAME & CASE-INSENSITIVE DUPLICATE CHECK) ---
+    function openAddSubjectModal() {
+        document.getElementById('editSubjectIndexInput').value = '';
+        document.getElementById('newSubjectNameInput').value = '';
+        document.getElementById('addSubjectModalTitle').textContent = 'Add New Subject';
+        document.getElementById('addSubjectSubmitBtn').textContent = 'Add Subject';
+        openSheetModal('addSubjectModal', 'addSubjectSheet');
+    }
+
+    function openRenameSubjectFromAction() {
+        var idx = actionSubjectIdx;
+        var oldName = appData.subjects[idx];
+        closeSubjectActionModal();
+        if (oldName === undefined) return;
+        setTimeout(function() {
+            document.getElementById('editSubjectIndexInput').value = String(idx);
+            document.getElementById('newSubjectNameInput').value = oldName;
+            document.getElementById('addSubjectModalTitle').textContent = 'Rename Subject';
+            document.getElementById('addSubjectSubmitBtn').textContent = 'Update';
+            openSheetModal('addSubjectModal', 'addSubjectSheet');
+        }, 230);
+    }
+
+    function closeAddSubjectModal() {
+        closeSheetModal('addSubjectModal', 'addSubjectSheet');
+    }
+
+    function saveNewSubject(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var sub = document.getElementById('newSubjectNameInput').value.trim();
+        if (!sub) return;
+        var editIdxStr = document.getElementById('editSubjectIndexInput').value;
+
+        var duplicateIdx = appData.subjects.findIndex(function(x) {
+            return x.toLowerCase() === sub.toLowerCase();
+        });
+
+        if (editIdxStr !== '') {
+            var editIdx = Number(editIdxStr);
+            var oldSub = appData.subjects[editIdx];
+            if (!oldSub) {
+                closeAddSubjectModal();
+                return;
+            }
+            if (duplicateIdx !== -1 && duplicateIdx !== editIdx) {
+                alert('A subject with this name already exists.');
+                return;
+            }
+            appData.subjects[editIdx] = sub;
+            (appData.students || []).forEach(function(s) {
+                if (s.subject === oldSub) s.subject = sub;
+            });
+            if (selectedSubjectFilter === oldSub) selectedSubjectFilter = sub;
+        } else {
+            if (duplicateIdx !== -1) {
+                closeAddSubjectModal();
+                return;
+            }
+            appData.subjects.push(sub);
+        }
+
+        populateSubjectDropdowns();
+        closeAddSubjectModal();
+        saveAllData();
+        refreshActiveViews();
+    }
+
+    function getAllKnownSubjects() {
+        var list = (appData.subjects || []).slice();
+        (appData.students || []).forEach(function(s) {
+            if (s.subject && !list.some(function(x) { return x.toLowerCase() === s.subject.toLowerCase(); })) {
+                list.push(s.subject);
+            }
+        });
+        return list;
+    }
+
+    function populateSubjectDropdowns() {
+        var modalSel = document.getElementById('newStuSubject');
+        if (!modalSel) return;
+        var list = getAllKnownSubjects();
+        if (!list.length) {
+            modalSel.innerHTML = '<option value="General Music">General Music</option>';
+            return;
+        }
+        modalSel.innerHTML = list.map(function(sub) {
+            return '<option value="' + escHtml(sub) + '">' + escHtml(sub) + '</option>';
+        }).join('');
+    }
+
+    function startSubLongPress(idx) {
+        subLongPressTriggered = false;
+        clearTimeout(subPressTimer);
+        subPressTimer = setTimeout(function() {
+            subLongPressTriggered = true;
+            openSubjectActionModal(idx);
+        }, 550);
+    }
+
+    function cancelSubLongPress() {
+        clearTimeout(subPressTimer);
+    }
+
+    function handleSubCardClick(idx) {
+        if (subLongPressTriggered) {
+            subLongPressTriggered = false;
+            return;
+        }
+        selectedSubjectFilter = appData.subjects[idx] || '';
+        showMainTab('students', 'next');
+    }
+
+    function openSubjectActionModal(idx) {
+        cancelSubLongPress();
+        var sub = appData.subjects[idx];
+        if (!sub) return;
+        actionSubjectIdx = idx;
+        var count = appData.students.filter(function(s) { return s.subject === sub; }).length;
+        document.getElementById('actionSubIcon').textContent = getSubjectIcon(sub);
+        document.getElementById('actionSubTitle').textContent = sub;
+        document.getElementById('actionSubInfo').textContent = count + (count === 1 ? ' student enrolled' : ' students enrolled');
+        openSheetModal('subjectActionModal', 'subjectActionSheet');
+    }
+
+    function closeSubjectActionModal() {
+        subLongPressTriggered = false;
+        closeSheetModal('subjectActionModal', 'subjectActionSheet');
+    }
+
+    function confirmTrashSubject() {
+        var sub = appData.subjects[actionSubjectIdx];
+        closeSubjectActionModal();
+        if (!sub) return;
+        appData.subjects.splice(actionSubjectIdx, 1);
+        if (selectedSubjectFilter === sub) selectedSubjectFilter = '';
+        populateSubjectDropdowns();
+        moveToTrash('Subject', null, sub, 'Subject Category', sub);
+    }
+
+    function setSubjectFilter(sub) {
+        selectedSubjectFilter = sub;
+        var grid = document.getElementById('studentGrid');
+        if (grid) {
+            grid.classList.remove('animate-view');
+            void grid.offsetWidth;
+            grid.classList.add('animate-view');
+        }
+        renderStudents();
+    }
+
+    function renderCategories() {
+        var box = document.getElementById('categoryGrid');
+        if (!box) return;
+
+        if (!appData.subjects.length) {
+            box.innerHTML = '<div class="col-span-2 bg-white border border-zinc-200/80 rounded-[24px] p-6 text-center text-xs text-zinc-400">No subjects active. Tap "＋ Add Subject" above.</div>';
+            return;
+        }
+
+        box.innerHTML = appData.subjects.map(function(sub, idx) {
+            var count = appData.students.filter(function(s) { return s.subject === sub; }).length;
+            var modClass = 'mod-sub-' + (idx % 4);
+            return '<div ' +
+                'onclick="handleSubCardClick(' + idx + ')" ' +
+                'oncontextmenu="event.preventDefault(); openSubjectActionModal(' + idx + ');" ' +
+                'onmousedown="startSubLongPress(' + idx + ')" ' +
+                'onmouseup="cancelSubLongPress()" ' +
+                'onmouseleave="cancelSubLongPress()" ' +
+                'ontouchstart="startSubLongPress(' + idx + ')" ' +
+                'ontouchend="cancelSubLongPress()" ' +
+                'ontouchcancel="cancelSubLongPress()" ' +
+                'ontouchmove="cancelSubLongPress()" ' +
+                'class="touch-item ' + modClass + ' bg-white border border-zinc-200/80 p-4 rounded-[26px] cursor-pointer flex flex-col justify-between min-h-[122px] shadow-2xs">' +
+                '<div class="flex justify-between items-center gap-1">' +
+                    '<span class="sub-badge-pill px-2.5 py-0.5 rounded-full bg-white/75 text-[10px] font-bold text-zinc-900">' + count + ' ' + (count === 1 ? 'Student' : 'Students') + '</span>' +
+                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="sub-menu-btn touch-item w-7 h-7 rounded-full bg-white/75 text-zinc-900 flex items-center justify-center text-xs font-bold">⋮</button>' +
+                '</div>' +
+                '<div class="mt-3 flex items-end justify-between gap-2">' +
+                    '<h3 class="font-extrabold text-zinc-900 text-base leading-snug truncate">' + escHtml(sub) + '</h3>' +
+                    '<span class="text-2xl leading-none shrink-0">' + getSubjectIcon(sub) + '</span>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // --- STUDENTS ---
+    function formatStudentOptionLabel(s) {
+        var duplicateCount = (appData.students || []).filter(function(other) {
+            return other.name.trim().toLowerCase() === s.name.trim().toLowerCase();
+        }).length;
+        if (duplicateCount > 1) {
+            return escHtml(s.name) + ' (' + escHtml(s.subject) + ' · ' + escHtml(s.id) + ')';
+        }
+        return escHtml(s.name) + ' (' + escHtml(s.subject) + ')';
+    }
+
+    function onSearchStudents() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(renderStudents, 70);
+    }
+
+    function openStudentModal() {
+        if (!appData.subjects.length) {
+            openAddSubjectModal();
+            return;
+        }
+        document.getElementById('addStudentForm').reset();
+        document.getElementById('editStuId').value = '';
+        document.getElementById('studentModalTitle').textContent = 'New Student';
+        document.getElementById('studentModalSubmitBtn').textContent = 'Save';
+        populateSubjectDropdowns();
+        openSheetModal('studentModal', 'studentModalSheet');
+    }
+
+    function openEditStudentModal(stuId) {
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        if (!s) return;
+        document.getElementById('editStuId').value = s.id;
+        document.getElementById('newStuName').value = s.name;
+        if (appData.subjects.indexOf(s.subject) === -1) {
+            appData.subjects.push(s.subject);
+        }
+        populateSubjectDropdowns();
+        document.getElementById('newStuSubject').value = s.subject;
+        document.getElementById('newStuBook').value = s.book === 'None' ? '' : s.book;
+        document.getElementById('studentModalTitle').textContent = 'Edit Student';
+        document.getElementById('studentModalSubmitBtn').textContent = 'Update';
+        openSheetModal('studentModal', 'studentModalSheet');
+    }
+
+    function closeStudentModal() {
+        closeSheetModal('studentModal', 'studentModalSheet');
+    }
+
+    function saveStudentForm(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var editId = document.getElementById('editStuId').value;
+        var sub = document.getElementById('newStuSubject').value;
+        var name = document.getElementById('newStuName').value.trim();
+        var book = document.getElementById('newStuBook').value.trim() || 'None';
+        if (!name) return;
+
+        if (editId) {
+            var s = appData.students.find(function(x) { return x.id === editId; });
+            if (s) { s.name = name; s.subject = sub; s.book = book; }
+            closeStudentModal();
+            saveAllData();
+            if (currentStudentId === editId) refreshStudentProfileData(editId);
+        } else {
+            var nowMs = Date.now();
+            var stu = {
+                id: generateUniqueId('JSM-', appData.students),
+                createdAt: nowMs,
+                name: name,
+                subject: sub,
+                book: book,
+                feeStatus: 'None',
+                dueAmount: '',
+                notes: '',
+                attendance: [],
+                classes: [],
+                fees: []
+            };
+            appData.students.push(stu);
+            closeStudentModal();
+            saveAllData();
+            openStudentProfile(stu.id);
+        }
+    }
+
+    function openQuickAttendanceModal() {
+        if (!appData.students.length) return alert('Please add a student first.');
+        var sel = document.getElementById('quickAttStuSelect');
+        sel.innerHTML = appData.students.map(function(s) {
+            return '<option value="' + s.id + '">' + formatStudentOptionLabel(s) + '</option>';
+        }).join('');
+        document.getElementById('quickAttDate').value = todayStr;
+        selectQuickAttPill('Present');
+        document.getElementById('quickAttRemarks').value = '';
+        openSheetModal('quickAttModal', 'quickAttSheet');
+    }
+
+    function closeQuickAttendanceModal() {
+        closeSheetModal('quickAttModal', 'quickAttSheet');
+    }
+
+    function saveQuickAttendance(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var stuId = document.getElementById('quickAttStuSelect').value;
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        if (!s) return;
+        var nowMs = Date.now();
+        s.attendance.unshift({
+            id: nowMs,
+            createdAt: nowMs,
+            date: document.getElementById('quickAttDate').value,
+            status: document.getElementById('quickAttStatus').value,
+            remarks: document.getElementById('quickAttRemarks').value.trim()
+        });
+        sortByDateDesc(s.attendance);
+        closeQuickAttendanceModal();
+        saveAllData();
+        if (currentMainTab === 'attendance') renderMasterAttendance();
+    }
+
+    function startStuLongPress(stuId) {
+        longPressTriggered = false;
+        clearTimeout(pressTimer);
+        pressTimer = setTimeout(function() {
+            longPressTriggered = true;
+            openStudentActionModal(stuId);
+        }, 550);
+    }
+
+    function cancelStuLongPress() {
+        clearTimeout(pressTimer);
+    }
+
+    function handleStuCardClick(stuId) {
+        if (longPressTriggered) {
+            longPressTriggered = false;
+            return;
+        }
+        openStudentProfile(stuId);
+    }
+
+    function openStudentActionModal(stuId) {
+        cancelStuLongPress();
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        if (!s) return;
+        actionStudentId = stuId;
+        document.getElementById('actionStuName').textContent = s.name;
+        document.getElementById('actionStuSub').textContent = s.subject + ' · ' + s.book;
+        openSheetModal('studentActionModal', 'studentActionSheet');
+    }
+
+    function closeStudentActionModal() {
+        longPressTriggered = false;
+        closeSheetModal('studentActionModal', 'studentActionSheet');
+    }
+
+    function handleStudentAction(action) {
+        var stuId = actionStudentId;
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        closeStudentActionModal();
+        if (!s) return;
+
+        if (action === 'edit') {
+            setTimeout(function() { openEditStudentModal(stuId); }, 220);
+        } else if (action === 'trash') {
+            appData.students = appData.students.filter(function(st) { return st.id !== stuId; });
+            moveToTrash('Student', s.id, s.name, 'Subject: ' + s.subject + ' | Book: ' + s.book, s);
+            if (currentStudentId === stuId) showMainTab('students', 'prev');
+        }
+    }
+
+    // --- STATUS BADGES & CUMULATIVE FEE SUMMARY ---
+    function feeStatusBadge(status, dueAmt) {
+        if (!status || status === 'None') return '';
+        var numDue = Number(dueAmt || 0);
+        if (numDue > 0) {
+            return '<span class="badge-due text-[10px] bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-bold">Due ₹' + escHtml(numDue) + '</span>';
+        }
+        if (status === 'Pending' || status === 'Remaining Due') {
+            return '<span class="badge-pending text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Pending</span>';
+        }
+        if (status === 'Paid') {
+            return '<span class="badge-paid text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">Paid</span>';
+        }
+        return '';
+    }
+
+    function statusBadge(st) {
+        var styles = {
+            'Present': 'badge-paid bg-emerald-50 text-emerald-700 border-emerald-200',
+            'Absent': 'badge-due bg-red-50 text-red-600 border-red-200',
+            'Tardy': 'badge-pending bg-amber-50 text-amber-700 border-amber-200',
+            'Rescheduled': 'bg-zinc-100 text-zinc-700 border-zinc-200'
+        };
+        var cls = styles[st] || 'bg-zinc-100 text-zinc-700 border-zinc-200';
+        return '<span class="px-2 py-0.5 rounded-full border font-bold text-[10px] ' + cls + '">' + escHtml(st) + '</span>';
+    }
+
+    function syncStudentFeeSummary(s) {
+        if (!s.fees || !s.fees.length) {
+            s.feeStatus = 'None';
+            s.dueAmount = '';
+            return;
+        }
+        sortByDateDesc(s.fees);
+        var totalDue = 0;
+        var hasPending = false;
+        s.fees.forEach(function(f) {
+            var d = Number(f.dueAmount || 0);
+            if (d > 0) totalDue += d;
+            if (f.status === 'Pending' || (f.status === 'Remaining Due' && d <= 0)) {
+                hasPending = true;
+            }
+        });
+        totalDue = Math.round(totalDue * 100) / 100;
+
+        if (totalDue > 0) {
+            s.feeStatus = 'Remaining Due';
+            s.dueAmount = String(totalDue);
+        } else if (hasPending) {
+            s.feeStatus = 'Pending';
+            s.dueAmount = '';
+        } else {
+            s.feeStatus = s.fees[0].status || 'Paid';
+            s.dueAmount = '';
+        }
+    }
+
+    function renderStudents() {
+        document.getElementById('stuCount').textContent = appData.students.length;
+        var q = document.getElementById('stuSearch').value.toLowerCase();
+        var filterSubjects = getAllKnownSubjects();
+
+        if (selectedSubjectFilter && filterSubjects.indexOf(selectedSubjectFilter) === -1) {
+            selectedSubjectFilter = '';
+        }
+
+        var pillBox = document.getElementById('studentSubjectPills');
+        if (pillBox) {
+            var allActive = !selectedSubjectFilter ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
+            pillBox.innerHTML = '<button type="button" onclick="setSubjectFilter(\'\')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + allActive + '">All</button>' +
+                filterSubjects.map(function(sub) {
+                    var isAct = selectedSubjectFilter === sub;
+                    var cls = isAct ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
+                    var safeArg = JSON.stringify(sub).replace(/"/g, '&quot;');
+                    return '<button type="button" onclick="setSubjectFilter(' + safeArg + ')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + cls + '">' + escHtml(sub) + '</button>';
+                }).join('');
+        }
+
+        var grid = document.getElementById('studentGrid');
+        var filtered = appData.students.filter(function(s) {
+            return s.name.toLowerCase().indexOf(q) !== -1 && (!selectedSubjectFilter || s.subject === selectedSubjectFilter);
+        });
+        if (!filtered.length) {
+            grid.innerHTML = '<div class="p-8 text-center text-xs text-zinc-400">No students found.</div>';
+            return;
+        }
+
+        grid.innerHTML = filtered.map(function(s) {
+            return '<div ' +
+                'onclick="handleStuCardClick(\'' + s.id + '\')" ' +
+                'oncontextmenu="event.preventDefault(); openStudentActionModal(\'' + s.id + '\');" ' +
+                'onmousedown="startStuLongPress(\'' + s.id + '\')" ' +
+                'onmouseup="cancelStuLongPress()" ' +
+                'onmouseleave="cancelStuLongPress()" ' +
+                'ontouchstart="startStuLongPress(\'' + s.id + '\')" ' +
+                'ontouchend="cancelStuLongPress()" ' +
+                'ontouchcancel="cancelStuLongPress()" ' +
+                'ontouchmove="cancelStuLongPress()" ' +
+                'class="touch-item px-4 py-3.5 cursor-pointer flex justify-between items-center gap-3">' +
+                '<div class="min-w-0 flex-1">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<h3 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(s.name) + '</h3>' +
+                        feeStatusBadge(s.feeStatus, s.dueAmount) +
+                    '</div>' +
+                    '<p class="text-xs text-zinc-400 truncate mt-0.5">' + escHtml(s.subject) + ' · Book: ' + escHtml(s.book) + '</p>' +
+                '</div>' +
+                '<button type="button" onclick="event.stopPropagation(); openStudentActionModal(\'' + s.id + '\');" class="touch-item w-8 h-8 rounded-full text-zinc-400 flex items-center justify-center text-sm shrink-0">⋮</button>' +
+            '</div>';
+        }).join('');
+    }
+
+    // --- STUDENT PROFILE ---
+    function getActiveStudent() {
+        return appData.students.find(function(s) { return s.id === currentStudentId; });
+    }
+
+    function refreshStudentProfileData(id) {
+        currentStudentId = id;
+        var s = getActiveStudent();
+        if (!s) return;
+
+        syncStudentFeeSummary(s);
+
+        document.getElementById('profAvatar').textContent = getSubjectIcon(s.subject);
+        document.getElementById('profName').textContent = s.name;
+        document.getElementById('profSubject').textContent = s.subject;
+        document.getElementById('profBook').value = s.book;
+        if (document.activeElement !== document.getElementById('stuNotes')) {
+            document.getElementById('stuNotes').value = s.notes || '';
+        }
+
+        var nonRescheduledAtt = (s.attendance || []).filter(function(a) { return a.status !== 'Rescheduled'; });
+        var presentAtt = nonRescheduledAtt.filter(function(a) { return a.status === 'Present' || a.status === 'Tardy'; }).length;
+        var attPct = nonRescheduledAtt.length ? Math.round((presentAtt / nonRescheduledAtt.length) * 100) + '%' : '100%';
+        document.getElementById('profStatAtt').textContent = attPct;
+        document.getElementById('profStatCls').textContent = (s.classes || []).length;
+        var feeLabel = (!s.feeStatus || s.feeStatus === 'None') ? 'No Entry' : (s.dueAmount && Number(s.dueAmount) > 0 ? 'Due ₹' + s.dueAmount : s.feeStatus);
+        document.getElementById('profStatFee').textContent = feeLabel;
+
+        renderStudentAttendance();
+        renderStudentClasses();
+        renderStudentFees();
+    }
+
+    function openStudentProfile(id) {
+        dismissActiveKeyboard();
+        var isNewProfile = currentStudentId !== id;
+        currentStudentId = id;
+        var s = getActiveStudent();
+        if (!s) return;
+
+        if (isNewProfile) pushAppHistoryState();
+
+        MAIN_TABS_ORDER.forEach(function(t) {
+            document.getElementById('tab-' + t).classList.add('hidden');
+        });
+        var profEl = document.getElementById('profileScreen');
+        resetActiveSwipeElement(profEl, false);
+        profEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next');
+        void profEl.offsetWidth;
+        profEl.classList.add('animate-swipe-next');
+
+        document.getElementById('stuAttDate').value = todayStr;
+        selectStuAttPill('Present');
+        document.getElementById('clsDate').value = todayStr;
+
+        refreshStudentProfileData(id);
+        switchProfileSection(activeProfileSec || 'att');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateStudentBook() {
+        var s = getActiveStudent();
+        if (s) { s.book = document.getElementById('profBook').value.trim() || 'None'; saveAllData(); }
+    }
+
+    // --- NOTES & NOTICE BOARD ---
+    function saveStudentNotes(force) {
+        skipNoteBlur = false;
+        var s = getActiveStudent();
+        if (!s) return;
+        var newVal = document.getElementById('stuNotes').value;
+        if (!force && s.notes === newVal) return;
+        s.notes = newVal;
+        saveAllData();
+    }
+
+    function trashStudentNotes() {
+        skipNoteBlur = false;
+        var s = getActiveStudent();
+        if (!s) return;
+        var val = document.getElementById('stuNotes').value.trim();
+        if (!val) return alert('Notes box is already empty.');
+        if (!confirm('Move Class Notes for ' + s.name + ' to the 30-Day Trash?')) return;
+        document.getElementById('stuNotes').value = '';
+        s.notes = '';
+        moveToTrash('Class Note', s.id, s.name, val.slice(0, 80), val);
+    }
+
+    function saveNoticeBoard(force) {
+        skipNoteBlur = false;
+        var newVal = document.getElementById('noticeBoardInput').value;
+        if (!force && appData.noticeBoard === newVal) return;
+        appData.noticeBoard = newVal;
+        saveAllData();
+    }
+
+    function trashNoticeBoard() {
+        skipNoteBlur = false;
+        var val = document.getElementById('noticeBoardInput').value.trim();
+        if (!val) return alert('Notice Board is already empty.');
+        if (!confirm('Move Notice Board content to the 30-Day Trash?')) return;
+        document.getElementById('noticeBoardInput').value = '';
+        appData.noticeBoard = '';
+        moveToTrash('Notice', null, 'Notice Board', val.slice(0, 80), val);
+    }
+
+    // --- 30-DAY TRASH ---
+    function moveToTrash(kind, studentId, title, summary, dataPayload) {
+        var now = Date.now();
+        var exp = now + THIRTY_DAYS_MS;
+        if (!appData.trash) appData.trash = [];
+        appData.trash.unshift({
+            trashId: 'TR-' + now + '-' + Math.floor(10 + Math.random() * 90),
+            kind: kind,
+            studentId: studentId,
+            title: title,
+            summary: summary,
+            deletedAtMs: now,
+            deletedDate: toLocalIso(new Date(now)),
+            expiresDate: toLocalIso(new Date(exp)),
+            data: dataPayload
+        });
+        showUndoToast(kind + ' moved to Trash');
+        saveAllData();
+    }
+
+    function purgeExpiredTrash() {
+        if (!appData.trash) appData.trash = [];
+        var now = Date.now();
+        appData.trash = appData.trash.filter(function(t) {
+            if (t.expiresDate) {
+                var expMs = Date.parse(t.expiresDate + 'T23:59:59');
+                if (!isNaN(expMs)) return now <= expMs;
+            }
+            var delMs = Number(t.deletedAtMs) || (t.deletedDate ? Date.parse(t.deletedDate) : 0);
+            if (!delMs || isNaN(delMs)) return true;
+            return (now - delMs) < THIRTY_DAYS_MS;
+        });
+    }
+
+    function updateTrashCount() {
+        var cnt = (appData.trash || []).length;
+        var el = document.getElementById('trashCount');
+        if (el) {
+            el.textContent = cnt;
+            el.classList.toggle('hidden', cnt === 0);
+        }
+    }
+
+    function showUndoToast(msg) {
+        var toast = document.getElementById('undoToast');
+        document.getElementById('undoText').textContent = msg;
+        toast.classList.remove('hidden', 'animate-sheet-out');
+        toast.classList.add('flex', 'animate-sheet');
+        clearTimeout(undoTimer);
+        undoTimer = setTimeout(function() {
+            toast.classList.remove('animate-sheet');
+            toast.classList.add('animate-sheet-out');
+            setTimeout(function() {
+                toast.classList.replace('flex', 'hidden');
+                toast.classList.remove('animate-sheet-out');
+            }, 220);
+        }, 6000);
+    }
+
+    function undoLastDelete() {
+        if (!appData.trash || !appData.trash.length) return;
+        restoreTrashItem(appData.trash[0].trashId);
+        document.getElementById('undoToast').classList.replace('flex', 'hidden');
+    }
+
+    function restoreTrashItem(trashId) {
+        var idx = appData.trash.findIndex(function(t) { return t.trashId === trashId; });
+        if (idx === -1) return;
+        var item = appData.trash.splice(idx, 1)[0];
+
+        if (item.kind === 'Subject') {
+            if (!appData.subjects.some(function(x) { return x.toLowerCase() === String(item.data).toLowerCase(); })) {
+                appData.subjects.push(item.data);
+            }
+        } else if (item.kind === 'Student') {
+            appData.students.push(item.data);
+            if (item.data && item.data.subject && !appData.subjects.some(function(x) { return x.toLowerCase() === item.data.subject.toLowerCase(); })) {
+                appData.subjects.push(item.data.subject);
+            }
+        } else if (item.kind === 'Notice' || item.kind === 'General Note') {
+            appData.noticeBoard = item.data;
+            document.getElementById('noticeBoardInput').value = appData.noticeBoard;
+        } else {
+            var stu = appData.students.find(function(s) { return s.id === item.studentId; });
+            if (!stu) {
+                alert('Please restore the student profile first.');
+                appData.trash.unshift(item);
+                return;
+            }
+            if (item.kind === 'Attendance') {
+                stu.attendance.unshift(item.data);
+                sortByDateDesc(stu.attendance);
+            }
+            if (item.kind === 'Class') {
+                stu.classes.unshift(item.data);
+                sortByDateDesc(stu.classes);
+            }
+            if (item.kind === 'Fee') {
+                stu.fees.unshift(item.data);
+                syncStudentFeeSummary(stu);
+            }
+            if (item.kind === 'Class Note') stu.notes = item.data;
+        }
+        saveAllData();
+        refreshActiveViews();
+    }
+
+    function deleteTrashPermanently(trashId) {
+        if (!confirm('PERMANENTLY delete this item from the app and Google Sheets? This cannot be undone.')) return;
+        appData.trash = appData.trash.filter(function(t) { return t.trashId !== trashId; });
+        saveAllData();
+        renderTrash();
+    }
+
+    function emptyAllTrash() {
+        if (!appData.trash || !appData.trash.length) return alert('Trash is already empty.');
+        if (!confirm('PERMANENTLY delete ALL items in Trash from Google Sheets? This cannot be undone.')) return;
+        appData.trash = [];
+        saveAllData();
+        renderTrash();
+    }
+
+    function renderTrash() {
+        var box = document.getElementById('trashList');
+        var emptyBtn = document.getElementById('emptyTrashBtn');
+        if (!appData.trash.length) {
+            emptyBtn.classList.add('hidden');
+            box.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">Trash bin is empty.</div>';
+            return;
+        }
+        emptyBtn.classList.remove('hidden');
+        box.innerHTML = appData.trash.map(function(t) {
+            return '<div class="p-4 flex justify-between items-center gap-3">' +
+                '<div class="min-w-0 flex-1">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<span class="text-[10px] font-bold uppercase bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">' + escHtml(t.kind) + '</span>' +
+                        '<h4 class="font-bold text-zinc-900 text-xs truncate">' + escHtml(t.title) + '</h4>' +
+                    '</div>' +
+                    '<p class="text-xs text-zinc-500 truncate mt-1">' + escHtml(t.summary) + '</p>' +
+                    '<p class="text-[10px] text-zinc-400 mt-0.5">Expires ' + escHtml(t.expiresDate) + '</p>' +
+                '</div>' +
+                '<div class="flex items-center gap-1.5 shrink-0">' +
+                    '<button type="button" onclick="restoreTrashItem(\'' + t.trashId + '\')" class="touch-item h-8 bg-zinc-900 text-white px-3 rounded-full text-xs font-bold">Restore</button>' +
+                    '<button type="button" onclick="deleteTrashPermanently(\'' + t.trashId + '\')" class="touch-item h-8 bg-red-50 text-red-600 px-2.5 rounded-full text-xs font-bold">✕</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    function removeSubRecord(stuId, col, id) {
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        if (!s) return;
+        var item = s[col].find(function(x) { return x.id == id; });
+        if (!item) return;
+        if (!confirm('Move this entry to the 30-Day Trash?')) return;
+        s[col] = s[col].filter(function(x) { return x.id != id; });
+
+        if (col === 'fees') syncStudentFeeSummary(s);
+
+        var kindMap = { attendance: 'Attendance', classes: 'Class', fees: 'Fee' };
+        var sum = col === 'attendance' ? (item.date + ' - ' + item.status) :
+                  col === 'classes' ? (item.date + ' - ' + (item.lesson || item.repertoire || 'Class')) :
+                  (item.date + ' - ' + item.type + ' (Paid: ₹' + item.amount + ')');
+
+        moveToTrash(kindMap[col], s.id, s.name, sum, item);
+        if (currentStudentId === stuId) {
+            refreshStudentProfileData(stuId);
+        } else {
+            renderMasterAttendance();
+            renderMasterFees();
+        }
+    }
+
+    // --- ATTENDANCE & PILL CALENDAR STRIP ---
+    function renderWeekStrip() {
+        var strip = document.getElementById('weekStrip');
+        var parts = selectedAttDate ? selectedAttDate.split('-').map(Number) : null;
+        var baseDate = parts ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date();
+        var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+        document.getElementById('attHeaderDateTitle').textContent = selectedAttDate
+            ? (monthNames[baseDate.getMonth()] + ' ' + baseDate.getDate())
+            : 'All Dates';
+
+        var html = [];
+        for (var offset = -3; offset <= 3; offset++) {
+            var d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + offset);
+            var iso = toLocalIso(d);
+            var isSelected = selectedAttDate === iso;
+
+            if (isSelected) {
+                html.push(
+                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md scale-105">' +
+                        '<span class="w-1 h-1 rounded-full bg-current"></span>' +
+                        '<span class="text-[10px] opacity-80">' + dayNames[d.getDay()] + '</span>' +
+                        '<span class="text-xs font-extrabold">' + d.getDate() + '</span>' +
+                    '</button>'
+                );
+            } else {
+                html.push(
+                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-white border border-zinc-200/80 rounded-full py-2.5 flex flex-col items-center gap-1 text-zinc-500">' +
+                        '<span class="w-1 h-1 rounded-full bg-zinc-300"></span>' +
+                        '<span class="text-[10px]">' + dayNames[d.getDay()] + '</span>' +
+                        '<span class="text-xs font-bold text-zinc-900">' + d.getDate() + '</span>' +
+                    '</button>'
+                );
+            }
+        }
+        strip.innerHTML = html.join('');
+    }
+
+    function onPickAttendanceDate(dateVal) {
+        selectedAttDate = dateVal;
+        document.getElementById('regAttDate').value = dateVal;
+        renderWeekStrip();
+        var list = document.getElementById('masterAttList');
+        if (list) {
+            list.classList.remove('animate-view');
+            void list.offsetWidth;
+            list.classList.add('animate-view');
+        }
+        renderMasterAttendance();
+    }
+
+    function clearAttDateFilter() {
+        selectedAttDate = '';
+        document.getElementById('regAttDate').value = '';
+        renderWeekStrip();
+        renderMasterAttendance();
+    }
+
+    function setAttStatusFilter(st) {
+        selectedAttStatus = st;
+        ['ALL', 'Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(k) {
+            var btn = document.getElementById('afilt-' + k);
+            if (!btn) return;
+            var active = (k === 'ALL' && !st) || k === st;
+            btn.className = active
+                ? 'touch-item h-8 px-3.5 rounded-full text-xs font-bold bg-zinc-900 text-white shrink-0'
+                : 'touch-item h-8 px-3.5 rounded-full text-xs font-semibold bg-white border border-zinc-200 text-zinc-600 shrink-0';
+        });
+        var list = document.getElementById('masterAttList');
+        if (list) {
+            list.classList.remove('animate-view');
+            void list.offsetWidth;
+            list.classList.add('animate-view');
+        }
+        renderMasterAttendance();
+    }
+
+    function addStudentAttendance(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var s = getActiveStudent();
+        if (!s) return;
+        var nowMs = Date.now();
+        s.attendance.unshift({
+            id: nowMs,
+            createdAt: nowMs,
+            date: document.getElementById('stuAttDate').value,
+            status: document.getElementById('stuAttStatus').value,
+            remarks: document.getElementById('stuAttRemarks').value.trim()
+        });
+        sortByDateDesc(s.attendance);
+        document.getElementById('stuAttRemarks').value = '';
+        saveAllData();
+        refreshStudentProfileData(s.id);
+    }
+
+    function openEditAttendanceModal(stuId, attId) {
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        var a = (s ? s.attendance || [] : []).find(function(x) { return x.id == attId; });
+        if (!a) return;
+        document.getElementById('editAttStuId').value = stuId;
+        document.getElementById('editAttId').value = a.id;
+        document.getElementById('editAttDate').value = a.date;
+        document.getElementById('editAttStatus').value = a.status;
+        document.getElementById('editAttRemarks').value = a.remarks || '';
+        openSheetModal('editAttModal', 'editAttSheet');
+    }
+
+    function closeEditAttModal() {
+        closeSheetModal('editAttModal', 'editAttSheet');
+    }
+
+    function saveEditedAttendance(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var stuId = document.getElementById('editAttStuId').value;
+        var attId = document.getElementById('editAttId').value;
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        var a = (s ? s.attendance || [] : []).find(function(x) { return x.id == attId; });
+        if (a) {
+            a.date = document.getElementById('editAttDate').value;
+            a.status = document.getElementById('editAttStatus').value;
+            a.remarks = document.getElementById('editAttRemarks').value.trim();
+            sortByDateDesc(s.attendance);
+        }
+        closeEditAttModal();
+        saveAllData();
+        if (currentStudentId === stuId) refreshStudentProfileData(stuId);
+        renderMasterAttendance();
+    }
+
+    function renderStudentAttendance() {
+        var s = getActiveStudent();
+        var list = document.getElementById('stuAttList');
+        var counts = { Present: 0, Absent: 0, Tardy: 0, Rescheduled: 0 };
+
+        if (!(s.attendance || []).length) {
+            list.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No attendance logged yet.</div>';
+        } else {
+            list.innerHTML = (s.attendance || []).map(function(a) {
+                counts[a.status] = (counts[a.status] || 0) + 1;
+                return '<div class="px-4 py-3 flex justify-between items-center text-xs">' +
+                    '<div>' +
+                        '<div class="flex items-center gap-2">' +
+                            '<span class="font-bold text-zinc-900">' + escHtml(a.date) + '</span>' +
+                            statusBadge(a.status) +
+                        '</div>' +
+                        (a.remarks ? '<p class="text-zinc-400 mt-0.5">' + escHtml(a.remarks) + '</p>' : '') +
+                    '</div>' +
+                    '<div class="flex items-center gap-1">' +
+                        '<button type="button" onclick="openEditAttendanceModal(\'' + s.id + '\', ' + a.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
+                        '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'attendance\', ' + a.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        }
+
+        document.getElementById('stuAttStats').innerHTML =
+            '<span>P:' + counts.Present + '</span>' +
+            '<span>A:' + counts.Absent + '</span>' +
+            '<span>T:' + counts.Tardy + '</span>' +
+            '<span>R:' + counts.Rescheduled + '</span>';
+    }
+
+    function renderMasterAttendance() {
+        var list = document.getElementById('masterAttList');
+        var rows = [];
+        appData.students.forEach(function(s) {
+            (s.attendance || []).forEach(function(a) {
+                if ((!selectedAttDate || a.date === selectedAttDate) && (!selectedAttStatus || a.status === selectedAttStatus)) {
+                    rows.push({ id: a.id, createdAt: a.createdAt, date: a.date, status: a.status, remarks: a.remarks, stuName: s.name, stuSub: s.subject, stuId: s.id });
+                }
+            });
+        });
+        sortByDateDesc(rows);
+
+        if (!rows.length) {
+            list.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">No attendance records found.</div>';
+            return;
+        }
+
+        list.innerHTML = rows.slice(0, 100).map(function(r) {
+            return '<div class="px-4 py-3.5 flex justify-between items-center gap-3">' +
+                '<div onclick="openStudentProfile(\'' + r.stuId + '\')" class="touch-item cursor-pointer min-w-0 flex-1">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<h4 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(r.stuName) + '</h4>' +
+                        statusBadge(r.status) +
+                    '</div>' +
+                    '<p class="text-xs text-zinc-400 mt-0.5">' + escHtml(r.date) + ' · ' + escHtml(r.stuSub) + (r.remarks ? ' · ' + escHtml(r.remarks) : '') + '</p>' +
+                '</div>' +
+                '<div class="flex items-center gap-1 shrink-0">' +
+                    '<button type="button" onclick="openEditAttendanceModal(\'' + r.stuId + '\', ' + r.id + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
+                    '<button type="button" onclick="removeSubRecord(\'' + r.stuId + '\', \'attendance\', ' + r.id + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // --- DAILY CLASSES ---
+    function addStudentClass(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var s = getActiveStudent();
+        if (!s) return;
+        var nowMs = Date.now();
+        s.classes.unshift({
+            id: nowMs,
+            createdAt: nowMs,
+            date: document.getElementById('clsDate').value,
+            technique: document.getElementById('clsTech').value.trim(),
+            lesson: document.getElementById('clsLesson').value.trim(),
+            repertoire: document.getElementById('clsRep').value.trim()
+        });
+        sortByDateDesc(s.classes);
+        document.getElementById('clsTech').value = '';
+        document.getElementById('clsLesson').value = '';
+        document.getElementById('clsRep').value = '';
+        saveAllData();
+        refreshStudentProfileData(s.id);
+    }
+
+    function openEditClassModal(stuId, clsId) {
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        var c = (s ? s.classes || [] : []).find(function(x) { return x.id == clsId; });
+        if (!c) return;
+        document.getElementById('editClsStuId').value = stuId;
+        document.getElementById('editClsId').value = c.id;
+        document.getElementById('editClsDate').value = c.date;
+        document.getElementById('editClsTech').value = c.technique || '';
+        document.getElementById('editClsLesson').value = c.lesson || '';
+        document.getElementById('editClsRep').value = c.repertoire || '';
+        openSheetModal('editClassModal', 'editClassSheet');
+    }
+
+    function closeEditClassModal() {
+        closeSheetModal('editClassModal', 'editClassSheet');
+    }
+
+    function saveEditedClass(e) {
+        e.preventDefault();
+        if (!acquireSubmitLock()) return;
+        var stuId = document.getElementById('editClsStuId').value;
+        var clsId = document.getElementById('editClsId').value;
+        var s = appData.students.find(function(x) { return x.id === stuId; });
+        var c = (s ? s.classes || [] : []).find(function(x) { return x.id == clsId; });
+        if (c) {
+            c.date = document.getElementById('editClsDate').value;
+            c.technique = document.getElementById('editClsTech').value.trim();
+            c.lesson = document.getElementById('editClsLesson').value.trim();
+            c.repertoire = document.getElementById('editClsRep').value.trim();
+            sortByDateDesc(s.classes);
+        }
+        closeEditClassModal();
+        saveAllData();
+        if (currentStudentId === stuId) renderStudentClasses();
+    }
+
+    function renderStudentClasses() {
+        var s = getActiveStudent();
+        var box = document.getElementById('stuClassList');
+        if (!(s.classes || []).length) {
+            box.innerHTML = '<div class="p-6 text-center text-zinc-400 text-xs">No classes logged yet.</div>';
+            return;
+        }
+        box.innerHTML = (s.classes || []).map(function(c) {
+            return '<div class="p-4 text-xs space-y-1">' +
+                '<div class="flex justify-between items-center font-bold text-zinc-900 pb-1">' +
+                    '<span>' + escHtml(c.date) + '</span>' +
+                    '<div class="flex items-center gap-1">' +
+                        '<button type="button" onclick="openEditClassModal(\'' + s.id + '\', ' + c.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
+                        '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'classes\', ' + c.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="text-zinc-600"><span class="text-zinc-400">Technique:</span> ' + escHtml(c.technique || '-') + '</div>' +
+                '<div class="text-zinc-600"><span class="text-zinc-400">Lesson:</span> ' + escHtml(c.lesson || '-') + '</div>' +
+                '<div class="text-zinc-600"><span class="text-zinc-400">Repertoire:</span> ' + escHtml(c.repertoire || '-') + '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // --- FEES ---
+    function openFeeModal(preselectedStuId, editFeeId) {
+        if (!appData.students.length) return alert('Please add a student first.');
+        var sel = document.getElementById('feeStuSelect');
+        sel.innerHTML = appData.students.map(function(s) {
+            return '<option value="' + s.id + '" ' + (s.id === preselectedStuId ? 'selected' : '') + '>' + formatStudentOptionLabel(s) + '</option>';
+        }).join('');
+
+        if (editFeeId && preselectedStuId) {
+            var s = appData.students.find(function(x) { return x.id === preselectedStuId; });
+            var f = (s ? s.fees || [] : []).find(function(x) { return x.id === editFeeId; });
+            if (f) {
+                document.getElementById('feeModalTitle').textContent = 'Edit Fee';
+                document.getElementById('editFeeId').value = f.id;
+                document.getElementById('feeStuSelect').value = s.id;
+                document.getElementById('feeStuSelect').disabled = true;
+                selectFeeTypePill(f.type || 'Monthly Fee');
+                document.getElementById('feeMonthInput').value = f.month || currentMonthStr;
+                document.getElementById('feeDateInput').value = f.date;
+                selectFeeModePill(f.mode || 'UPI');
+                selectFeeStatusPill(f.status || 'Paid');
+                document.getElementById('feeAmountInput').value = f.amount;
+                document.getElementById('feeDueInput').value = f.dueAmount || '';
+                document.getElementById('feeRemarksInput').value = f.remarks || '';
+                openSheetModal('feeModal', 'feeModalSheet');
+                return;
+            }
+        }
+
+        document.getElementById('feeModalTitle').textContent = 'Record Fee';
+        document.getElementById('editFeeId').value = '';
+        document.getElementById('feeStuSelect').disabled = false;
+        selectFeeTypePill('Monthly Fee');
+        document.getElementById('feeDateInput').value = todayStr;
+        document.getElementById('feeMonthInput').value = currentMonthStr;
+        selectFeeModePill('UPI');
+        selectFeeStatusPill('Paid');
+        document.getElementById('feeAmountInput').value = '';
+        document.getElementById('feeDueInput').value = '';
+        document.getElementById('feeRemarksInput').value = '';
+        openSheetModal('feeModal', 'feeModalSheet');
+    }
+
+    function closeFeeModal() {
+        closeSheetModal('feeModal', 'feeModalSheet');
+    }
+
+    function toggleFeeMonth() {
+        var isMonthly = document.getElementById('feeTypeSelect').value === 'Monthly Fee';
+        document.getElementById('feeMonthWrapper').classList.toggle('hidden', !isMonthly);
+    }
+
+    function handleFeeStatusUI() {
+        var st = document.getElementById('feeStatusSelect').value;
+        if (st === 'Paid') {
+            document.getElementById('feeDueInput').value = '';
+        } else if (st === 'Pending' && !document.getElementById('feeAmountInput').value) {
+            document.getElementById('feeAmountInput').value = '0';
+        }
+    }
+
+    function submitFeeForm(shouldSendPdf) {
+        if (!acquireSubmitLock()) return;
+        var stuId = document.getElementById('feeStuSelect').value;
+        var rawAmt = document.getElementById('feeAmountInput').value;
+        var date = document.getElementById('feeDateInput').value;
+        if (!stuId || rawAmt === '' || !date) return alert('Please fill in Student, Date, and Amount Paid.');
+
+        var numAmt = Math.max(0, Number(rawAmt || 0));
+        var amount = String(Math.round(numAmt * 100) / 100);
+
+        var s = appData.students.find(function(st) { return st.id === stuId; });
+        if (!s) return;
+
+        var editFeeId = document.getElementById('editFeeId').value;
+        var type = document.getElementById('feeTypeSelect').value;
+        var rawDue = document.getElementById('feeDueInput').value.trim();
+        var numDue = Math.max(0, Number(rawDue || 0));
+        var dueVal = numDue > 0 ? String(Math.round(numDue * 100) / 100) : '';
+        var status = document.getElementById('feeStatusSelect').value;
+
+        if (numDue > 0) {
+            status = 'Remaining Due';
+        } else if (status === 'Remaining Due') {
+            status = numAmt > 0 ? 'Paid' : 'Pending';
+        }
+
+        var targetFeeId = editFeeId;
+
+        if (editFeeId) {
+            var existing = (s.fees || []).find(function(x) { return x.id === editFeeId; });
+            if (existing) {
+                existing.type = type;
+                existing.status = status;
+                existing.month = type === 'Monthly Fee' ? document.getElementById('feeMonthInput').value : '';
+                existing.date = date;
+                existing.mode = document.getElementById('feeModeSelect').value;
+                existing.amount = amount;
+                existing.dueAmount = dueVal;
+                existing.remarks = document.getElementById('feeRemarksInput').value.trim();
+            }
+        } else {
+            var nowMs = Date.now();
+            targetFeeId = generateUniqueId('JSM-R', s.fees);
+            s.fees.unshift({
+                id: targetFeeId,
+                createdAt: nowMs,
+                type: type,
+                status: status,
+                month: type === 'Monthly Fee' ? document.getElementById('feeMonthInput').value : '',
+                date: date,
+                mode: document.getElementById('feeModeSelect').value,
+                amount: amount,
+                dueAmount: dueVal,
+                remarks: document.getElementById('feeRemarksInput').value.trim()
+            });
+        }
+
+        syncStudentFeeSummary(s);
+        closeFeeModal();
+        saveAllData();
+
+        if (currentStudentId === stuId) refreshStudentProfileData(stuId);
+        renderMasterFees();
+        if (shouldSendPdf) downloadReceipt(stuId, targetFeeId);
+    }
+
+    function renderStudentFees() {
+        var s = getActiveStudent();
+        var banner = document.getElementById('stuFeeSummaryBanner');
+        if (!s.fees || !s.fees.length) {
+            banner.innerHTML = '<span class="text-zinc-400">No fee records yet.</span>';
+        } else {
+            var latest = s.fees[0];
+            banner.innerHTML =
+                '<div class="flex items-center gap-2">' +
+                    '<span class="text-zinc-400">Summary:</span>' +
+                    '<strong class="text-zinc-900 font-bold">' + escHtml(latest.type) + '</strong>' +
+                    feeStatusBadge(s.feeStatus, s.dueAmount) +
+                '</div>';
+        }
+
+        var box = document.getElementById('stuFeeList');
+        box.innerHTML = (s.fees || []).map(function(f) {
+            var subText = f.type === 'Monthly Fee' && f.month ? (f.type + ' (' + formatMonthYear(f.month) + ')') : f.type;
+            var dueLine = f.dueAmount && Number(f.dueAmount) > 0 ? ' · <span class="text-red-500 font-bold">Due ₹' + escHtml(f.dueAmount) + '</span>' : '';
+            return '<div class="p-4 flex justify-between items-center gap-3 text-xs">' +
+                '<div class="min-w-0 flex-1">' +
+                    '<div class="font-bold text-zinc-900">' + escHtml(subText) + ' · ₹' + escHtml(f.amount) + dueLine + '</div>' +
+                    '<div class="text-zinc-400 mt-0.5">' + escHtml(f.date) + ' · ' + escHtml(f.mode) + '</div>' +
+                    (f.remarks ? '<div class="text-zinc-400 mt-0.5">' + escHtml(f.remarks) + '</div>' : '') +
+                '</div>' +
+                '<div class="flex items-center gap-1.5 shrink-0">' +
+                    '<button type="button" onclick="downloadReceipt(\'' + s.id + '\', \'' + f.id + '\')" class="touch-item h-7 px-3 rounded-full bg-zinc-100 text-zinc-800 text-[11px] font-bold">Share PDF</button>' +
+                    '<button type="button" onclick="openFeeModal(\'' + s.id + '\', \'' + f.id + '\')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
+                    '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'fees\', \'' + f.id + '\')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    function renderMasterFees() {
+        var box = document.getElementById('masterFeeList');
+        var allFees = [];
+        appData.students.forEach(function(s) {
+            (s.fees || []).forEach(function(f) {
+                allFees.push({
+                    id: f.id, createdAt: f.createdAt, type: f.type, status: f.status, month: f.month, date: f.date,
+                    mode: f.mode, amount: f.amount, dueAmount: f.dueAmount, remarks: f.remarks,
+                    stuName: s.name, stuSub: s.subject, stuId: s.id
+                });
+            });
+        });
+        sortByDateDesc(allFees);
+
+        if (!allFees.length) {
+            box.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">No fees recorded yet.</div>';
+            return;
+        }
+
+        box.innerHTML = allFees.slice(0, 100).map(function(f) {
+            var subText = f.type === 'Monthly Fee' && f.month ? (f.type + ' (' + formatMonthYear(f.month) + ')') : f.type;
+            var dueLine = f.dueAmount && Number(f.dueAmount) > 0 ? ' · <span class="text-red-500 font-bold">Due ₹' + escHtml(f.dueAmount) + '</span>' : '';
+            return '<div class="p-4 flex justify-between items-center gap-3">' +
+                '<div onclick="openStudentProfile(\'' + f.stuId + '\')" class="touch-item cursor-pointer min-w-0 flex-1">' +
+                    '<div class="flex items-center gap-2">' +
+                        '<h4 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(f.stuName) + '</h4>' +
+                        feeStatusBadge(f.status || 'Paid', f.dueAmount) +
+                    '</div>' +
+                    '<p class="text-xs text-zinc-600 mt-0.5">' + escHtml(subText) + ' — Paid ₹' + escHtml(f.amount) + ' (' + escHtml(f.mode) + ')' + dueLine + '</p>' +
+                    '<p class="text-[11px] text-zinc-400 mt-0.5">' + escHtml(f.id) + ' · ' + escHtml(f.date) + '</p>' +
+                '</div>' +
+                '<div class="flex items-center gap-1 shrink-0">' +
+                    '<button type="button" onclick="downloadReceipt(\'' + f.stuId + '\', \'' + f.id + '\')" class="touch-item h-8 bg-zinc-900 text-white px-3.5 rounded-full text-xs font-bold">Share</button>' +
+                    '<button type="button" onclick="openFeeModal(\'' + f.stuId + '\', \'' + f.id + '\')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
+                    '<button type="button" onclick="removeSubRecord(\'' + f.stuId + '\', \'fees\', \'' + f.id + '\')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    }
+
+    // --- PDF RECEIPT GENERATOR (CUMULATIVE DEBT, FORMATTED MONTH, SAFE BOUNDS) ---
+    function downloadReceipt(stuId, feeId) {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            alert('PDF library is still loading. Please check your internet connection and try again.');
+            return;
+        }
+        var s = appData.students.find(function(st) { return st.id === stuId; });
+        if (!s) return;
+        var f = (s.fees || []).find(function(item) { return item.id === feeId; });
+        if (!f) return;
+
+        syncStudentFeeSummary(s);
+
+        var jsPDF = window.jspdf.jsPDF;
+        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
+
+        doc.setDrawColor(11, 37, 69);
+        doc.setLineWidth(1.5);
+        doc.rect(8, 8, 194, 132);
+        doc.setDrawColor(216, 200, 150);
+        doc.setLineWidth(0.6);
+        doc.rect(10, 10, 190, 128);
+
+        if (cachedPdfLogoDataUrl) {
+            try { doc.addImage(cachedPdfLogoDataUrl, 'PNG', 16, 13, 26, 26); } catch (e) {}
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(18);
+        doc.setTextColor(11, 37, 69);
+        doc.text("JOY'S SCHOOL OF MUSIC", 105, 22, { align: 'center' });
+
+        doc.setFontSize(9);
+        doc.setTextColor(142, 146, 151);
+        doc.text('Est. 2022  |  Official Fee Receipt', 105, 28, { align: 'center' });
+
+        doc.setDrawColor(216, 200, 150);
+        doc.line(16, 41, 194, 41);
+
+        doc.setFontSize(10);
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Receipt No: ' + f.id, 16, 48);
+        doc.text('Date: ' + f.date, 194, 48, { align: 'right' });
+        doc.line(16, 52, 194, 52);
+
+        var y = 58;
+        var drawRow = function(label, value, allowTwoLines) {
+            if (y > 106) return;
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(9.5);
+            doc.setTextColor(11, 37, 69);
+            doc.text(label, 22, y);
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(30, 30, 30);
+            var maxLines = (allowTwoLines && y <= 98) ? 2 : 1;
+            var wrapped = doc.splitTextToSize(String(value || '-'), 112).slice(0, maxLines);
+            doc.text(wrapped, 78, y);
+            y += (wrapped.length > 1 ? 9.6 : 6.8);
+        };
+
+        drawRow('Student Name:', s.name + ' (' + s.id + ')', false);
+        drawRow('Subject:', s.subject, false);
+        drawRow('Fee Type:', f.type, false);
+        if (f.type === 'Monthly Fee' && f.month) drawRow('Paid for Month:', formatMonthYear(f.month), false);
+        drawRow('Payment Mode:', f.mode, false);
+        drawRow('Receipt Status:', f.status || 'Paid', false);
+        if (f.remarks) drawRow('Remarks:', f.remarks, true);
+
+        var entryDue = Number(f.dueAmount || 0);
+        var totalStudentDue = Number(s.dueAmount || 0);
+        var effectiveDue = Math.max(entryDue, totalStudentDue);
+
+        doc.setFillColor(11, 37, 69);
+        doc.rect(16, 112, 87, 15, 'F');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(9);
+        doc.setTextColor(216, 200, 150);
+        doc.text('AMOUNT PAID (THIS RECEIPT):', 21, 118);
+        doc.setFontSize(12);
+        doc.setTextColor(255, 255, 255);
+        doc.text('INR ' + f.amount + '/-', 21, 124);
+
+        if (effectiveDue > 0) {
+            doc.setFillColor(185, 28, 28);
+            doc.rect(107, 112, 87, 15, 'F');
+            doc.setFontSize(8.5);
+            doc.setTextColor(254, 202, 202);
+            var dueTitle = (totalStudentDue > entryDue && entryDue > 0)
+                ? 'TOTAL ACCOUNT DUE (THIS: INR ' + entryDue + ')'
+                : 'TOTAL REMAINING DUE (UNPAID):';
+            doc.text(dueTitle, 112, 118);
+            doc.setFontSize(12);
+            doc.setTextColor(255, 255, 255);
+            doc.text('INR ' + effectiveDue + '/-', 112, 124);
+        } else {
+            doc.setFillColor(241, 245, 249);
+            doc.setDrawColor(203, 213, 225);
+            doc.rect(107, 112, 87, 15, 'FD');
+            doc.setFontSize(9);
+            doc.setTextColor(100, 116, 139);
+            doc.text('TOTAL REMAINING DUE:', 112, 118);
+            doc.setFontSize(11);
+            doc.setTextColor(15, 23, 42);
+            doc.text('INR 0/- (All Dues Cleared)', 112, 124);
+        }
+
+        doc.setFontSize(8);
+        doc.setTextColor(130, 130, 130);
+        doc.text("Thank you! — JSM APP (An Official App For Joy's School Of Music)", 105, 134, { align: 'center' });
+
+        var fileName = 'JSM_Receipt_' + s.name.replace(/\s+/g, '_') + '_' + f.date + '.pdf';
+        if (typeof AndroidPDF !== 'undefined' && AndroidPDF.sharePDF) {
+            AndroidPDF.sharePDF(doc.output('datauristring'), fileName);
+        } else {
+            doc.save(fileName);
+        }
+    }
+</script>
+</body>
+</html>
