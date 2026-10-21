@@ -33,11 +33,23 @@
             box-shadow: 0 0 0 3px rgba(20, 20, 26, 0.08);
         }
 
+        /* Prevent Scroll Bleeding Inside Modals & Drawers */
+        .modal-backdrop {
+            overscroll-behavior: none;
+            touch-action: none;
+        }
+        .modal-sheet-box {
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+        }
+
         /* Locked Notice Board Height & Smooth Expand Transition */
         #noticeBoardInput {
             resize: none !important;
             height: 58px;
             overflow-y: auto;
+            overscroll-behavior: contain;
             transition: height 0.32s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.22s ease;
         }
         #noticeBoardInput.notice-expanded {
@@ -354,6 +366,21 @@
         body[data-theme="dark"] .theme-btn-active {
             border-color: #D8C896 !important;
         }
+        body[data-theme="dark"] .badge-paid {
+            background-color: rgba(16, 185, 129, 0.16) !important;
+            color: #6EE7B7 !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+        }
+        body[data-theme="dark"] .badge-pending {
+            background-color: rgba(245, 158, 11, 0.16) !important;
+            color: #FCD34D !important;
+            border-color: rgba(245, 158, 11, 0.35) !important;
+        }
+        body[data-theme="dark"] .badge-due {
+            background-color: rgba(239, 68, 68, 0.18) !important;
+            color: #FCA5A5 !important;
+            border-color: rgba(239, 68, 68, 0.38) !important;
+        }
         body[data-theme="dark"] input,
         body[data-theme="dark"] select,
         body[data-theme="dark"] textarea {
@@ -495,6 +522,22 @@
             background-color: #FAEA7F !important;
             color: #0B0B0E !important;
         }
+        /* Dark-Adapted Status Badges in Neon Mode */
+        body[data-theme="neon"] .badge-paid {
+            background-color: rgba(149, 242, 103, 0.16) !important;
+            color: #95F267 !important;
+            border-color: rgba(149, 242, 103, 0.38) !important;
+        }
+        body[data-theme="neon"] .badge-pending {
+            background-color: rgba(250, 234, 127, 0.16) !important;
+            color: #FAEA7F !important;
+            border-color: rgba(250, 234, 127, 0.38) !important;
+        }
+        body[data-theme="neon"] .badge-due {
+            background-color: rgba(239, 68, 68, 0.2) !important;
+            color: #FCA5A5 !important;
+            border-color: rgba(239, 68, 68, 0.42) !important;
+        }
         /* Bottom Capsule Dock with Glowing Lime Active Bubble */
         body[data-theme="neon"] #bottomCapsuleDock {
             background-color: #181820 !important;
@@ -537,7 +580,7 @@
 </div>
 
 <!-- ================= MASTER PIN LOCK SCREEN (2-HOUR SESSION TIMEOUT) ================= -->
-<div id="pinLockScreen" class="fixed inset-0 bg-[#F6F5FA] z-[100] flex flex-col items-center justify-center p-6 select-none">
+<div id="pinLockScreen" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] z-[100] flex flex-col items-center justify-center p-6 select-none">
     <div class="w-full max-w-xs text-center space-y-6 animate-view">
         <div class="w-16 h-16 rounded-full bg-white border border-zinc-200 mx-auto flex items-center justify-center overflow-hidden shadow-sm">
             <img id="lockLogoImg" class="w-full h-full object-contain" alt="JSM" onerror="this.classList.add('hidden'); document.getElementById('lockLogoFallback').classList.remove('hidden');">
@@ -641,7 +684,7 @@
             <div class="flex justify-between items-center">
                 <div>
                     <h2 class="text-base font-extrabold text-zinc-900">Your Subjects</h2>
-                    <p class="text-[11px] text-zinc-400">Tap to open · Hold or ⋮ to delete</p>
+                    <p class="text-[11px] text-zinc-400">Tap to open · Hold or ⋮ to rename/delete</p>
                 </div>
                 <button type="button" onclick="openAddSubjectModal()" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold flex items-center gap-1 shadow-2xs">
                     <span>＋</span> Add Subject
@@ -886,29 +929,30 @@
     </div>
 </nav>
 
-<!-- MODAL 0: ADD NEW SUBJECT (DEDICATED HOME SCREEN MODAL) -->
-<div id="addSubjectModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeAddSubjectModal()">
-    <div id="addSubjectSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
+<!-- MODAL 0: ADD / RENAME SUBJECT -->
+<div id="addSubjectModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeAddSubjectModal()">
+    <div id="addSubjectSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
-            <h3 class="font-extrabold text-base text-zinc-900">Add New Subject</h3>
+            <h3 id="addSubjectModalTitle" class="font-extrabold text-base text-zinc-900">Add New Subject</h3>
             <button type="button" onclick="closeAddSubjectModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
         </div>
         <form onsubmit="saveNewSubject(event)" class="space-y-3.5">
+            <input type="hidden" id="editSubjectIndexInput" value="">
             <div>
                 <label class="block text-xs font-semibold text-zinc-500 mb-1">Subject Name *</label>
                 <input type="text" id="newSubjectNameInput" required class="w-full border border-zinc-200 rounded-2xl p-3 bg-zinc-50/50 font-semibold" placeholder="e.g., Drums, Vocals, Ukulele">
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1">
                 <button type="button" onclick="closeAddSubjectModal()" class="touch-item h-11 rounded-2xl bg-zinc-100 text-zinc-700 font-bold text-xs">Cancel</button>
-                <button type="submit" class="touch-item h-11 rounded-2xl bg-zinc-900 text-white font-bold text-xs">Add Subject</button>
+                <button type="submit" id="addSubjectSubmitBtn" class="touch-item h-11 rounded-2xl bg-zinc-900 text-white font-bold text-xs">Add Subject</button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- MODAL 1: ADD / EDIT STUDENT -->
-<div id="studentModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentModal()">
-    <div id="studentModalSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
+<div id="studentModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentModal()">
+    <div id="studentModalSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 id="studentModalTitle" class="font-extrabold text-base text-zinc-900">New Student</h3>
             <button type="button" onclick="closeStudentModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
@@ -936,8 +980,8 @@
 </div>
 
 <!-- MODAL 1B: QUICK ATTENDANCE -->
-<div id="quickAttModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeQuickAttendanceModal()">
-    <div id="quickAttSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
+<div id="quickAttModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeQuickAttendanceModal()">
+    <div id="quickAttSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 class="font-extrabold text-base text-zinc-900">Mark Attendance</h3>
             <button type="button" onclick="closeQuickAttendanceModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
@@ -971,8 +1015,8 @@
 </div>
 
 <!-- MODAL 2: STUDENT OPTIONS -->
-<div id="studentActionModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentActionModal()">
-    <div id="studentActionSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-2.5 text-center animate-sheet" onclick="event.stopPropagation()">
+<div id="studentActionModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentActionModal()">
+    <div id="studentActionSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-2.5 text-center animate-sheet" onclick="event.stopPropagation()">
         <h3 id="actionStuName" class="font-extrabold text-base text-zinc-900"></h3>
         <p id="actionStuSub" class="text-xs text-zinc-400 pb-2"></p>
         <button type="button" onclick="handleStudentAction('edit')" class="touch-item w-full h-11 rounded-2xl bg-zinc-100 text-zinc-900 font-bold text-xs">Edit Student</button>
@@ -981,20 +1025,21 @@
     </div>
 </div>
 
-<!-- MODAL 2B: SUBJECT OPTIONS -->
-<div id="subjectActionModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeSubjectActionModal()">
-    <div id="subjectActionSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-2.5 text-center animate-sheet" onclick="event.stopPropagation()">
+<!-- MODAL 2B: SUBJECT OPTIONS (WITH RENAME & TRASH) -->
+<div id="subjectActionModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeSubjectActionModal()">
+    <div id="subjectActionSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-2.5 text-center animate-sheet" onclick="event.stopPropagation()">
         <div id="actionSubIcon" class="text-3xl">🎵</div>
         <h3 id="actionSubTitle" class="font-extrabold text-base text-zinc-900"></h3>
         <p id="actionSubInfo" class="text-xs text-zinc-400 pb-2"></p>
+        <button type="button" onclick="openRenameSubjectFromAction()" class="touch-item w-full h-11 rounded-2xl bg-zinc-100 text-zinc-900 font-bold text-xs">Rename Subject</button>
         <button type="button" onclick="confirmTrashSubject()" class="touch-item w-full h-11 rounded-2xl bg-red-50 text-red-600 font-bold text-xs">Move Subject to Trash</button>
         <button type="button" onclick="closeSubjectActionModal()" class="touch-item w-full h-10 rounded-2xl text-zinc-400 text-xs font-semibold">Cancel</button>
     </div>
 </div>
 
 <!-- MODAL 3: ALL-IN-ONE FEE FORM -->
-<div id="feeModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeFeeModal()">
-    <div id="feeModalSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-lg w-full p-6 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto animate-sheet" onclick="event.stopPropagation()">
+<div id="feeModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeFeeModal()">
+    <div id="feeModalSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-lg w-full p-6 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 id="feeModalTitle" class="font-extrabold text-base text-zinc-900">Record Fee</h3>
             <button type="button" onclick="closeFeeModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
@@ -1052,11 +1097,11 @@
                 <div class="grid grid-cols-2 gap-2.5">
                     <div>
                         <label class="block text-[11px] font-semibold text-zinc-500 mb-1">Amount Paid (₹) *</label>
-                        <input type="number" id="feeAmountInput" required min="0" step="any" class="w-full border border-zinc-200 rounded-xl p-2.5 bg-white font-bold" placeholder="1200">
+                        <input type="number" id="feeAmountInput" required min="0" step="any" onkeydown="if(event.key==='-'||event.key==='e'||event.key==='E') event.preventDefault();" oninput="if(this.value<0) this.value=0;" class="w-full border border-zinc-200 rounded-xl p-2.5 bg-white font-bold" placeholder="1200">
                     </div>
                     <div>
                         <label class="block text-[11px] font-semibold text-zinc-500 mb-1">Remaining Due (₹)</label>
-                        <input type="number" id="feeDueInput" min="0" step="any" class="w-full border border-zinc-200 rounded-xl p-2.5 bg-white font-bold" placeholder="0">
+                        <input type="number" id="feeDueInput" min="0" step="any" onkeydown="if(event.key==='-'||event.key==='e'||event.key==='E') event.preventDefault();" oninput="if(this.value<0) this.value=0;" class="w-full border border-zinc-200 rounded-xl p-2.5 bg-white font-bold" placeholder="0">
                     </div>
                 </div>
             </div>
@@ -1076,8 +1121,8 @@
 </div>
 
 <!-- MODAL 4: EDIT ATTENDANCE -->
-<div id="editAttModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditAttModal()">
-    <div id="editAttSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-3 animate-sheet" onclick="event.stopPropagation()">
+<div id="editAttModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditAttModal()">
+    <div id="editAttSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-3 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 class="font-extrabold text-base text-zinc-900">Edit Attendance</h3>
             <button type="button" onclick="closeEditAttModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-xs font-bold">✕</button>
@@ -1102,8 +1147,8 @@
 </div>
 
 <!-- MODAL 5: EDIT DAILY CLASS -->
-<div id="editClassModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditClassModal()">
-    <div id="editClassSheet" class="bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-3 animate-sheet" onclick="event.stopPropagation()">
+<div id="editClassModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditClassModal()">
+    <div id="editClassSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-3 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 class="font-extrabold text-base text-zinc-900">Edit Class Entry</h3>
             <button type="button" onclick="closeEditClassModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-xs font-bold">✕</button>
@@ -1124,8 +1169,8 @@
 </div>
 
 <!-- 3-BAR SLIDE-OUT SIDE MENU (WITH 3 STREAMLINED THEMES) -->
-<div id="sideMenuModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden justify-end z-50 animate-backdrop-in" onclick="closeSideMenu()">
-    <div id="sideMenuPanel" class="bg-white w-72 max-w-[82vw] h-full p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-drawer-in" onclick="event.stopPropagation()">
+<div id="sideMenuModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden justify-end z-50 animate-backdrop-in" onclick="closeSideMenu()">
+    <div id="sideMenuPanel" class="modal-sheet-box bg-white w-72 max-w-[82vw] h-full p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-drawer-in" onclick="event.stopPropagation()">
         <div class="space-y-6">
             <div class="flex justify-between items-center border-b border-zinc-100 pb-4">
                 <div>
@@ -1214,7 +1259,7 @@
 </div>
 
 <!-- FULL-SCREEN NATIVE VIEW-ONLY DATABASE VIEWER -->
-<div id="liveSheetModal" class="fixed inset-0 bg-[#F6F5FA] hidden flex-col z-50 animate-view">
+<div id="liveSheetModal" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] hidden flex-col z-50 animate-view">
     <div class="px-4 py-3 bg-white border-b border-zinc-200 flex justify-between items-center shadow-2xs">
         <div class="flex items-center gap-2.5">
             <button type="button" onclick="closeLiveSheetViewer()" class="touch-item h-9 px-3.5 rounded-full bg-zinc-100 text-zinc-800 font-bold text-xs">← Back</button>
@@ -1237,7 +1282,7 @@
         <button type="button" onclick="switchNativeSheetTab('Trash_30_Days')" id="nstab-Trash_30_Days" class="touch-item h-9 px-4 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 shrink-0 transition">Trash_30_Days</button>
     </div>
 
-    <div class="flex-1 w-full overflow-auto p-4">
+    <div class="modal-sheet-box flex-1 w-full overflow-auto p-4">
         <div id="nativeSheetCard" class="bg-white border border-zinc-200/80 rounded-[20px] shadow-2xs overflow-x-auto animate-view">
             <table class="w-full text-left border-collapse">
                 <thead id="nativeSheetHead" class="bg-zinc-50 border-b border-zinc-200 text-[11px] font-extrabold uppercase tracking-wider text-zinc-500"></thead>
@@ -1253,6 +1298,7 @@
 
     // 2-Hour Session Timeout (in milliseconds)
     var SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+    var PIN_CIPHER_SALT = "JSM_EST2022_KEY";
 
     var DRIVE_LOGO_ID = "1k0m6PTwF8_W-dVDrtp1Ru_71d_uO34Cl";
     var DRIVE_LOGO_URL_PRIMARY = "https://lh3.googleusercontent.com/d/" + DRIVE_LOGO_ID;
@@ -1287,6 +1333,7 @@
     var selectedAttStatus = '';
     var undoTimer = null;
     var saveDebounceTimer = null;
+    var hasPendingSave = false;
     var searchDebounceTimer = null;
     var pressTimer = null;
     var longPressTriggered = false;
@@ -1295,6 +1342,12 @@
     var skipNoteBlur = false;
     var skipNoteBlurTimer = null;
     var isNoticeExpanded = false;
+    var isFormSubmittingLock = false;
+
+    // Background Scroll Lock State
+    var isBodyScrollLocked = false;
+    var savedWindowScrollY = 0;
+    var isHandlingPopState = false;
 
     // 60fps Pull-to-Refresh & Real-Time Interactive Swipe State
     var gestureStartX = 0;
@@ -1307,6 +1360,7 @@
     var isHorizontalDragging = false;
     var activeSwipeEl = null;
     var rafGestureId = null;
+    var lastActivityRecordMs = 0;
 
     function toLocalIso(d) {
         var dt = d || new Date();
@@ -1324,6 +1378,85 @@
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
+    }
+
+    function formatMonthYear(ym) {
+        if (!ym || typeof ym !== 'string' || ym.indexOf('-') === -1) return ym || '';
+        var parts = ym.split('-');
+        var yr = Number(parts[0]);
+        var mo = Number(parts[1]) - 1;
+        var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        if (mo >= 0 && mo < 12 && yr > 1900) {
+            return monthNames[mo] + ' ' + yr;
+        }
+        return ym;
+    }
+
+    function generateUniqueId(prefix, existingList) {
+        var candidate = '';
+        var tries = 0;
+        do {
+            var nowPart = Date.now().toString().slice(-5);
+            var randPart = Math.floor(10 + Math.random() * 90);
+            candidate = prefix + nowPart + randPart;
+            tries++;
+        } while (
+            tries < 20 &&
+            Array.isArray(existingList) &&
+            existingList.some(function(item) { return item && item.id === candidate; })
+        );
+        return candidate;
+    }
+
+    function acquireSubmitLock() {
+        if (isFormSubmittingLock) return false;
+        isFormSubmittingLock = true;
+        setTimeout(function() { isFormSubmittingLock = false; }, 450);
+        return true;
+    }
+
+    function dismissActiveKeyboard() {
+        var ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT')) {
+            ae.blur();
+        }
+    }
+
+    // Scrambled PIN Storage Helpers (Replaces Plain-Text PIN Storage)
+    function encodePinForStorage(pinStr) {
+        try {
+            var out = [];
+            for (var i = 0; i < pinStr.length; i++) {
+                out.push(pinStr.charCodeAt(i) ^ PIN_CIPHER_SALT.charCodeAt(i % PIN_CIPHER_SALT.length));
+            }
+            return btoa(out.join('.'));
+        } catch (e) { return ''; }
+    }
+
+    function decodePinFromStorage(encoded) {
+        try {
+            if (!encoded) return '';
+            var parts = atob(encoded).split('.');
+            var out = '';
+            for (var i = 0; i < parts.length; i++) {
+                out += String.fromCharCode(Number(parts[i]) ^ PIN_CIPHER_SALT.charCodeAt(i % PIN_CIPHER_SALT.length));
+            }
+            return /^\d{4}$/.test(out) ? out : '';
+        } catch (e) { return ''; }
+    }
+
+    function getStoredSessionPin() {
+        try {
+            var enc = localStorage.getItem('jsmSessionToken') || '';
+            if (enc) return decodePinFromStorage(enc);
+            var legacy = localStorage.getItem('jsmSessionPin') || '';
+            if (/^\d{4}$/.test(legacy)) {
+                localStorage.setItem('jsmSessionToken', encodePinForStorage(legacy));
+                localStorage.removeItem('jsmSessionPin');
+                return legacy;
+            }
+        } catch (e) {}
+        return '';
     }
 
     // Self-resetting blur guard so unfocused button taps never lock out future auto-saves
@@ -1370,8 +1503,116 @@
         renderStudents();
         updateTrashCount();
         initTouchGestures();
+        initModalScrollGuard();
+        initHistoryBackHandler();
         checkSessionOnStartup();
+        setInterval(updateDynamicGreeting, 60000);
     };
+
+    // --- BACKGROUND SCROLL LOCK & MODAL TOUCH BLEED GUARD ---
+    function syncBodyScrollLock() {
+        var shouldLock = isAnyOverlayModalOpen();
+        if (shouldLock && !isBodyScrollLocked) {
+            savedWindowScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+            document.body.style.position = 'fixed';
+            document.body.style.top = '-' + savedWindowScrollY + 'px';
+            document.body.style.left = '0';
+            document.body.style.right = '0';
+            document.body.style.width = '100%';
+            isBodyScrollLocked = true;
+        } else if (!shouldLock && isBodyScrollLocked) {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.width = '';
+            isBodyScrollLocked = false;
+            window.scrollTo(0, savedWindowScrollY);
+        }
+    }
+
+    function initModalScrollGuard() {
+        var modalTouchStartY = 0;
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches && e.touches.length === 1) {
+                modalTouchStartY = e.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        document.addEventListener('touchmove', function(e) {
+            if (!isAnyOverlayModalOpen()) return;
+            var target = e.target;
+            var scrollBox = target.closest('.modal-sheet-box, textarea');
+            if (!scrollBox) {
+                if (e.cancelable) e.preventDefault();
+                return;
+            }
+            var canScroll = scrollBox.scrollHeight > scrollBox.clientHeight + 1;
+            if (!canScroll) {
+                if (e.cancelable) e.preventDefault();
+                return;
+            }
+            var curY = e.touches[0].clientY;
+            var dy = curY - modalTouchStartY;
+            var atTop = scrollBox.scrollTop <= 0;
+            var atBottom = (scrollBox.scrollTop + scrollBox.clientHeight) >= (scrollBox.scrollHeight - 1);
+            if ((atTop && dy > 0) || (atBottom && dy < 0)) {
+                if (e.cancelable) e.preventDefault();
+            }
+        }, { passive: false });
+    }
+
+    // --- PHONE HARDWARE BACK BUTTON HANDLER ---
+    function pushAppHistoryState() {
+        if (isHandlingPopState) return;
+        try {
+            history.pushState({ jsmNav: Date.now() }, '');
+        } catch (e) {}
+    }
+
+    function initHistoryBackHandler() {
+        try {
+            history.replaceState({ jsmRoot: true }, '');
+        } catch (e) {}
+        window.addEventListener('popstate', function() {
+            isHandlingPopState = true;
+            try {
+                if (!document.getElementById('pinLockScreen').classList.contains('hidden')) {
+                    pushAppHistoryState();
+                    return;
+                }
+                varclosableModals = [
+                    { id: 'editClassModal', close: closeEditClassModal },
+                    { id: 'editAttModal', close: closeEditAttModal },
+                    { id: 'feeModal', close: closeFeeModal },
+                    { id: 'subjectActionModal', close: closeSubjectActionModal },
+                    { id: 'studentActionModal', close: closeStudentActionModal },
+                    { id: 'quickAttModal', close: closeQuickAttendanceModal },
+                    { id: 'studentModal', close: closeStudentModal },
+                    { id: 'addSubjectModal', close: closeAddSubjectModal },
+                    { id: 'liveSheetModal', close: closeLiveSheetViewer },
+                    { id: 'sideMenuModal', close: closeSideMenu }
+                ];
+                for (var i = 0; i < varclosableModals.length; i++) {
+                    var m = document.getElementById(varclosableModals[i].id);
+                    if (m && !m.classList.contains('hidden')) {
+                        varclosableModals[i].close();
+                        return;
+                    }
+                }
+                if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
+                    showMainTab('students', 'prev');
+                    return;
+                }
+                if (currentMainTab !== 'home') {
+                    showMainTab('home', 'prev');
+                    return;
+                }
+            } finally {
+                setTimeout(function() { isHandlingPopState = false; }, 60);
+            }
+        });
+    }
 
     // --- NOTICE BOARD INTENTIONAL EXPAND / COLLAPSE TOGGLE ---
     function toggleNoticeBoardExpand(e) {
@@ -1389,18 +1630,23 @@
 
     // --- SMOOTH MODAL & DRAWER ANIMATION HELPERS ---
     function openSheetModal(modalId, sheetId) {
+        dismissActiveKeyboard();
         var modal = document.getElementById(modalId);
         var sheet = document.getElementById(sheetId);
         if (!modal) return;
+        var wasHidden = modal.classList.contains('hidden');
         modal.classList.remove('hidden', 'animate-backdrop-out');
         modal.classList.add('flex', 'animate-backdrop-in');
         if (sheet) {
             sheet.classList.remove('animate-sheet-out');
             sheet.classList.add('animate-sheet');
         }
+        syncBodyScrollLock();
+        if (wasHidden) pushAppHistoryState();
     }
 
     function closeSheetModal(modalId, sheetId) {
+        dismissActiveKeyboard();
         var modal = document.getElementById(modalId);
         var sheet = document.getElementById(sheetId);
         if (!modal || modal.classList.contains('hidden')) return;
@@ -1414,7 +1660,20 @@
             modal.classList.replace('flex', 'hidden');
             modal.classList.remove('animate-backdrop-out');
             if (sheet) sheet.classList.remove('animate-sheet-out');
+            syncBodyScrollLock();
         }, 220);
+    }
+
+    function closeAllTransientModals() {
+        var ids = ['addSubjectModal', 'studentModal', 'quickAttModal', 'studentActionModal', 'subjectActionModal', 'feeModal', 'editAttModal', 'editClassModal', 'sideMenuModal'];
+        ids.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && !el.classList.contains('hidden')) {
+                el.classList.replace('flex', 'hidden');
+                el.classList.remove('animate-backdrop-in', 'animate-backdrop-out');
+            }
+        });
+        syncBodyScrollLock();
     }
 
     // --- GLOBAL 60FPS PULL-TO-REFRESH & REAL-TIME FINGER-FOLLOWING SWIPE ENGINE ---
@@ -1431,8 +1690,11 @@
         return false;
     }
 
-    function getActiveSwipeTargetElement() {
+    function getActiveSwipeTargetElement(dx) {
         if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
+            if (activeProfileSec === 'att' && dx > 0) {
+                return document.getElementById('profileScreen');
+            }
             return document.getElementById('psec-' + activeProfileSec);
         }
         return document.getElementById('tab-' + currentMainTab);
@@ -1441,7 +1703,8 @@
     function canSwipeInDirection(direction) {
         if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
             var pIdx = PROFILE_SECS_ORDER.indexOf(activeProfileSec);
-            return direction === 'next' ? (pIdx < PROFILE_SECS_ORDER.length - 1) : (pIdx > 0);
+            if (direction === 'prev') return true; // Can always swipe right (either prev sub-tab or exit profile back to Students)
+            return pIdx < PROFILE_SECS_ORDER.length - 1;
         }
         var idx = MAIN_TABS_ORDER.indexOf(currentMainTab);
         return direction === 'next' ? (idx < MAIN_TABS_ORDER.length - 1) : (idx > 0);
@@ -1479,6 +1742,7 @@
 
         document.addEventListener('touchstart', function(e) {
             if (!e.touches || e.touches.length !== 1) return;
+            recordUserActivityThrottled();
             if (!sessionPin || isAnyOverlayModalOpen()) {
                 isPtrEligible = false;
                 isSwipeEligible = false;
@@ -1517,7 +1781,8 @@
                 if (!isHorizontalDragging && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.35) {
                     isHorizontalDragging = true;
                     isPtrEligible = false;
-                    activeSwipeEl = getActiveSwipeTargetElement();
+                    dismissActiveKeyboard();
+                    activeSwipeEl = getActiveSwipeTargetElement(dx);
                     if (activeSwipeEl) {
                         activeSwipeEl.classList.remove('animate-view', 'animate-swipe-next', 'animate-swipe-prev', 'swipe-spring-back');
                         activeSwipeEl.classList.add('swipe-dragging');
@@ -1658,9 +1923,14 @@
 
     function handleHorizontalSwipe(direction) {
         recordUserActivity();
+        dismissActiveKeyboard();
         if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
             var pIdx = PROFILE_SECS_ORDER.indexOf(activeProfileSec);
             if (pIdx === -1) pIdx = 0;
+            if (direction === 'prev' && pIdx === 0) {
+                showMainTab('students', 'prev');
+                return;
+            }
             var nextPIdx = direction === 'next' ? pIdx + 1 : pIdx - 1;
             if (nextPIdx >= 0 && nextPIdx < PROFILE_SECS_ORDER.length) {
                 switchProfileSection(PROFILE_SECS_ORDER[nextPIdx], direction);
@@ -1679,9 +1949,17 @@
     // --- 2-HOUR SESSION TIMEOUT & PIN SECURITY ---
     function recordUserActivity() {
         if (!sessionPin) return;
+        lastActivityRecordMs = Date.now();
         try {
-            localStorage.setItem('jsmLastActiveMs', String(Date.now()));
+            localStorage.setItem('jsmLastActiveMs', String(lastActivityRecordMs));
         } catch (e) {}
+    }
+
+    function recordUserActivityThrottled() {
+        if (!sessionPin) return;
+        if (Date.now() - lastActivityRecordMs > 15000) {
+            recordUserActivity();
+        }
     }
 
     document.addEventListener('click', function() {
@@ -1693,8 +1971,21 @@
         }
     });
 
+    document.addEventListener('keydown', function() {
+        if (!document.getElementById('pinLockScreen').classList.contains('hidden')) return;
+        recordUserActivityThrottled();
+    });
+
+    document.addEventListener('input', function() {
+        if (!document.getElementById('pinLockScreen').classList.contains('hidden')) return;
+        recordUserActivityThrottled();
+    });
+
     document.addEventListener('visibilitychange', function() {
-        if (document.visibilityState === 'visible') {
+        if (document.visibilityState === 'hidden') {
+            flushPendingSaveNow(true);
+        } else if (document.visibilityState === 'visible') {
+            updateDynamicGreeting();
             if (isSessionExpired()) {
                 lockAppNow();
             } else if (sessionPin) {
@@ -1703,9 +1994,13 @@
         }
     });
 
+    window.addEventListener('pagehide', function() {
+        flushPendingSaveNow(true);
+    });
+
     function isSessionExpired() {
         try {
-            var savedPin = localStorage.getItem('jsmSessionPin') || '';
+            var savedPin = getStoredSessionPin();
             var lastMs = Number(localStorage.getItem('jsmLastActiveMs') || '0');
             if (!savedPin || !lastMs) return true;
             return (Date.now() - lastMs) > SESSION_TIMEOUT_MS;
@@ -1716,12 +2011,11 @@
 
     function checkSessionOnStartup() {
         if (!isSessionExpired()) {
-            try {
-                sessionPin = localStorage.getItem('jsmSessionPin') || '';
-            } catch (e) {}
+            sessionPin = getStoredSessionPin();
             if (sessionPin) {
                 recordUserActivity();
                 document.getElementById('pinLockScreen').classList.add('hidden');
+                syncBodyScrollLock();
                 syncFromSheet();
                 return;
             }
@@ -1730,14 +2024,17 @@
     }
 
     function lockAppNow() {
+        flushPendingSaveNow(true);
+        dismissActiveKeyboard();
         sessionPin = '';
         enteredPinBuffer = '';
         isVerifyingPin = false;
         try {
+            localStorage.removeItem('jsmSessionToken');
             localStorage.removeItem('jsmSessionPin');
             localStorage.removeItem('jsmLastActiveMs');
         } catch (e) {}
-        closeSideMenu();
+        closeAllTransientModals();
         closeLiveSheetViewer();
         hidePullToRefresh();
         updatePinDotsUI();
@@ -1747,6 +2044,7 @@
         var lockEl = document.getElementById('pinLockScreen');
         lockEl.classList.remove('hidden', 'animate-backdrop-out');
         lockEl.classList.add('animate-backdrop-in');
+        syncBodyScrollLock();
     }
 
     function updatePinDotsUI() {
@@ -1823,7 +2121,8 @@
             }
             sessionPin = candidatePin;
             try {
-                localStorage.setItem('jsmSessionPin', sessionPin);
+                localStorage.setItem('jsmSessionToken', encodePinForStorage(sessionPin));
+                localStorage.removeItem('jsmSessionPin');
                 localStorage.setItem('jsmLastActiveMs', String(Date.now()));
             } catch (e) {}
 
@@ -1853,6 +2152,7 @@
             setTimeout(function() {
                 lockEl.classList.add('hidden');
                 lockEl.classList.remove('animate-backdrop-out');
+                syncBodyScrollLock();
             }, 220);
         })
         .catch(function() {
@@ -1892,14 +2192,18 @@
 
     // --- SIDE MENU & NATIVE VIEW-ONLY DATABASE VIEWER ---
     function openSideMenu() {
+        dismissActiveKeyboard();
         var modal = document.getElementById('sideMenuModal');
         var panel = document.getElementById('sideMenuPanel');
+        var wasHidden = modal.classList.contains('hidden');
         modal.classList.remove('hidden', 'animate-backdrop-out');
         modal.classList.add('flex', 'animate-backdrop-in');
         if (panel) {
             panel.classList.remove('animate-drawer-out');
             panel.classList.add('animate-drawer-in');
         }
+        syncBodyScrollLock();
+        if (wasHidden) pushAppHistoryState();
     }
 
     function closeSideMenu() {
@@ -1916,6 +2220,7 @@
             modal.classList.replace('flex', 'hidden');
             modal.classList.remove('animate-backdrop-out');
             if (panel) panel.classList.remove('animate-drawer-out');
+            syncBodyScrollLock();
         }, 240);
     }
 
@@ -1923,1770 +2228,9 @@
         if (!sessionPin) return lockAppNow();
         closeSideMenu();
         var modal = document.getElementById('liveSheetModal');
+        var wasHidden = modal.classList.contains('hidden');
         modal.classList.remove('hidden', 'animate-backdrop-out');
         modal.classList.add('flex', 'animate-view');
-        switchNativeSheetTab(currentNativeSheetTab || 'Students');
-    }
-
-    function closeLiveSheetViewer() {
-        var modal = document.getElementById('liveSheetModal');
-        if (!modal || modal.classList.contains('hidden')) return;
-        modal.classList.remove('animate-view');
-        modal.classList.add('animate-backdrop-out');
-        setTimeout(function() {
-            modal.classList.replace('flex', 'hidden');
-            modal.classList.remove('animate-backdrop-out');
-        }, 200);
-    }
-
-    function reloadLiveSheet() {
-        if (!sessionPin) return lockAppNow();
-        var st = document.getElementById('nativeSheetStatus');
-        var icon = document.getElementById('liveSheetRefreshIcon');
-        if (st) st.textContent = '🔄 Fetching live data from Google Sheets...';
-        if (icon) icon.classList.add('animate-spin');
-
-        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(sessionPin) + '&t=' + Date.now(), {
-            method: 'GET',
-            redirect: 'follow'
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(remote) {
-            if (remote && remote.authError) return lockAppNow();
-            if (remote && Array.isArray(remote.students)) {
-                appData = {
-                    theme: remote.theme || appData.theme || 'modern',
-                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
-                    students: remote.students || [],
-                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
-                    trash: remote.trash || []
-                };
-            }
-            purgeExpiredTrash();
-            normalizeAllStudentsData();
-            refreshActiveViews();
-            renderNativeSheetTable(currentNativeSheetTab);
-            if (st) st.textContent = '🔒 View-Only · Verified Live from Google Sheets';
-        })
-        .catch(function() {
-            if (st) st.textContent = '⚠️ Offline — Showing last synced data';
-        })
-        .finally(function() {
-            if (icon) icon.classList.remove('animate-spin');
-        });
-    }
-
-    function switchNativeSheetTab(tabName) {
-        currentNativeSheetTab = tabName;
-        var tabs = ['Students', 'Fee_Register', 'Attendance_Register', 'Daily_Classes', 'Notice_Board', 'Trash_30_Days'];
-        tabs.forEach(function(t) {
-            var btn = document.getElementById('nstab-' + t);
-            if (!btn) return;
-            btn.className = (t === tabName)
-                ? "touch-item h-9 px-4 rounded-full text-xs font-bold bg-zinc-900 text-white shrink-0 transition shadow-2xs"
-                : "touch-item h-9 px-4 rounded-full text-xs font-semibold bg-zinc-100 text-zinc-600 shrink-0 transition";
-        });
-        var card = document.getElementById('nativeSheetCard');
-        if (card) {
-            card.classList.remove('animate-view');
-            void card.offsetWidth;
-            card.classList.add('animate-view');
-        }
-        renderNativeSheetTable(tabName);
-    }
-
-    function renderNativeSheetTable(tabName) {
-        var thead = document.getElementById('nativeSheetHead');
-        var tbody = document.getElementById('nativeSheetBody');
-        if (!thead || !tbody) return;
-
-        var headers = [];
-        var rows = [];
-
-        if (tabName === 'Students') {
-            headers = ['#', 'Student ID', 'Name', 'Subject', 'Book', 'Class Notes'];
-            (appData.students || []).forEach(function(s, i) {
-                rows.push([i + 1, s.id, s.name, s.subject, s.book, s.notes || '-']);
-            });
-        } else if (tabName === 'Daily_Classes') {
-            headers = ['#', 'Date', 'Student Name', 'Technique', 'Lesson', 'Repertoire'];
-            var cIdx = 1;
-            (appData.students || []).forEach(function(s) {
-                (s.classes || []).forEach(function(c) {
-                    rows.push([cIdx++, c.date, s.name, c.technique || '-', c.lesson || '-', c.repertoire || '-']);
-                });
-            });
-        } else if (tabName === 'Attendance_Register') {
-            headers = ['#', 'Date', 'Student Name', 'Subject', 'Status', 'Remarks'];
-            var aIdx = 1;
-            (appData.students || []).forEach(function(s) {
-                (s.attendance || []).forEach(function(a) {
-                    rows.push([aIdx++, a.date, s.name, s.subject, a.status, a.remarks || '-']);
-                });
-            });
-        } else if (tabName === 'Fee_Register') {
-            headers = ['#', 'Receipt No', 'Date', 'Student Name', 'Fee Type', 'Month', 'Mode', 'Status', 'Paid (₹)', 'Due (₹)', 'Remarks'];
-            var fIdx = 1;
-            (appData.students || []).forEach(function(s) {
-                (s.fees || []).forEach(function(f) {
-                    rows.push([fIdx++, f.id, f.date, s.name, f.type, f.month || '-', f.mode, f.status || 'Paid', '₹' + f.amount, '₹' + (f.dueAmount || '0'), f.remarks || '-']);
-                });
-            });
-        } else if (tabName === 'Notice_Board') {
-            headers = ['Notice Content'];
-            rows.push([appData.noticeBoard || 'No notice pinned.']);
-        } else if (tabName === 'Trash_30_Days') {
-            headers = ['#', 'Item Type', 'Name / Title', 'Deleted On', 'Expires On', 'Summary'];
-            (appData.trash || []).forEach(function(t, i) {
-                rows.push([i + 1, t.kind, t.title, t.deletedDate, t.expiresDate, t.summary]);
-            });
-        }
-
-        thead.innerHTML = '<tr>' + headers.map(function(h) {
-            return '<th class="px-4 py-3 whitespace-nowrap">' + escHtml(h) + '</th>';
-        }).join('') + '</tr>';
-
-        if (!rows.length) {
-            tbody.innerHTML = '<tr><td colspan="' + headers.length + '" class="px-4 py-8 text-center text-zinc-400">No rows recorded in ' + escHtml(tabName) + ' yet.</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = rows.map(function(r) {
-            return '<tr>' + r.map(function(cell, idx) {
-                var weight = idx === 0 ? 'text-zinc-400 font-bold' : 'text-zinc-800';
-                return '<td class="px-4 py-3.5 whitespace-nowrap ' + weight + '">' + escHtml(cell) + '</td>';
-            }).join('') + '</tr>';
-        }).join('');
-    }
-
-    function initDriveLogo() {
-        var imgEl = document.getElementById('headerLogoImg');
-        var lockImgEl = document.getElementById('lockLogoImg');
-        if (DRIVE_LOGO_ID) {
-            if (imgEl) imgEl.src = DRIVE_LOGO_URL_PRIMARY;
-            if (lockImgEl) lockImgEl.src = DRIVE_LOGO_URL_PRIMARY;
-        }
-
-        var offImg = new Image();
-        offImg.crossOrigin = "Anonymous";
-        offImg.onload = function() {
-            try {
-                var canvas = document.createElement('canvas');
-                canvas.width = offImg.width || 240;
-                canvas.height = offImg.height || 240;
-                canvas.getContext('2d').drawImage(offImg, 0, 0);
-                cachedPdfLogoDataUrl = canvas.toDataURL('image/png');
-            } catch (err) {}
-        };
-        offImg.src = DRIVE_LOGO_URL_PRIMARY;
-    }
-
-    function handleLogoFallback(imgEl) {
-        if (imgEl.src !== DRIVE_LOGO_URL_FALLBACK) {
-            imgEl.src = DRIVE_LOGO_URL_FALLBACK;
-        } else {
-            imgEl.classList.add('hidden');
-            document.getElementById('headerLogoFallback').classList.remove('hidden');
-        }
-    }
-
-    function updateDynamicGreeting() {
-        var now = new Date();
-        var hr = now.getHours();
-        var greet = 'Hello, Joy';
-        if (hr < 12) greet = 'Good morning, Joy';
-        else if (hr < 17) greet = 'Good afternoon, Joy';
-        else greet = 'Good evening, Joy';
-        document.getElementById('dynamicGreeting').textContent = greet;
-
-        var opts = { day: 'numeric', month: 'short' };
-        document.getElementById('dynamicDateSub').textContent = 'Today ' + now.toLocaleDateString('en-IN', opts);
-    }
-
-    function getSubjectIcon(sub) {
-        var s = (sub || '').toLowerCase();
-        if (s.indexOf('piano') !== -1 || s.indexOf('keyboard') !== -1) return '🎹';
-        if (s.indexOf('guitar') !== -1 || s.indexOf('ukulele') !== -1) return '🎸';
-        if (s.indexOf('violin') !== -1 || s.indexOf('string') !== -1) return '🎻';
-        if (s.indexOf('theory') !== -1) return '🎼';
-        if (s.indexOf('drum') !== -1) return '🥁';
-        if (s.indexOf('vocal') !== -1 || s.indexOf('sing') !== -1) return '🎤';
-        return '🎵';
-    }
-
-    // --- CLOUD SYNC ---
-    function setBadge(text, dotColor) {
-        var dot = document.getElementById('syncDot');
-        if (dot) dot.className = 'w-1.5 h-1.5 rounded-full transition-colors duration-300 ' + dotColor;
-    }
-
-    function refreshActiveViews() {
-        populateSubjectDropdowns();
-        renderCategories();
-        renderRecentActivity();
-        renderStudents();
-        updateTrashCount();
-        if (currentStudentId) {
-            refreshStudentProfileData(currentStudentId);
-        } else {
-            if (currentMainTab === 'attendance') { renderWeekStrip(); renderMasterAttendance(); }
-            if (currentMainTab === 'fees') renderMasterFees();
-            if (currentMainTab === 'trash') renderTrash();
-        }
-    }
-
-    function syncFromSheet(doneCallback) {
-        if (!sessionPin) {
-            if (typeof doneCallback === 'function') doneCallback();
-            return lockAppNow();
-        }
-        if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) {
-            setBadge('No Link', 'bg-red-500');
-            if (typeof doneCallback === 'function') doneCallback();
-            return;
-        }
-        setBadge('Syncing', 'bg-amber-500 animate-pulse');
-        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(sessionPin) + '&t=' + Date.now(), {
-            method: 'GET',
-            redirect: 'follow'
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(remote) {
-            if (remote && remote.authError) {
-                lockAppNow();
-                return;
-            }
-            if (remote && Array.isArray(remote.students)) {
-                appData = {
-                    theme: remote.theme || appData.theme || 'modern',
-                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
-                    students: remote.students || [],
-                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
-                    trash: remote.trash || []
-                };
-                applyThemeUI(appData.theme);
-                try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
-            }
-            purgeExpiredTrash();
-            normalizeAllStudentsData();
-            var nbEl = document.getElementById('noticeBoardInput');
-            if (nbEl && document.activeElement !== nbEl) {
-                nbEl.value = appData.noticeBoard || '';
-            }
-            refreshActiveViews();
-            setBadge('Synced', 'bg-emerald-500');
-        })
-        .catch(function() {
-            setBadge('Offline', 'bg-red-500');
-        })
-        .finally(function() {
-            if (typeof doneCallback === 'function') doneCallback();
-        });
-    }
-
-    function saveAllData() {
-        if (!sessionPin) return lockAppNow();
-        recordUserActivity();
-        purgeExpiredTrash();
-        renderCategories();
-        renderRecentActivity();
-        renderStudents();
-        updateTrashCount();
-
-        if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) return;
-        setBadge('Saving', 'bg-amber-500 animate-pulse');
-
-        clearTimeout(saveDebounceTimer);
-        saveDebounceTimer = setTimeout(function() {
-            var payloadToSave = {
-                pin: sessionPin,
-                theme: appData.theme,
-                subjects: appData.subjects,
-                students: appData.students,
-                noticeBoard: appData.noticeBoard,
-                trash: appData.trash
-            };
-            fetch(SHEET_API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payloadToSave),
-                redirect: 'follow'
-            })
-            .then(function(res) { return res.json(); })
-            .then(function(resp) {
-                if (resp && resp.authError) {
-                    lockAppNow();
-                } else {
-                    setBadge('Synced', 'bg-emerald-500');
-                }
-            })
-            .catch(function() { setBadge('Retry', 'bg-red-500'); });
-        }, 400);
-    }
-
-    // --- NAVIGATION & CAPSULE DOCK (WITH DIRECTIONAL SWIPE & SPRING DOCK) ---
-    function showMainTab(tab, swipeDir) {
-        var prevIdx = MAIN_TABS_ORDER.indexOf(currentMainTab);
-        var nextIdx = MAIN_TABS_ORDER.indexOf(tab);
-        if (!swipeDir && currentMainTab !== tab && !currentStudentId && prevIdx !== -1 && nextIdx !== -1) {
-            swipeDir = nextIdx > prevIdx ? 'next' : 'prev';
-        }
-
-        currentMainTab = tab;
-        currentStudentId = null;
-        document.getElementById('profileScreen').classList.add('hidden');
-
-        for (var i = 0; i < MAIN_TABS_ORDER.length; i++) {
-            var t = MAIN_TABS_ORDER[i];
-            var el = document.getElementById('tab-' + t);
-            resetActiveSwipeElement(el, false);
-            el.classList.add('hidden');
-            var btn = document.getElementById('bnav-' + t);
-            if (btn) {
-                btn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center text-zinc-400 font-medium relative";
-            }
-        }
-
-        var targetEl = document.getElementById('tab-' + tab);
-        targetEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next', 'animate-swipe-prev');
-        void targetEl.offsetWidth;
-        if (swipeDir === 'next') targetEl.classList.add('animate-swipe-next');
-        else if (swipeDir === 'prev') targetEl.classList.add('animate-swipe-prev');
-        else targetEl.classList.add('animate-view');
-
-        var activeBtn = document.getElementById('bnav-' + tab);
-        if (activeBtn) {
-            activeBtn.className = "dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center bg-white text-zinc-900 font-extrabold shadow-md scale-105 relative";
-        }
-
-        if (tab === 'home') { renderCategories(); renderRecentActivity(); }
-        if (tab === 'students') renderStudents();
-        if (tab === 'attendance') { renderWeekStrip(); renderMasterAttendance(); }
-        if (tab === 'fees') renderMasterFees();
-        if (tab === 'trash') renderTrash();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function switchProfileSection(sec, swipeDir) {
-        var prevIdx = PROFILE_SECS_ORDER.indexOf(activeProfileSec);
-        var nextIdx = PROFILE_SECS_ORDER.indexOf(sec);
-        if (!swipeDir && activeProfileSec !== sec && prevIdx !== -1 && nextIdx !== -1) {
-            swipeDir = nextIdx > prevIdx ? 'next' : 'prev';
-        }
-
-        activeProfileSec = sec;
-        var slider = document.getElementById('psecSliderPill');
-        if (slider && nextIdx !== -1) {
-            slider.style.transform = 'translate3d(' + (nextIdx * 100) + '%, 0, 0)';
-        }
-
-        for (var i = 0; i < PROFILE_SECS_ORDER.length; i++) {
-            var k = PROFILE_SECS_ORDER[i];
-            var secEl = document.getElementById('psec-' + k);
-            resetActiveSwipeElement(secEl, false);
-            if (k === sec) {
-                secEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next', 'animate-swipe-prev');
-                void secEl.offsetWidth;
-                if (swipeDir === 'next') secEl.classList.add('animate-swipe-next');
-                else if (swipeDir === 'prev') secEl.classList.add('animate-swipe-prev');
-                else secEl.classList.add('animate-view');
-            } else {
-                secEl.classList.add('hidden');
-            }
-            var btn = document.getElementById('psec-btn-' + k);
-            if (btn) {
-                btn.className = (k === sec)
-                    ? "touch-item relative z-10 h-9 rounded-xl text-xs font-extrabold text-zinc-900 transition-colors duration-200"
-                    : "touch-item relative z-10 h-9 rounded-xl text-xs font-semibold text-zinc-500 transition-colors duration-200";
-            }
-        }
-    }
-
-    // --- PILL SELECTORS ---
-    function selectStuAttPill(status) {
-        document.getElementById('stuAttStatus').value = status;
-        ['Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(st) {
-            var btn = document.getElementById('sap-' + st);
-            if (!btn) return;
-            btn.className = (st === status)
-                ? "touch-item h-9 rounded-xl font-bold text-xs bg-zinc-900 text-white"
-                : "touch-item h-9 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
-        });
-    }
-
-    function selectQuickAttPill(status) {
-        document.getElementById('quickAttStatus').value = status;
-        ['Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(st) {
-            var btn = document.getElementById('qap-' + st);
-            if (!btn) return;
-            btn.className = (st === status)
-                ? "touch-item h-10 rounded-xl font-bold text-xs bg-zinc-900 text-white"
-                : "touch-item h-10 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
-        });
-    }
-
-    function selectFeeTypePill(type) {
-        document.getElementById('feeTypeSelect').value = type;
-        var map = { 'Monthly Fee': 'ftp-Monthly', 'Admission Fee': 'ftp-Admission', 'Book Fee': 'ftp-Book' };
-        Object.keys(map).forEach(function(k) {
-            var btn = document.getElementById(map[k]);
-            if (!btn) return;
-            btn.className = (k === type)
-                ? "touch-item h-9 rounded-xl font-bold text-xs bg-zinc-900 text-white"
-                : "touch-item h-9 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
-        });
-        toggleFeeMonth();
-    }
-
-    function selectFeeModePill(mode) {
-        document.getElementById('feeModeSelect').value = mode;
-        ['UPI', 'Cash'].forEach(function(m) {
-            var btn = document.getElementById('fmp-' + m);
-            if (!btn) return;
-            btn.className = (m === mode)
-                ? "touch-item h-10 rounded-xl font-bold text-xs bg-zinc-900 text-white"
-                : "touch-item h-10 rounded-xl font-semibold text-xs bg-zinc-100 text-zinc-600";
-        });
-    }
-
-    function selectFeeStatusPill(status) {
-        document.getElementById('feeStatusSelect').value = status;
-        var map = { 'Paid': 'fsp-Paid', 'Remaining Due': 'fsp-Due', 'Pending': 'fsp-Pending' };
-        Object.keys(map).forEach(function(k) {
-            var btn = document.getElementById(map[k]);
-            if (!btn) return;
-            btn.className = (k === status)
-                ? "touch-item h-9 rounded-xl font-bold text-xs bg-zinc-900 text-white"
-                : "touch-item h-9 rounded-xl font-semibold text-xs bg-white border border-zinc-200 text-zinc-600";
-        });
-        handleFeeStatusUI();
-    }
-
-    // --- RECENT ACTIVITY ---
-    function renderRecentActivity() {
-        var box = document.getElementById('recentActivityList');
-        if (!box) return;
-        var events = [];
-
-        appData.students.forEach(function(s) {
-            if (s.createdAt) {
-                events.push({
-                    ts: s.createdAt,
-                    dateStr: toLocalIso(new Date(s.createdAt)),
-                    title: 'Added ' + s.name,
-                    sub: s.subject,
-                    stuId: s.id
-                });
-            }
-            (s.fees || []).forEach(function(f) {
-                var dueInfo = f.dueAmount && Number(f.dueAmount) > 0 ? ' · Due ₹' + f.dueAmount : '';
-                events.push({
-                    ts: f.createdAt || Number(String(f.id).replace(/\D/g, '')) || Date.parse(f.date) || 0,
-                    dateStr: f.date || '',
-                    title: s.name + ' · ₹' + f.amount,
-                    sub: f.type + dueInfo,
-                    stuId: s.id
-                });
-            });
-            (s.attendance || []).forEach(function(a) {
-                events.push({
-                    ts: a.id || Date.parse(a.date) || 0,
-                    dateStr: a.date || '',
-                    title: s.name + ' · ' + a.status,
-                    sub: s.subject + (a.remarks ? ' — ' + a.remarks : ''),
-                    stuId: s.id
-                });
-            });
-            (s.classes || []).forEach(function(c) {
-                events.push({
-                    ts: c.id || Date.parse(c.date) || 0,
-                    dateStr: c.date || '',
-                    title: 'Class · ' + s.name,
-                    sub: c.lesson || c.repertoire || c.technique || 'Logged',
-                    stuId: s.id
-                });
-            });
-        });
-
-        events.sort(function(a, b) { return b.ts - a.ts; });
-        var top5 = events.slice(0, 5);
-
-        if (!top5.length) {
-            box.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No recent activity yet.</div>';
-            return;
-        }
-
-        box.innerHTML = top5.map(function(ev) {
-            return '<div onclick="openStudentProfile(\'' + ev.stuId + '\')" class="touch-item px-4 py-3.5 flex items-center justify-between gap-3 cursor-pointer">' +
-                '<div class="min-w-0">' +
-                    '<h4 class="text-xs font-bold text-zinc-900 truncate">' + escHtml(ev.title) + '</h4>' +
-                    '<p class="text-[11px] text-zinc-400 truncate mt-0.5">' + escHtml(ev.sub) + '</p>' +
-                '</div>' +
-                '<span class="text-[11px] font-semibold text-zinc-400 shrink-0">' + escHtml(ev.dateStr.slice(5)) + '</span>' +
-            '</div>';
-        }).join('');
-    }
-
-    // --- SUBJECTS ---
-    function openAddSubjectModal() {
-        document.getElementById('newSubjectNameInput').value = '';
-        openSheetModal('addSubjectModal', 'addSubjectSheet');
-    }
-
-    function closeAddSubjectModal() {
-        closeSheetModal('addSubjectModal', 'addSubjectSheet');
-    }
-
-    function saveNewSubject(e) {
-        e.preventDefault();
-        var sub = document.getElementById('newSubjectNameInput').value.trim();
-        if (!sub) return;
-        if (appData.subjects.indexOf(sub) === -1) {
-            appData.subjects.push(sub);
-            populateSubjectDropdowns();
-            saveAllData();
-        }
-        closeAddSubjectModal();
-    }
-
-    function getAllKnownSubjects() {
-        var list = (appData.subjects || []).slice();
-        (appData.students || []).forEach(function(s) {
-            if (s.subject && list.indexOf(s.subject) === -1) {
-                list.push(s.subject);
-            }
-        });
-        return list;
-    }
-
-    function populateSubjectDropdowns() {
-        var modalSel = document.getElementById('newStuSubject');
-        if (!modalSel) return;
-        var list = getAllKnownSubjects();
-        if (!list.length) {
-            modalSel.innerHTML = '<option value="General Music">General Music</option>';
-            return;
-        }
-        modalSel.innerHTML = list.map(function(sub) {
-            return '<option value="' + escHtml(sub) + '">' + escHtml(sub) + '</option>';
-        }).join('');
-    }
-
-    function startSubLongPress(idx) {
-        subLongPressTriggered = false;
-        clearTimeout(subPressTimer);
-        subPressTimer = setTimeout(function() {
-            subLongPressTriggered = true;
-            openSubjectActionModal(idx);
-        }, 550);
-    }
-
-    function cancelSubLongPress() {
-        clearTimeout(subPressTimer);
-    }
-
-    function handleSubCardClick(idx) {
-        if (subLongPressTriggered) {
-            subLongPressTriggered = false;
-            return;
-        }
-        selectedSubjectFilter = appData.subjects[idx] || '';
-        showMainTab('students', 'next');
-    }
-
-    function openSubjectActionModal(idx) {
-        cancelSubLongPress();
-        var sub = appData.subjects[idx];
-        if (!sub) return;
-        actionSubjectIdx = idx;
-        var count = appData.students.filter(function(s) { return s.subject === sub; }).length;
-        document.getElementById('actionSubIcon').textContent = getSubjectIcon(sub);
-        document.getElementById('actionSubTitle').textContent = sub;
-        document.getElementById('actionSubInfo').textContent = count + (count === 1 ? ' student enrolled' : ' students enrolled');
-        openSheetModal('subjectActionModal', 'subjectActionSheet');
-    }
-
-    function closeSubjectActionModal() {
-        subLongPressTriggered = false;
-        closeSheetModal('subjectActionModal', 'subjectActionSheet');
-    }
-
-    function confirmTrashSubject() {
-        var sub = appData.subjects[actionSubjectIdx];
-        closeSubjectActionModal();
-        if (!sub) return;
-        appData.subjects.splice(actionSubjectIdx, 1);
-        if (selectedSubjectFilter === sub) selectedSubjectFilter = '';
-        populateSubjectDropdowns();
-        moveToTrash('Subject', null, sub, 'Subject Category', sub);
-    }
-
-    function setSubjectFilter(sub) {
-        selectedSubjectFilter = sub;
-        var grid = document.getElementById('studentGrid');
-        if (grid) {
-            grid.classList.remove('animate-view');
-            void grid.offsetWidth;
-            grid.classList.add('animate-view');
-        }
-        renderStudents();
-    }
-
-    function renderCategories() {
-        var box = document.getElementById('categoryGrid');
-        if (!box) return;
-
-        if (!appData.subjects.length) {
-            box.innerHTML = '<div class="col-span-2 bg-white border border-zinc-200/80 rounded-[24px] p-6 text-center text-xs text-zinc-400">No subjects active. Tap "＋ Add Subject" above.</div>';
-            return;
-        }
-
-        box.innerHTML = appData.subjects.map(function(sub, idx) {
-            var count = appData.students.filter(function(s) { return s.subject === sub; }).length;
-            var modClass = 'mod-sub-' + (idx % 4);
-            return '<div ' +
-                'onclick="handleSubCardClick(' + idx + ')" ' +
-                'oncontextmenu="event.preventDefault(); openSubjectActionModal(' + idx + ');" ' +
-                'onmousedown="startSubLongPress(' + idx + ')" ' +
-                'onmouseup="cancelSubLongPress()" ' +
-                'onmouseleave="cancelSubLongPress()" ' +
-                'ontouchstart="startSubLongPress(' + idx + ')" ' +
-                'ontouchend="cancelSubLongPress()" ' +
-                'ontouchcancel="cancelSubLongPress()" ' +
-                'ontouchmove="cancelSubLongPress()" ' +
-                'class="touch-item ' + modClass + ' bg-white border border-zinc-200/80 p-4 rounded-[26px] cursor-pointer flex flex-col justify-between min-h-[122px] shadow-2xs">' +
-                '<div class="flex justify-between items-center gap-1">' +
-                    '<span class="sub-badge-pill px-2.5 py-0.5 rounded-full bg-white/75 text-[10px] font-bold text-zinc-900">' + count + ' ' + (count === 1 ? 'Student' : 'Students') + '</span>' +
-                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="sub-menu-btn touch-item w-7 h-7 rounded-full bg-white/75 text-zinc-900 flex items-center justify-center text-xs font-bold">⋮</button>' +
-                '</div>' +
-                '<div class="mt-3 flex items-end justify-between gap-2">' +
-                    '<h3 class="font-extrabold text-zinc-900 text-base leading-snug truncate">' + escHtml(sub) + '</h3>' +
-                    '<span class="text-2xl leading-none shrink-0">' + getSubjectIcon(sub) + '</span>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    // --- STUDENTS ---
-    function onSearchStudents() {
-        clearTimeout(searchDebounceTimer);
-        searchDebounceTimer = setTimeout(renderStudents, 70);
-    }
-
-    function openStudentModal() {
-        if (!appData.subjects.length) {
-            openAddSubjectModal();
-            return;
-        }
-        document.getElementById('addStudentForm').reset();
-        document.getElementById('editStuId').value = '';
-        document.getElementById('studentModalTitle').textContent = 'New Student';
-        document.getElementById('studentModalSubmitBtn').textContent = 'Save';
-        populateSubjectDropdowns();
-        openSheetModal('studentModal', 'studentModalSheet');
-    }
-
-    function openEditStudentModal(stuId) {
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        if (!s) return;
-        document.getElementById('editStuId').value = s.id;
-        document.getElementById('newStuName').value = s.name;
-        if (appData.subjects.indexOf(s.subject) === -1) {
-            appData.subjects.push(s.subject);
-        }
-        populateSubjectDropdowns();
-        document.getElementById('newStuSubject').value = s.subject;
-        document.getElementById('newStuBook').value = s.book === 'None' ? '' : s.book;
-        document.getElementById('studentModalTitle').textContent = 'Edit Student';
-        document.getElementById('studentModalSubmitBtn').textContent = 'Update';
-        openSheetModal('studentModal', 'studentModalSheet');
-    }
-
-    function closeStudentModal() {
-        closeSheetModal('studentModal', 'studentModalSheet');
-    }
-
-    function saveStudentForm(e) {
-        e.preventDefault();
-        var editId = document.getElementById('editStuId').value;
-        var sub = document.getElementById('newStuSubject').value;
-        var name = document.getElementById('newStuName').value.trim();
-        var book = document.getElementById('newStuBook').value.trim() || 'None';
-
-        if (editId) {
-            var s = appData.students.find(function(x) { return x.id === editId; });
-            if (s) { s.name = name; s.subject = sub; s.book = book; }
-            closeStudentModal();
-            saveAllData();
-            if (currentStudentId === editId) refreshStudentProfileData(editId);
-        } else {
-            var nowMs = Date.now();
-            var stu = {
-                id: 'JSM-' + nowMs.toString().slice(-5),
-                createdAt: nowMs,
-                name: name,
-                subject: sub,
-                book: book,
-                feeStatus: 'None',
-                dueAmount: '',
-                notes: '',
-                attendance: [],
-                classes: [],
-                fees: []
-            };
-            appData.students.push(stu);
-            closeStudentModal();
-            saveAllData();
-            openStudentProfile(stu.id);
-        }
-    }
-
-    function openQuickAttendanceModal() {
-        if (!appData.students.length) return alert('Please add a student first.');
-        var sel = document.getElementById('quickAttStuSelect');
-        sel.innerHTML = appData.students.map(function(s) {
-            return '<option value="' + s.id + '">' + escHtml(s.name) + ' (' + escHtml(s.subject) + ')</option>';
-        }).join('');
-        document.getElementById('quickAttDate').value = todayStr;
-        selectQuickAttPill('Present');
-        document.getElementById('quickAttRemarks').value = '';
-        openSheetModal('quickAttModal', 'quickAttSheet');
-    }
-
-    function closeQuickAttendanceModal() {
-        closeSheetModal('quickAttModal', 'quickAttSheet');
-    }
-
-    function saveQuickAttendance(e) {
-        e.preventDefault();
-        var stuId = document.getElementById('quickAttStuSelect').value;
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        if (!s) return;
-        var nowMs = Date.now();
-        s.attendance.unshift({
-            id: nowMs,
-            createdAt: nowMs,
-            date: document.getElementById('quickAttDate').value,
-            status: document.getElementById('quickAttStatus').value,
-            remarks: document.getElementById('quickAttRemarks').value.trim()
-        });
-        sortByDateDesc(s.attendance);
-        closeQuickAttendanceModal();
-        saveAllData();
-        if (currentMainTab === 'attendance') renderMasterAttendance();
-    }
-
-    function startStuLongPress(stuId) {
-        longPressTriggered = false;
-        clearTimeout(pressTimer);
-        pressTimer = setTimeout(function() {
-            longPressTriggered = true;
-            openStudentActionModal(stuId);
-        }, 550);
-    }
-
-    function cancelStuLongPress() {
-        clearTimeout(pressTimer);
-    }
-
-    function handleStuCardClick(stuId) {
-        if (longPressTriggered) {
-            longPressTriggered = false;
-            return;
-        }
-        openStudentProfile(stuId);
-    }
-
-    function openStudentActionModal(stuId) {
-        cancelStuLongPress();
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        if (!s) return;
-        actionStudentId = stuId;
-        document.getElementById('actionStuName').textContent = s.name;
-        document.getElementById('actionStuSub').textContent = s.subject + ' · ' + s.book;
-        openSheetModal('studentActionModal', 'studentActionSheet');
-    }
-
-    function closeStudentActionModal() {
-        longPressTriggered = false;
-        closeSheetModal('studentActionModal', 'studentActionSheet');
-    }
-
-    function handleStudentAction(action) {
-        var stuId = actionStudentId;
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        closeStudentActionModal();
-        if (!s) return;
-
-        if (action === 'edit') {
-            setTimeout(function() { openEditStudentModal(stuId); }, 220);
-        } else if (action === 'trash') {
-            appData.students = appData.students.filter(function(st) { return st.id !== stuId; });
-            moveToTrash('Student', s.id, s.name, 'Subject: ' + s.subject + ' | Book: ' + s.book, s);
-            if (currentStudentId === stuId) showMainTab('students', 'prev');
-        }
-    }
-
-    // --- STATUS BADGES & CUMULATIVE FEE SUMMARY ---
-    function feeStatusBadge(status, dueAmt) {
-        if (!status || status === 'None') return '';
-        var numDue = Number(dueAmt || 0);
-        if (numDue > 0) {
-            return '<span class="text-[10px] bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full font-bold">Due ₹' + escHtml(numDue) + '</span>';
-        }
-        if (status === 'Pending' || status === 'Remaining Due') {
-            return '<span class="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Pending</span>';
-        }
-        if (status === 'Paid') {
-            return '<span class="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">Paid</span>';
-        }
-        return '';
-    }
-
-    function statusBadge(st) {
-        var styles = {
-            'Present': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-            'Absent': 'bg-red-50 text-red-600 border-red-200',
-            'Tardy': 'bg-amber-50 text-amber-700 border-amber-200',
-            'Rescheduled': 'bg-zinc-100 text-zinc-700 border-zinc-200'
-        };
-        var cls = styles[st] || 'bg-zinc-100 text-zinc-700 border-zinc-200';
-        return '<span class="px-2 py-0.5 rounded-full border font-bold text-[10px] ' + cls + '">' + escHtml(st) + '</span>';
-    }
-
-    // Sums unpaid dues across all fee entries so older debts are never hidden by newer payments
-    function syncStudentFeeSummary(s) {
-        if (!s.fees || !s.fees.length) {
-            s.feeStatus = 'None';
-            s.dueAmount = '';
-            return;
-        }
-        sortByDateDesc(s.fees);
-        var totalDue = 0;
-        var hasPending = false;
-        s.fees.forEach(function(f) {
-            var d = Number(f.dueAmount || 0);
-            if (d > 0) totalDue += d;
-            if (f.status === 'Pending' || (f.status === 'Remaining Due' && d <= 0)) {
-                hasPending = true;
-            }
-        });
-        totalDue = Math.round(totalDue * 100) / 100;
-
-        if (totalDue > 0) {
-            s.feeStatus = 'Remaining Due';
-            s.dueAmount = String(totalDue);
-        } else if (hasPending) {
-            s.feeStatus = 'Pending';
-            s.dueAmount = '';
-        } else {
-            s.feeStatus = s.fees[0].status || 'Paid';
-            s.dueAmount = '';
-        }
-    }
-
-    function renderStudents() {
-        document.getElementById('stuCount').textContent = appData.students.length;
-        var q = document.getElementById('stuSearch').value.toLowerCase();
-        var filterSubjects = getAllKnownSubjects();
-
-        if (selectedSubjectFilter && filterSubjects.indexOf(selectedSubjectFilter) === -1) {
-            selectedSubjectFilter = '';
-        }
-
-        var pillBox = document.getElementById('studentSubjectPills');
-        if (pillBox) {
-            var allActive = !selectedSubjectFilter ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
-            pillBox.innerHTML = '<button type="button" onclick="setSubjectFilter(\'\')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + allActive + '">All</button>' +
-                filterSubjects.map(function(sub) {
-                    var isAct = selectedSubjectFilter === sub;
-                    var cls = isAct ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
-                    var safeArg = JSON.stringify(sub).replace(/"/g, '&quot;');
-                    return '<button type="button" onclick="setSubjectFilter(' + safeArg + ')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + cls + '">' + escHtml(sub) + '</button>';
-                }).join('');
-        }
-
-        var grid = document.getElementById('studentGrid');
-        var filtered = appData.students.filter(function(s) {
-            return s.name.toLowerCase().indexOf(q) !== -1 && (!selectedSubjectFilter || s.subject === selectedSubjectFilter);
-        });
-        if (!filtered.length) {
-            grid.innerHTML = '<div class="p-8 text-center text-xs text-zinc-400">No students found.</div>';
-            return;
-        }
-
-        grid.innerHTML = filtered.map(function(s) {
-            return '<div ' +
-                'onclick="handleStuCardClick(\'' + s.id + '\')" ' +
-                'oncontextmenu="event.preventDefault(); openStudentActionModal(\'' + s.id + '\');" ' +
-                'onmousedown="startStuLongPress(\'' + s.id + '\')" ' +
-                'onmouseup="cancelStuLongPress()" ' +
-                'onmouseleave="cancelStuLongPress()" ' +
-                'ontouchstart="startStuLongPress(\'' + s.id + '\')" ' +
-                'ontouchend="cancelStuLongPress()" ' +
-                'ontouchcancel="cancelStuLongPress()" ' +
-                'ontouchmove="cancelStuLongPress()" ' +
-                'class="touch-item px-4 py-3.5 cursor-pointer flex justify-between items-center gap-3">' +
-                '<div class="min-w-0 flex-1">' +
-                    '<div class="flex items-center gap-2">' +
-                        '<h3 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(s.name) + '</h3>' +
-                        feeStatusBadge(s.feeStatus, s.dueAmount) +
-                    '</div>' +
-                    '<p class="text-xs text-zinc-400 truncate mt-0.5">' + escHtml(s.subject) + ' · Book: ' + escHtml(s.book) + '</p>' +
-                '</div>' +
-                '<button type="button" onclick="event.stopPropagation(); openStudentActionModal(\'' + s.id + '\');" class="touch-item w-8 h-8 rounded-full text-zinc-400 flex items-center justify-center text-sm shrink-0">⋮</button>' +
-            '</div>';
-        }).join('');
-    }
-
-    // --- STUDENT PROFILE ---
-    function getActiveStudent() {
-        return appData.students.find(function(s) { return s.id === currentStudentId; });
-    }
-
-    function refreshStudentProfileData(id) {
-        currentStudentId = id;
-        var s = getActiveStudent();
-        if (!s) return;
-
-        syncStudentFeeSummary(s);
-
-        document.getElementById('profAvatar').textContent = getSubjectIcon(s.subject);
-        document.getElementById('profName').textContent = s.name;
-        document.getElementById('profSubject').textContent = s.subject;
-        document.getElementById('profBook').value = s.book;
-        if (document.activeElement !== document.getElementById('stuNotes')) {
-            document.getElementById('stuNotes').value = s.notes || '';
-        }
-
-        // Exclude Rescheduled classes from attendance denominator so rescheduling is mathematically neutral
-        var nonRescheduledAtt = (s.attendance || []).filter(function(a) { return a.status !== 'Rescheduled'; });
-        var presentAtt = nonRescheduledAtt.filter(function(a) { return a.status === 'Present' || a.status === 'Tardy'; }).length;
-        var attPct = nonRescheduledAtt.length ? Math.round((presentAtt / nonRescheduledAtt.length) * 100) + '%' : '100%';
-        document.getElementById('profStatAtt').textContent = attPct;
-        document.getElementById('profStatCls').textContent = (s.classes || []).length;
-        var feeLabel = (!s.feeStatus || s.feeStatus === 'None') ? 'No Entry' : (s.dueAmount && Number(s.dueAmount) > 0 ? 'Due ₹' + s.dueAmount : s.feeStatus);
-        document.getElementById('profStatFee').textContent = feeLabel;
-
-        renderStudentAttendance();
-        renderStudentClasses();
-        renderStudentFees();
-    }
-
-    function openStudentProfile(id) {
-        currentStudentId = id;
-        var s = getActiveStudent();
-        if (!s) return;
-
-        MAIN_TABS_ORDER.forEach(function(t) {
-            document.getElementById('tab-' + t).classList.add('hidden');
-        });
-        var profEl = document.getElementById('profileScreen');
-        profEl.classList.remove('hidden', 'animate-view', 'animate-swipe-next');
-        void profEl.offsetWidth;
-        profEl.classList.add('animate-swipe-next');
-
-        document.getElementById('stuAttDate').value = todayStr;
-        selectStuAttPill('Present');
-        document.getElementById('clsDate').value = todayStr;
-
-        refreshStudentProfileData(id);
-        switchProfileSection(activeProfileSec || 'att');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function updateStudentBook() {
-        var s = getActiveStudent();
-        if (s) { s.book = document.getElementById('profBook').value.trim() || 'None'; saveAllData(); }
-    }
-
-    // --- NOTES & NOTICE BOARD ---
-    function saveStudentNotes(force) {
-        skipNoteBlur = false;
-        var s = getActiveStudent();
-        if (!s) return;
-        var newVal = document.getElementById('stuNotes').value;
-        if (!force && s.notes === newVal) return;
-        s.notes = newVal;
-        saveAllData();
-    }
-
-    function trashStudentNotes() {
-        skipNoteBlur = false;
-        var s = getActiveStudent();
-        if (!s) return;
-        var val = document.getElementById('stuNotes').value.trim();
-        if (!val) return alert('Notes box is already empty.');
-        if (!confirm('Move Class Notes for ' + s.name + ' to the 30-Day Trash?')) return;
-        document.getElementById('stuNotes').value = '';
-        s.notes = '';
-        moveToTrash('Class Note', s.id, s.name, val.slice(0, 80), val);
-    }
-
-    function saveNoticeBoard(force) {
-        skipNoteBlur = false;
-        var newVal = document.getElementById('noticeBoardInput').value;
-        if (!force && appData.noticeBoard === newVal) return;
-        appData.noticeBoard = newVal;
-        saveAllData();
-    }
-
-    function trashNoticeBoard() {
-        skipNoteBlur = false;
-        var val = document.getElementById('noticeBoardInput').value.trim();
-        if (!val) return alert('Notice Board is already empty.');
-        if (!confirm('Move Notice Board content to the 30-Day Trash?')) return;
-        document.getElementById('noticeBoardInput').value = '';
-        appData.noticeBoard = '';
-        moveToTrash('Notice', null, 'Notice Board', val.slice(0, 80), val);
-    }
-
-    // --- 30-DAY TRASH ---
-    function moveToTrash(kind, studentId, title, summary, dataPayload) {
-        var now = Date.now();
-        var exp = now + THIRTY_DAYS_MS;
-        if (!appData.trash) appData.trash = [];
-        appData.trash.unshift({
-            trashId: 'TR-' + now,
-            kind: kind,
-            studentId: studentId,
-            title: title,
-            summary: summary,
-            deletedAtMs: now,
-            deletedDate: toLocalIso(new Date(now)),
-            expiresDate: toLocalIso(new Date(exp)),
-            data: dataPayload
-        });
-        showUndoToast(kind + ' moved to Trash');
-        saveAllData();
-    }
-
-    // Handles both local deletedAtMs numbers and cloud-synced date strings so 30-day auto-purge works reliably
-    function purgeExpiredTrash() {
-        if (!appData.trash) appData.trash = [];
-        var now = Date.now();
-        appData.trash = appData.trash.filter(function(t) {
-            if (t.expiresDate) {
-                var expMs = Date.parse(t.expiresDate + 'T23:59:59');
-                if (!isNaN(expMs)) return now <= expMs;
-            }
-            var delMs = Number(t.deletedAtMs) || (t.deletedDate ? Date.parse(t.deletedDate) : 0);
-            if (!delMs || isNaN(delMs)) return true;
-            return (now - delMs) < THIRTY_DAYS_MS;
-        });
-    }
-
-    function updateTrashCount() {
-        var cnt = (appData.trash || []).length;
-        var el = document.getElementById('trashCount');
-        if (el) {
-            el.textContent = cnt;
-            el.classList.toggle('hidden', cnt === 0);
-        }
-    }
-
-    function showUndoToast(msg) {
-        var toast = document.getElementById('undoToast');
-        document.getElementById('undoText').textContent = msg;
-        toast.classList.remove('hidden', 'animate-sheet-out');
-        toast.classList.add('flex', 'animate-sheet');
-        clearTimeout(undoTimer);
-        undoTimer = setTimeout(function() {
-            toast.classList.remove('animate-sheet');
-            toast.classList.add('animate-sheet-out');
-            setTimeout(function() {
-                toast.classList.replace('flex', 'hidden');
-                toast.classList.remove('animate-sheet-out');
-            }, 220);
-        }, 6000);
-    }
-
-    function undoLastDelete() {
-        if (!appData.trash || !appData.trash.length) return;
-        restoreTrashItem(appData.trash[0].trashId);
-        document.getElementById('undoToast').classList.replace('flex', 'hidden');
-    }
-
-    function restoreTrashItem(trashId) {
-        var idx = appData.trash.findIndex(function(t) { return t.trashId === trashId; });
-        if (idx === -1) return;
-        var item = appData.trash.splice(idx, 1)[0];
-
-        if (item.kind === 'Subject') {
-            if (appData.subjects.indexOf(item.data) === -1) appData.subjects.push(item.data);
-        } else if (item.kind === 'Student') {
-            appData.students.push(item.data);
-        } else if (item.kind === 'Notice' || item.kind === 'General Note') {
-            appData.noticeBoard = item.data;
-            document.getElementById('noticeBoardInput').value = appData.noticeBoard;
-        } else {
-            var stu = appData.students.find(function(s) { return s.id === item.studentId; });
-            if (!stu) {
-                alert('Please restore the student profile first.');
-                appData.trash.unshift(item);
-                return;
-            }
-            if (item.kind === 'Attendance') {
-                stu.attendance.unshift(item.data);
-                sortByDateDesc(stu.attendance);
-            }
-            if (item.kind === 'Class') {
-                stu.classes.unshift(item.data);
-                sortByDateDesc(stu.classes);
-            }
-            if (item.kind === 'Fee') {
-                stu.fees.unshift(item.data);
-                syncStudentFeeSummary(stu);
-            }
-            if (item.kind === 'Class Note') stu.notes = item.data;
-        }
-        saveAllData();
-        refreshActiveViews();
-    }
-
-    function deleteTrashPermanently(trashId) {
-        if (!confirm('PERMANENTLY delete this item from the app and Google Sheets? This cannot be undone.')) return;
-        appData.trash = appData.trash.filter(function(t) { return t.trashId !== trashId; });
-        saveAllData();
-        renderTrash();
-    }
-
-    function emptyAllTrash() {
-        if (!appData.trash || !appData.trash.length) return alert('Trash is already empty.');
-        if (!confirm('PERMANENTLY delete ALL items in Trash from Google Sheets? This cannot be undone.')) return;
-        appData.trash = [];
-        saveAllData();
-        renderTrash();
-    }
-
-    function renderTrash() {
-        var box = document.getElementById('trashList');
-        var emptyBtn = document.getElementById('emptyTrashBtn');
-        if (!appData.trash.length) {
-            emptyBtn.classList.add('hidden');
-            box.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">Trash bin is empty.</div>';
-            return;
-        }
-        emptyBtn.classList.remove('hidden');
-        box.innerHTML = appData.trash.map(function(t) {
-            return '<div class="p-4 flex justify-between items-center gap-3">' +
-                '<div class="min-w-0 flex-1">' +
-                    '<div class="flex items-center gap-2">' +
-                        '<span class="text-[10px] font-bold uppercase bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-full">' + escHtml(t.kind) + '</span>' +
-                        '<h4 class="font-bold text-zinc-900 text-xs truncate">' + escHtml(t.title) + '</h4>' +
-                    '</div>' +
-                    '<p class="text-xs text-zinc-500 truncate mt-1">' + escHtml(t.summary) + '</p>' +
-                    '<p class="text-[10px] text-zinc-400 mt-0.5">Expires ' + escHtml(t.expiresDate) + '</p>' +
-                '</div>' +
-                '<div class="flex items-center gap-1.5 shrink-0">' +
-                    '<button type="button" onclick="restoreTrashItem(\'' + t.trashId + '\')" class="touch-item h-8 bg-zinc-900 text-white px-3 rounded-full text-xs font-bold">Restore</button>' +
-                    '<button type="button" onclick="deleteTrashPermanently(\'' + t.trashId + '\')" class="touch-item h-8 bg-red-50 text-red-600 px-2.5 rounded-full text-xs font-bold">✕</button>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    function removeSubRecord(stuId, col, id) {
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        if (!s) return;
-        var item = s[col].find(function(x) { return x.id == id; });
-        if (!item) return;
-        if (!confirm('Move this entry to the 30-Day Trash?')) return;
-        s[col] = s[col].filter(function(x) { return x.id != id; });
-
-        if (col === 'fees') syncStudentFeeSummary(s);
-
-        var kindMap = { attendance: 'Attendance', classes: 'Class', fees: 'Fee' };
-        var sum = col === 'attendance' ? (item.date + ' - ' + item.status) :
-                  col === 'classes' ? (item.date + ' - ' + (item.lesson || item.repertoire || 'Class')) :
-                  (item.date + ' - ' + item.type + ' (Paid: ₹' + item.amount + ')');
-
-        moveToTrash(kindMap[col], s.id, s.name, sum, item);
-        if (currentStudentId === stuId) {
-            refreshStudentProfileData(stuId);
-        } else {
-            renderMasterAttendance();
-            renderMasterFees();
-        }
-    }
-
-    // --- ATTENDANCE & PILL CALENDAR STRIP ---
-    function renderWeekStrip() {
-        var strip = document.getElementById('weekStrip');
-        var parts = selectedAttDate ? selectedAttDate.split('-').map(Number) : null;
-        var baseDate = parts ? new Date(parts[0], parts[1] - 1, parts[2]) : new Date();
-        var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        var monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-        document.getElementById('attHeaderDateTitle').textContent = selectedAttDate
-            ? (monthNames[baseDate.getMonth()] + ' ' + baseDate.getDate())
-            : 'All Dates';
-
-        var html = [];
-        for (var offset = -3; offset <= 3; offset++) {
-            var d = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate() + offset);
-            var iso = toLocalIso(d);
-            var isSelected = selectedAttDate === iso;
-
-            if (isSelected) {
-                html.push(
-                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md scale-105">' +
-                        '<span class="w-1 h-1 rounded-full bg-current"></span>' +
-                        '<span class="text-[10px] opacity-80">' + dayNames[d.getDay()] + '</span>' +
-                        '<span class="text-xs font-extrabold">' + d.getDate() + '</span>' +
-                    '</button>'
-                );
-            } else {
-                html.push(
-                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-white border border-zinc-200/80 rounded-full py-2.5 flex flex-col items-center gap-1 text-zinc-500">' +
-                        '<span class="w-1 h-1 rounded-full bg-zinc-300"></span>' +
-                        '<span class="text-[10px]">' + dayNames[d.getDay()] + '</span>' +
-                        '<span class="text-xs font-bold text-zinc-900">' + d.getDate() + '</span>' +
-                    '</button>'
-                );
-            }
-        }
-        strip.innerHTML = html.join('');
-    }
-
-    function onPickAttendanceDate(dateVal) {
-        selectedAttDate = dateVal;
-        document.getElementById('regAttDate').value = dateVal;
-        renderWeekStrip();
-        var list = document.getElementById('masterAttList');
-        if (list) {
-            list.classList.remove('animate-view');
-            void list.offsetWidth;
-            list.classList.add('animate-view');
-        }
-        renderMasterAttendance();
-    }
-
-    function clearAttDateFilter() {
-        selectedAttDate = '';
-        document.getElementById('regAttDate').value = '';
-        renderWeekStrip();
-        renderMasterAttendance();
-    }
-
-    function setAttStatusFilter(st) {
-        selectedAttStatus = st;
-        ['ALL', 'Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(k) {
-            var btn = document.getElementById('afilt-' + k);
-            if (!btn) return;
-            var active = (k === 'ALL' && !st) || k === st;
-            btn.className = active
-                ? 'touch-item h-8 px-3.5 rounded-full text-xs font-bold bg-zinc-900 text-white shrink-0'
-                : 'touch-item h-8 px-3.5 rounded-full text-xs font-semibold bg-white border border-zinc-200 text-zinc-600 shrink-0';
-        });
-        var list = document.getElementById('masterAttList');
-        if (list) {
-            list.classList.remove('animate-view');
-            void list.offsetWidth;
-            list.classList.add('animate-view');
-        }
-        renderMasterAttendance();
-    }
-
-    function addStudentAttendance(e) {
-        e.preventDefault();
-        var s = getActiveStudent();
-        var nowMs = Date.now();
-        s.attendance.unshift({
-            id: nowMs,
-            createdAt: nowMs,
-            date: document.getElementById('stuAttDate').value,
-            status: document.getElementById('stuAttStatus').value,
-            remarks: document.getElementById('stuAttRemarks').value.trim()
-        });
-        sortByDateDesc(s.attendance);
-        document.getElementById('stuAttRemarks').value = '';
-        saveAllData();
-        refreshStudentProfileData(s.id);
-    }
-
-    function openEditAttendanceModal(stuId, attId) {
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        var a = (s ? s.attendance || [] : []).find(function(x) { return x.id == attId; });
-        if (!a) return;
-        document.getElementById('editAttStuId').value = stuId;
-        document.getElementById('editAttId').value = a.id;
-        document.getElementById('editAttDate').value = a.date;
-        document.getElementById('editAttStatus').value = a.status;
-        document.getElementById('editAttRemarks').value = a.remarks || '';
-        openSheetModal('editAttModal', 'editAttSheet');
-    }
-
-    function closeEditAttModal() {
-        closeSheetModal('editAttModal', 'editAttSheet');
-    }
-
-    function saveEditedAttendance(e) {
-        e.preventDefault();
-        var stuId = document.getElementById('editAttStuId').value;
-        var attId = document.getElementById('editAttId').value;
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        var a = (s ? s.attendance || [] : []).find(function(x) { return x.id == attId; });
-        if (a) {
-            a.date = document.getElementById('editAttDate').value;
-            a.status = document.getElementById('editAttStatus').value;
-            a.remarks = document.getElementById('editAttRemarks').value.trim();
-            sortByDateDesc(s.attendance);
-        }
-        closeEditAttModal();
-        saveAllData();
-        if (currentStudentId === stuId) refreshStudentProfileData(stuId);
-        renderMasterAttendance();
-    }
-
-    function renderStudentAttendance() {
-        var s = getActiveStudent();
-        var list = document.getElementById('stuAttList');
-        var counts = { Present: 0, Absent: 0, Tardy: 0, Rescheduled: 0 };
-
-        if (!(s.attendance || []).length) {
-            list.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No attendance logged yet.</div>';
-        } else {
-            list.innerHTML = (s.attendance || []).map(function(a) {
-                counts[a.status] = (counts[a.status] || 0) + 1;
-                return '<div class="px-4 py-3 flex justify-between items-center text-xs">' +
-                    '<div>' +
-                        '<div class="flex items-center gap-2">' +
-                            '<span class="font-bold text-zinc-900">' + escHtml(a.date) + '</span>' +
-                            statusBadge(a.status) +
-                        '</div>' +
-                        (a.remarks ? '<p class="text-zinc-400 mt-0.5">' + escHtml(a.remarks) + '</p>' : '') +
-                    '</div>' +
-                    '<div class="flex items-center gap-1">' +
-                        '<button type="button" onclick="openEditAttendanceModal(\'' + s.id + '\', ' + a.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
-                        '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'attendance\', ' + a.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
-                    '</div>' +
-                '</div>';
-            }).join('');
-        }
-
-        document.getElementById('stuAttStats').innerHTML =
-            '<span>P:' + counts.Present + '</span>' +
-            '<span>A:' + counts.Absent + '</span>' +
-            '<span>T:' + counts.Tardy + '</span>' +
-            '<span>R:' + counts.Rescheduled + '</span>';
-    }
-
-    function renderMasterAttendance() {
-        var list = document.getElementById('masterAttList');
-        var rows = [];
-        appData.students.forEach(function(s) {
-            (s.attendance || []).forEach(function(a) {
-                if ((!selectedAttDate || a.date === selectedAttDate) && (!selectedAttStatus || a.status === selectedAttStatus)) {
-                    rows.push({ id: a.id, createdAt: a.createdAt, date: a.date, status: a.status, remarks: a.remarks, stuName: s.name, stuSub: s.subject, stuId: s.id });
-                }
-            });
-        });
-        sortByDateDesc(rows);
-
-        if (!rows.length) {
-            list.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">No attendance records found.</div>';
-            return;
-        }
-
-        list.innerHTML = rows.slice(0, 100).map(function(r) {
-            return '<div class="px-4 py-3.5 flex justify-between items-center gap-3">' +
-                '<div onclick="openStudentProfile(\'' + r.stuId + '\')" class="touch-item cursor-pointer min-w-0 flex-1">' +
-                    '<div class="flex items-center gap-2">' +
-                        '<h4 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(r.stuName) + '</h4>' +
-                        statusBadge(r.status) +
-                    '</div>' +
-                    '<p class="text-xs text-zinc-400 mt-0.5">' + escHtml(r.date) + ' · ' + escHtml(r.stuSub) + (r.remarks ? ' · ' + escHtml(r.remarks) : '') + '</p>' +
-                '</div>' +
-                '<div class="flex items-center gap-1 shrink-0">' +
-                    '<button type="button" onclick="openEditAttendanceModal(\'' + r.stuId + '\', ' + r.id + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
-                    '<button type="button" onclick="removeSubRecord(\'' + r.stuId + '\', \'attendance\', ' + r.id + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    // --- DAILY CLASSES ---
-    function addStudentClass(e) {
-        e.preventDefault();
-        var s = getActiveStudent();
-        var nowMs = Date.now();
-        s.classes.unshift({
-            id: nowMs,
-            createdAt: nowMs,
-            date: document.getElementById('clsDate').value,
-            technique: document.getElementById('clsTech').value.trim(),
-            lesson: document.getElementById('clsLesson').value.trim(),
-            repertoire: document.getElementById('clsRep').value.trim()
-        });
-        sortByDateDesc(s.classes);
-        document.getElementById('clsTech').value = '';
-        document.getElementById('clsLesson').value = '';
-        document.getElementById('clsRep').value = '';
-        saveAllData();
-        refreshStudentProfileData(s.id);
-    }
-
-    function openEditClassModal(stuId, clsId) {
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        var c = (s ? s.classes || [] : []).find(function(x) { return x.id == clsId; });
-        if (!c) return;
-        document.getElementById('editClsStuId').value = stuId;
-        document.getElementById('editClsId').value = c.id;
-        document.getElementById('editClsDate').value = c.date;
-        document.getElementById('editClsTech').value = c.technique || '';
-        document.getElementById('editClsLesson').value = c.lesson || '';
-        document.getElementById('editClsRep').value = c.repertoire || '';
-        openSheetModal('editClassModal', 'editClassSheet');
-    }
-
-    function closeEditClassModal() {
-        closeSheetModal('editClassModal', 'editClassSheet');
-    }
-
-    function saveEditedClass(e) {
-        e.preventDefault();
-        var stuId = document.getElementById('editClsStuId').value;
-        var clsId = document.getElementById('editClsId').value;
-        var s = appData.students.find(function(x) { return x.id === stuId; });
-        var c = (s ? s.classes || [] : []).find(function(x) { return x.id == clsId; });
-        if (c) {
-            c.date = document.getElementById('editClsDate').value;
-            c.technique = document.getElementById('editClsTech').value.trim();
-            c.lesson = document.getElementById('editClsLesson').value.trim();
-            c.repertoire = document.getElementById('editClsRep').value.trim();
-            sortByDateDesc(s.classes);
-        }
-        closeEditClassModal();
-        saveAllData();
-        if (currentStudentId === stuId) renderStudentClasses();
-    }
-
-    function renderStudentClasses() {
-        var s = getActiveStudent();
-        var box = document.getElementById('stuClassList');
-        if (!(s.classes || []).length) {
-            box.innerHTML = '<div class="p-6 text-center text-zinc-400 text-xs">No classes logged yet.</div>';
-            return;
-        }
-        box.innerHTML = (s.classes || []).map(function(c) {
-            return '<div class="p-4 text-xs space-y-1">' +
-                '<div class="flex justify-between items-center font-bold text-zinc-900 pb-1">' +
-                    '<span>' + escHtml(c.date) + '</span>' +
-                    '<div class="flex items-center gap-1">' +
-                        '<button type="button" onclick="openEditClassModal(\'' + s.id + '\', ' + c.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
-                        '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'classes\', ' + c.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="text-zinc-600"><span class="text-zinc-400">Technique:</span> ' + escHtml(c.technique || '-') + '</div>' +
-                '<div class="text-zinc-600"><span class="text-zinc-400">Lesson:</span> ' + escHtml(c.lesson || '-') + '</div>' +
-                '<div class="text-zinc-600"><span class="text-zinc-400">Repertoire:</span> ' + escHtml(c.repertoire || '-') + '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    // --- FEES ---
-    function openFeeModal(preselectedStuId, editFeeId) {
-        if (!appData.students.length) return alert('Please add a student first.');
-        var sel = document.getElementById('feeStuSelect');
-        sel.innerHTML = appData.students.map(function(s) {
-            return '<option value="' + s.id + '" ' + (s.id === preselectedStuId ? 'selected' : '') + '>' + escHtml(s.name) + ' (' + escHtml(s.subject) + ')</option>';
-        }).join('');
-
-        if (editFeeId && preselectedStuId) {
-            var s = appData.students.find(function(x) { return x.id === preselectedStuId; });
-            var f = (s ? s.fees || [] : []).find(function(x) { return x.id === editFeeId; });
-            if (f) {
-                document.getElementById('feeModalTitle').textContent = 'Edit Fee';
-                document.getElementById('editFeeId').value = f.id;
-                document.getElementById('feeStuSelect').value = s.id;
-                document.getElementById('feeStuSelect').disabled = true;
-                selectFeeTypePill(f.type || 'Monthly Fee');
-                document.getElementById('feeMonthInput').value = f.month || currentMonthStr;
-                document.getElementById('feeDateInput').value = f.date;
-                selectFeeModePill(f.mode || 'UPI');
-                selectFeeStatusPill(f.status || 'Paid');
-                document.getElementById('feeAmountInput').value = f.amount;
-                document.getElementById('feeDueInput').value = f.dueAmount || '';
-                document.getElementById('feeRemarksInput').value = f.remarks || '';
-                openSheetModal('feeModal', 'feeModalSheet');
-                return;
-            }
-        }
-
-        document.getElementById('feeModalTitle').textContent = 'Record Fee';
-        document.getElementById('editFeeId').value = '';
-        document.getElementById('feeStuSelect').disabled = false;
-        selectFeeTypePill('Monthly Fee');
-        document.getElementById('feeDateInput').value = todayStr;
-        document.getElementById('feeMonthInput').value = currentMonthStr;
-        selectFeeModePill('UPI');
-        selectFeeStatusPill('Paid');
-        document.getElementById('feeAmountInput').value = '';
-        document.getElementById('feeDueInput').value = '';
-        document.getElementById('feeRemarksInput').value = '';
-        openSheetModal('feeModal', 'feeModalSheet');
-    }
-
-    function closeFeeModal() {
-        closeSheetModal('feeModal', 'feeModalSheet');
-    }
-
-    function toggleFeeMonth() {
-        var isMonthly = document.getElementById('feeTypeSelect').value === 'Monthly Fee';
-        document.getElementById('feeMonthWrapper').classList.toggle('hidden', !isMonthly);
-    }
-
-    function handleFeeStatusUI() {
-        var st = document.getElementById('feeStatusSelect').value;
-        if (st === 'Paid') {
-            document.getElementById('feeDueInput').value = '';
-        } else if (st === 'Pending' && !document.getElementById('feeAmountInput').value) {
-            document.getElementById('feeAmountInput').value = '0';
-        }
-    }
-
-    function submitFeeForm(shouldSendPdf) {
-        var stuId = document.getElementById('feeStuSelect').value;
-        var amount = document.getElementById('feeAmountInput').value;
-        var date = document.getElementById('feeDateInput').value;
-        if (!stuId || amount === '' || !date) return alert('Please fill in Student, Date, and Amount Paid.');
-
-        var s = appData.students.find(function(st) { return st.id === stuId; });
-        if (!s) return;
-
-        var editFeeId = document.getElementById('editFeeId').value;
-        var type = document.getElementById('feeTypeSelect').value;
-        var rawDue = document.getElementById('feeDueInput').value.trim();
-        var numDue = Number(rawDue || 0);
-        var dueVal = numDue > 0 ? String(numDue) : '';
-        var status = document.getElementById('feeStatusSelect').value;
-
-        if (numDue > 0) {
-            status = 'Remaining Due';
-        } else if (status === 'Remaining Due') {
-            status = Number(amount) > 0 ? 'Paid' : 'Pending';
-        }
-
-        var targetFeeId = editFeeId;
-
-        if (editFeeId) {
-            var existing = (s.fees || []).find(function(x) { return x.id === editFeeId; });
-            if (existing) {
-                existing.type = type;
-                existing.status = status;
-                existing.month = type === 'Monthly Fee' ? document.getElementById('feeMonthInput').value : '';
-                existing.date = date;
-                existing.mode = document.getElementById('feeModeSelect').value;
-                existing.amount = amount;
-                existing.dueAmount = dueVal;
-                existing.remarks = document.getElementById('feeRemarksInput').value.trim();
-            }
-        } else {
-            var nowMs = Date.now();
-            targetFeeId = 'JSM-R' + nowMs.toString().slice(-6);
-            s.fees.unshift({
-                id: targetFeeId,
-                createdAt: nowMs,
-                type: type,
-                status: status,
-                month: type === 'Monthly Fee' ? document.getElementById('feeMonthInput').value : '',
-                date: date,
-                mode: document.getElementById('feeModeSelect').value,
-                amount: amount,
-                dueAmount: dueVal,
-                remarks: document.getElementById('feeRemarksInput').value.trim()
-            });
-        }
-
-        syncStudentFeeSummary(s);
-        closeFeeModal();
-        saveAllData();
-
-        if (currentStudentId === stuId) refreshStudentProfileData(stuId);
-        renderMasterFees();
-        if (shouldSendPdf) downloadReceipt(stuId, targetFeeId);
-    }
-
-    function renderStudentFees() {
-        var s = getActiveStudent();
-        var banner = document.getElementById('stuFeeSummaryBanner');
-        if (!s.fees || !s.fees.length) {
-            banner.innerHTML = '<span class="text-zinc-400">No fee records yet.</span>';
-        } else {
-            var latest = s.fees[0];
-            banner.innerHTML =
-                '<div class="flex items-center gap-2">' +
-                    '<span class="text-zinc-400">Summary:</span>' +
-                    '<strong class="text-zinc-900 font-bold">' + escHtml(latest.type) + '</strong>' +
-                    feeStatusBadge(s.feeStatus, s.dueAmount) +
-                '</div>';
-        }
-
-        var box = document.getElementById('stuFeeList');
-        box.innerHTML = (s.fees || []).map(function(f) {
-            var subText = f.type === 'Monthly Fee' && f.month ? (f.type + ' (' + f.month + ')') : f.type;
-            var dueLine = f.dueAmount && Number(f.dueAmount) > 0 ? ' · <span class="text-red-600 font-bold">Due ₹' + escHtml(f.dueAmount) + '</span>' : '';
-            return '<div class="p-4 flex justify-between items-center gap-3 text-xs">' +
-                '<div class="min-w-0 flex-1">' +
-                    '<div class="font-bold text-zinc-900">' + escHtml(subText) + ' · ₹' + escHtml(f.amount) + dueLine + '</div>' +
-                    '<div class="text-zinc-400 mt-0.5">' + escHtml(f.date) + ' · ' + escHtml(f.mode) + '</div>' +
-                    (f.remarks ? '<div class="text-zinc-400 mt-0.5">' + escHtml(f.remarks) + '</div>' : '') +
-                '</div>' +
-                '<div class="flex items-center gap-1.5 shrink-0">' +
-                    '<button type="button" onclick="downloadReceipt(\'' + s.id + '\', \'' + f.id + '\')" class="touch-item h-7 px-3 rounded-full bg-zinc-100 text-zinc-800 text-[11px] font-bold">Share PDF</button>' +
-                    '<button type="button" onclick="openFeeModal(\'' + s.id + '\', \'' + f.id + '\')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
-                    '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'fees\', \'' + f.id + '\')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    function renderMasterFees() {
-        var box = document.getElementById('masterFeeList');
-        var allFees = [];
-        appData.students.forEach(function(s) {
-            (s.fees || []).forEach(function(f) {
-                allFees.push({
-                    id: f.id, createdAt: f.createdAt, type: f.type, status: f.status, month: f.month, date: f.date,
-                    mode: f.mode, amount: f.amount, dueAmount: f.dueAmount, remarks: f.remarks,
-                    stuName: s.name, stuSub: s.subject, stuId: s.id
-                });
-            });
-        });
-        sortByDateDesc(allFees);
-
-        if (!allFees.length) {
-            box.innerHTML = '<div class="p-8 text-center text-zinc-400 text-xs">No fees recorded yet.</div>';
-            return;
-        }
-
-        box.innerHTML = allFees.slice(0, 100).map(function(f) {
-            var subText = f.type === 'Monthly Fee' && f.month ? (f.type + ' (' + f.month + ')') : f.type;
-            var dueLine = f.dueAmount && Number(f.dueAmount) > 0 ? ' · <span class="text-red-600 font-bold">Due ₹' + escHtml(f.dueAmount) + '</span>' : '';
-            return '<div class="p-4 flex justify-between items-center gap-3">' +
-                '<div onclick="openStudentProfile(\'' + f.stuId + '\')" class="touch-item cursor-pointer min-w-0 flex-1">' +
-                    '<div class="flex items-center gap-2">' +
-                        '<h4 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(f.stuName) + '</h4>' +
-                        feeStatusBadge(f.status || 'Paid', f.dueAmount) +
-                    '</div>' +
-                    '<p class="text-xs text-zinc-600 mt-0.5">' + escHtml(subText) + ' — Paid ₹' + escHtml(f.amount) + ' (' + escHtml(f.mode) + ')' + dueLine + '</p>' +
-                    '<p class="text-[11px] text-zinc-400 mt-0.5">' + escHtml(f.id) + ' · ' + escHtml(f.date) + '</p>' +
-                '</div>' +
-                '<div class="flex items-center gap-1 shrink-0">' +
-                    '<button type="button" onclick="downloadReceipt(\'' + f.stuId + '\', \'' + f.id + '\')" class="touch-item h-8 bg-zinc-900 text-white px-3.5 rounded-full text-xs font-bold">Share</button>' +
-                    '<button type="button" onclick="openFeeModal(\'' + f.stuId + '\', \'' + f.id + '\')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
-                    '<button type="button" onclick="removeSubRecord(\'' + f.stuId + '\', \'fees\', \'' + f.id + '\')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
-                '</div>' +
-            '</div>';
-        }).join('');
-    }
-
-    // --- PDF RECEIPT GENERATOR (WITH ANTI-COLLISION SPACING & WORD WRAP) ---
-    function downloadReceipt(stuId, feeId) {
-        var s = appData.students.find(function(st) { return st.id === stuId; });
-        if (!s) return;
-        var f = (s.fees || []).find(function(item) { return item.id === feeId; });
-        if (!f) return;
-
-        var jsPDF = window.jspdf.jsPDF;
-        var doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: [210, 148] });
-
-        doc.setDrawColor(11, 37, 69);
-        doc.setLineWidth(1.5);
-        doc.rect(8, 8, 194, 132);
-        doc.setDrawColor(216, 200, 150);
-        doc.setLineWidth(0.6);
-        doc.rect(10, 10, 190, 128);
-
-        if (cachedPdfLogoDataUrl) {
-            try { doc.addImage(cachedPdfLogoDataUrl, 'PNG', 16, 13, 26, 26); } catch (e) {}
-        }
-
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(18);
-        doc.setTextColor(11, 37, 69);
-        doc.text("JOY'S SCHOOL OF MUSIC", 105, 22, { align: 'center' });
-
-        doc.setFontSize(9);
-        doc.setTextColor(142, 146, 151);
-        doc.text('Est. 2022  |  Official Fee Receipt', 105, 28, { align: 'center' });
-
-        doc.setDrawColor(216, 200, 150);
-        doc.line(16, 41, 194, 41);
-
-        doc.setFontSize(10);
-        doc.setTextColor(50, 50, 50);
-        doc.setFont('helvetica', 'bold');
-        doc.text('Receipt No: ' + f.id, 16, 48);
-        doc.text('Date: ' + f.date, 194, 48, { align: 'right' });
-        doc.line(16, 52, 194, 52);
-
-        var y = 58;
-        var drawRow = function(label, value) {
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(9.5);
-            doc.setTextColor(11, 37, 69);
-            doc.text(label, 22, y);
-            doc.setFont('helvetica', 'normal');
-            doc.setTextColor(30, 30, 30);
-            var wrapped = doc.splitTextToSize(String(value || '-'), 112).slice(0, 2);
-            doc.text(wrapped, 78, y);
-            y += (wrapped.length > 1 ? 10.5 : 7.2);
-        };
-
-        drawRow('Student Name:', s.name);
-        drawRow('Subject:', s.subject);
-        drawRow('Fee Type:', f.type);
-        if (f.type === 'Monthly Fee' && f.month) drawRow('Paid for Month:', f.month);
-        drawRow('Payment Mode:', f.mode);
-        drawRow('Payment Status:', f.status || 'Paid');
-        if (f.remarks) drawRow('Remarks:', f.remarks);
-
-        var hasDue = f.dueAmount && Number(f.dueAmount) > 0;
-
-        doc.setFillColor(11, 37, 69);
-        doc.rect(16, 112, 87, 15, 'F');
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.setTextColor(216, 200, 150);
-        doc.text('AMOUNT PAID:', 21, 118);
-        doc.setFontSize(12);
-        doc.setTextColor(255, 255, 255);
-        doc.text('INR ' + f.amount + '/-', 21, 124);
-
-        if (hasDue) {
-            doc.setFillColor(185, 28, 28);
-            doc.rect(107, 112, 87, 15, 'F');
-            doc.setFontSize(9);
-            doc.setTextColor(254, 202, 202);
-            doc.text('REMAINING DUE (UNPAID):', 112, 118);
-            doc.setFontSize(12);
-            doc.setTextColor(255, 255, 255);
-            doc.text('INR ' + f.dueAmount + '/-', 112, 124);
-        } else {
-            doc.setFillColor(241, 245, 249);
-            doc.setDrawColor(203, 213, 225);
-            doc.rect(107, 112, 87, 15, 'FD');
-            doc.setFontSize(9);
-            doc.setTextColor(100, 116, 139);
-            doc.text('REMAINING DUE:', 112, 118);
-            doc.setFontSize(11);
-            doc.setTextColor(15, 23, 42);
-            doc.text('INR 0/- (Cleared)', 112, 124);
-        }
-
-        doc.setFontSize(8);
-        doc.setTextColor(130, 130, 130);
-        doc.text("Thank you! — JSM APP (An Official App For Joy's School Of Music)", 105, 134, { align: 'center' });
-
-        var fileName = 'JSM_Receipt_' + s.name.replace(/\s+/g, '_') + '_' + f.date + '.pdf';
-        if (typeof AndroidPDF !== 'undefined' && AndroidPDF.sharePDF) {
-            AndroidPDF.sharePDF(doc.output('datauristring'), fileName);
-        } else {
-            doc.save(fileName);
-        }
-    }
-</script>
-</body>
-</html>
+        syncBodyScrollLock();
+        if (wasHidden) pushAppHistoryState();
+        switchNativeSheetTab(currentNativeSheetTab ||
