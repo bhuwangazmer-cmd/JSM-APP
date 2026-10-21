@@ -33,6 +33,17 @@
             box-shadow: 0 0 0 3px rgba(20, 20, 26, 0.08);
         }
 
+        /* Locked Notice Board Height & Smooth Expand Transition */
+        #noticeBoardInput {
+            resize: none !important;
+            height: 58px;
+            overflow-y: auto;
+            transition: height 0.32s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.22s ease;
+        }
+        #noticeBoardInput.notice-expanded {
+            height: 168px;
+        }
+
         /* Tailwind v3 Compatibility Polyfills */
         .shadow-2xs { box-shadow: 0 1px 2px 0 rgba(20, 20, 26, 0.04); }
         .shadow-xs { box-shadow: 0 2px 6px -1px rgba(20, 20, 26, 0.06), 0 1px 2px -1px rgba(20, 20, 26, 0.04); }
@@ -196,7 +207,7 @@
             transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.25s ease !important;
         }
 
-        /* ================= THEME 1: MODERN (VIBRANT BENTO PASTELS) ================= */
+        /* ================= THEME 1: PASTEL BENTO ================= */
         body[data-theme="modern"] {
             background-color: #F6F5FA !important;
             color: #14141A !important;
@@ -213,6 +224,12 @@
         }
         body[data-theme="modern"] #noticeCard textarea,
         body[data-theme="modern"] #noticeCard .notice-label {
+            color: #14141A !important;
+        }
+        body[data-theme="modern"] .notice-sub-btn,
+        body[data-theme="modern"] .sub-badge-pill,
+        body[data-theme="modern"] .sub-menu-btn {
+            background-color: rgba(255, 255, 255, 0.75) !important;
             color: #14141A !important;
         }
         body[data-theme="modern"] #qact-student {
@@ -253,29 +270,7 @@
         body[data-theme="modern"] .stat-pill-2 { background-color: #BDD8FF !important; color: #102A52 !important; }
         body[data-theme="modern"] .stat-pill-3 { background-color: #FCD283 !important; color: #422600 !important; }
 
-        /* ================= THEME 2: MONOCHROME (CLEAN ARCHITECTURAL) ================= */
-        body[data-theme="monochrome"] {
-            background-color: #F7F7F5 !important;
-            color: #18181B !important;
-        }
-        body[data-theme="monochrome"] header,
-        body[data-theme="monochrome"] #pinLockScreen,
-        body[data-theme="monochrome"] #liveSheetModal {
-            background-color: #F7F7F5 !important;
-        }
-        body[data-theme="monochrome"] #noticeCard {
-            background-color: #EAEAE6 !important;
-            border-color: #DEDED8 !important;
-        }
-        body[data-theme="monochrome"] .stat-pill-1,
-        body[data-theme="monochrome"] .stat-pill-2,
-        body[data-theme="monochrome"] .stat-pill-3 {
-            background-color: #FFFFFF !important;
-            border: 1px solid #E4E4E7 !important;
-            color: #18181B !important;
-        }
-
-        /* ================= THEME 3: DARK MODE (OBSIDIAN & GOLD) ================= */
+        /* ================= THEME 2: MIDNIGHT SLATE ================= */
         body[data-theme="dark"] {
             background-color: #0D0F14 !important;
             color: #F3F4F6 !important;
@@ -289,6 +284,16 @@
         body[data-theme="dark"] #noticeCard {
             background: linear-gradient(135deg, #1E2436 0%, #171B26 100%) !important;
             border-color: #2B3348 !important;
+        }
+        body[data-theme="dark"] #noticeCard textarea {
+            background-color: rgba(13, 15, 20, 0.45) !important;
+            color: #F3F4F6 !important;
+        }
+        body[data-theme="dark"] .notice-sub-btn,
+        body[data-theme="dark"] .sub-badge-pill,
+        body[data-theme="dark"] .sub-menu-btn {
+            background-color: #262D3D !important;
+            color: #F3F4F6 !important;
         }
         body[data-theme="dark"] .bg-white,
         body[data-theme="dark"] #psecSliderPill {
@@ -343,7 +348,7 @@
             border-color: #2E3646 !important;
         }
 
-        /* ================= THEME 4: NEON PULSE (PITCH BLACK, ELECTRIC LIME & VIOLET) ================= */
+        /* ================= THEME 3: NEON PULSE (WITH HIGH-CONTRAST PILL FIXES) ================= */
         body[data-theme="neon"] {
             background-color: #0B0B0E !important;
             color: #F4F4F6 !important;
@@ -403,11 +408,18 @@
             color: #0B0B0E !important;
         }
         body[data-theme="neon"] #noticeCard textarea::placeholder {
-            color: rgba(11, 11, 14, 0.6) !important;
+            color: rgba(11, 11, 14, 0.62) !important;
         }
         body[data-theme="neon"] #noticeCard .bg-zinc-900 {
             background-color: #0B0B0E !important;
             color: #FFFFFF !important;
+        }
+        /* High-Contrast Fix for Notice Clear/Expand & Subject Card Badges/Menu Dots */
+        body[data-theme="neon"] .notice-sub-btn,
+        body[data-theme="neon"] .sub-badge-pill,
+        body[data-theme="neon"] .sub-menu-btn {
+            background-color: rgba(255, 255, 255, 0.82) !important;
+            color: #0B0B0E !important;
         }
         /* Quick Action Pills */
         body[data-theme="neon"] #qact-student {
@@ -567,8 +579,8 @@
     <!-- ================= TAB 1: HOME DASHBOARD ================= -->
     <div id="tab-home" class="space-y-6 animate-view">
 
-        <!-- 1. Hero Notice Banner -->
-        <div id="noticeCard" class="bg-white border border-zinc-200/80 p-5 rounded-[28px] shadow-xs space-y-3 relative overflow-hidden transition-all duration-300">
+        <!-- 1. Hero Notice Banner (Fixed Default Shape + Dedicated Bottom-Right Expand Toggle) -->
+        <div id="noticeCard" class="bg-white border border-zinc-200/80 p-5 rounded-[28px] shadow-xs space-y-2.5 relative overflow-hidden transition-all duration-300">
             <div class="flex justify-between items-start gap-2">
                 <div>
                     <span class="notice-label text-[10px] font-extrabold uppercase tracking-widest opacity-60">School Notice Board</span>
@@ -576,10 +588,17 @@
                 </div>
                 <div class="flex items-center gap-1.5">
                     <button type="button" onmousedown="skipNoteBlur=true" onclick="saveNoticeBoard(true)" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">Save</button>
-                    <button type="button" onmousedown="skipNoteBlur=true" onclick="trashNoticeBoard()" class="touch-item h-8 px-3 rounded-full bg-white/70 text-zinc-800 text-xs font-semibold" title="Move to Trash">Clear</button>
+                    <button type="button" onmousedown="skipNoteBlur=true" onclick="trashNoticeBoard()" class="notice-sub-btn touch-item h-8 px-3 rounded-full bg-white/75 text-zinc-900 text-xs font-bold shadow-2xs" title="Move to Trash">Clear</button>
                 </div>
             </div>
             <textarea id="noticeBoardInput" onblur="if(!skipNoteBlur) saveNoticeBoard(); skipNoteBlur=false;" rows="2" class="w-full bg-white/55 backdrop-blur-xs border-0 rounded-2xl p-3 text-zinc-900 text-xs font-medium leading-relaxed placeholder-zinc-500 focus:ring-0" placeholder="Tap to write announcements, book orders, or reminders..."></textarea>
+            <div class="flex justify-between items-center pt-0.5">
+                <span class="notice-label text-[10px] font-semibold opacity-55">Locked height · Tap to expand</span>
+                <button type="button" id="noticeExpandBtn" onmousedown="skipNoteBlur=true" onclick="toggleNoticeBoardExpand(event)" class="notice-sub-btn touch-item h-7 px-3 rounded-full bg-white/75 text-zinc-900 text-[11px] font-bold flex items-center gap-1 shadow-2xs">
+                    <span id="noticeExpandLabel">Expand</span>
+                    <span id="noticeExpandIcon" class="text-[10px] leading-none">▾</span>
+                </button>
+            </div>
         </div>
 
         <!-- 2. Quick Actions Pill Strip -->
@@ -1082,7 +1101,7 @@
     </div>
 </div>
 
-<!-- 3-BAR SLIDE-OUT SIDE MENU (WITH 4 THEMES) -->
+<!-- 3-BAR SLIDE-OUT SIDE MENU (WITH 3 STREAMLINED THEMES) -->
 <div id="sideMenuModal" class="fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden justify-end z-50 animate-backdrop-in" onclick="closeSideMenu()">
     <div id="sideMenuPanel" class="bg-white w-72 max-w-[82vw] h-full p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-drawer-in" onclick="event.stopPropagation()">
         <div class="space-y-6">
@@ -1094,7 +1113,7 @@
                 <button type="button" onclick="closeSideMenu()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold">✕</button>
             </div>
 
-            <!-- APP THEME PALETTE SELECTOR (4 THEMES) -->
+            <!-- APP THEME PALETTE SELECTOR (3 THEMES) -->
             <div class="space-y-2.5">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">App Theme</span>
                 <div class="space-y-2">
@@ -1104,24 +1123,11 @@
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#FCD283]"></span>
                             </span>
                             <div>
-                                <div class="text-xs font-bold text-zinc-900">1) Modern Bento</div>
+                                <div class="text-xs font-bold text-zinc-900">1) Pastel Bento</div>
                                 <div class="text-[10px] text-zinc-400">Warm pastels & capsule dock</div>
                             </div>
                         </div>
                         <span id="theme-chk-modern" class="text-xs font-bold">✓</span>
-                    </button>
-
-                    <button type="button" onclick="setAppTheme('monochrome')" id="theme-btn-monochrome" class="touch-item w-full p-3 rounded-2xl border border-zinc-200 flex items-center justify-between text-left transition">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-5 h-5 rounded-full bg-[#F7F7F5] border border-zinc-400 flex items-center justify-center">
-                                <span class="w-2.5 h-2.5 rounded-full bg-zinc-900"></span>
-                            </span>
-                            <div>
-                                <div class="text-xs font-bold text-zinc-900">2) Monochrome</div>
-                                <div class="text-[10px] text-zinc-400">Minimal stone & charcoal</div>
-                            </div>
-                        </div>
-                        <span id="theme-chk-monochrome" class="text-xs font-bold hidden">✓</span>
                     </button>
 
                     <button type="button" onclick="setAppTheme('dark')" id="theme-btn-dark" class="touch-item w-full p-3 rounded-2xl border border-zinc-200 flex items-center justify-between text-left transition">
@@ -1130,7 +1136,7 @@
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#D8C896]"></span>
                             </span>
                             <div>
-                                <div class="text-xs font-bold text-zinc-900">3) Dark</div>
+                                <div class="text-xs font-bold text-zinc-900">2) Midnight Slate</div>
                                 <div class="text-[10px] text-zinc-400">Obsidian slate & warm gold</div>
                             </div>
                         </div>
@@ -1143,7 +1149,7 @@
                                 <span class="w-2.5 h-2.5 rounded-full bg-[#95F267]"></span>
                             </span>
                             <div>
-                                <div class="text-xs font-bold text-zinc-900">4) Neon Pulse</div>
+                                <div class="text-xs font-bold text-zinc-900">3) Neon Pulse</div>
                                 <div class="text-[10px] text-zinc-400">Pitch black, electric lime & violet</div>
                             </div>
                         </div>
@@ -1265,6 +1271,7 @@
     var subPressTimer = null;
     var subLongPressTriggered = false;
     var skipNoteBlur = false;
+    var isNoticeExpanded = false;
 
     // 60fps Pull-to-Refresh & Real-Time Interactive Swipe State
     var gestureStartX = 0;
@@ -1315,6 +1322,19 @@
         initTouchGestures();
         checkSessionOnStartup();
     };
+
+    // --- NOTICE BOARD intentional EXPAND / COLLAPSE TOGGLE ---
+    function toggleNoticeBoardExpand(e) {
+        if (e) e.stopPropagation();
+        if (isHorizontalDragging || isPtrDragging) return;
+        isNoticeExpanded = !isNoticeExpanded;
+        var box = document.getElementById('noticeBoardInput');
+        var lbl = document.getElementById('noticeExpandLabel');
+        var ico = document.getElementById('noticeExpandIcon');
+        if (box) box.classList.toggle('notice-expanded', isNoticeExpanded);
+        if (lbl) lbl.textContent = isNoticeExpanded ? 'Collapse' : 'Expand';
+        if (ico) ico.textContent = isNoticeExpanded ? '▴' : '▾';
+    }
 
     // --- SMOOTH MODAL & DRAWER ANIMATION HELPERS ---
     function openSheetModal(modalId, sheetId) {
@@ -1781,9 +1801,9 @@
         });
     }
 
-    // --- APP THEME SWITCHER (4 THEMES: MODERN / MONOCHROME / DARK / NEON) ---
+    // --- APP THEME SWITCHER (3 THEMES: PASTEL BENTO / MIDNIGHT SLATE / NEON PULSE) ---
     function applyThemeUI(themeName) {
-        var valid = ['modern', 'monochrome', 'dark', 'neon'];
+        var valid = ['modern', 'dark', 'neon'];
         var chosen = valid.indexOf(themeName) !== -1 ? themeName : 'modern';
         appData.theme = chosen;
         document.body.setAttribute('data-theme', chosen);
@@ -2455,8 +2475,8 @@
                 'ontouchmove="cancelSubLongPress()" ' +
                 'class="touch-item ' + modClass + ' bg-white border border-zinc-200/80 p-4 rounded-[26px] cursor-pointer flex flex-col justify-between min-h-[122px] shadow-2xs">' +
                 '<div class="flex justify-between items-center gap-1">' +
-                    '<span class="px-2.5 py-0.5 rounded-full bg-white/65 text-[10px] font-bold text-zinc-800">' + count + ' ' + (count === 1 ? 'Student' : 'Students') + '</span>' +
-                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="touch-item w-7 h-7 rounded-full bg-white/50 text-zinc-700 flex items-center justify-center text-xs font-bold">⋮</button>' +
+                    '<span class="sub-badge-pill px-2.5 py-0.5 rounded-full bg-white/75 text-[10px] font-bold text-zinc-900">' + count + ' ' + (count === 1 ? 'Student' : 'Students') + '</span>' +
+                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="sub-menu-btn touch-item w-7 h-7 rounded-full bg-white/75 text-zinc-900 flex items-center justify-center text-xs font-bold">⋮</button>' +
                 '</div>' +
                 '<div class="mt-3 flex items-end justify-between gap-2">' +
                     '<h3 class="font-extrabold text-zinc-900 text-base leading-snug truncate">' + escHtml(sub) + '</h3>' +
@@ -2979,7 +2999,7 @@
             if (isSelected) {
                 html.push(
                     '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md scale-105">' +
-                        '<span class="w-1 h-1 rounded-full bg- currentColor"></span>' +
+                        '<span class="w-1 h-1 rounded-full bg-current"></span>' +
                         '<span class="text-[10px] opacity-80">' + dayNames[d.getDay()] + '</span>' +
                         '<span class="text-xs font-extrabold">' + d.getDate() + '</span>' +
                     '</button>'
