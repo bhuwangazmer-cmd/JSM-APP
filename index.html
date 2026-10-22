@@ -55,13 +55,15 @@
         /* Locked Notice Board Height & Smooth Expand Transition */
         #noticeBoardInput {
             resize: none !important;
-            height: 58px;
+            height: 80px;
+            font-size: 13.5px !important;
+            line-height: 1.45 !important;
             overflow-y: auto;
             overscroll-behavior: contain;
             transition: height 0.32s cubic-bezier(0.32, 0.72, 0, 1), background-color 0.22s ease;
         }
         #noticeBoardInput.notice-expanded {
-            height: 168px;
+            height: 180px;
         }
 
         /* Tailwind v3 Compatibility Polyfills */
@@ -652,22 +654,22 @@
     <!-- ================= TAB 1: HOME DASHBOARD ================= -->
     <div id="tab-home" class="space-y-6 animate-view">
 
-        <!-- 1. Hero Notice Banner (Fixed Default Shape + Dedicated Bottom-Right Expand Toggle) -->
-        <div id="noticeCard" class="bg-white border border-zinc-200/80 p-5 rounded-[28px] shadow-xs space-y-2.5 relative overflow-hidden transition-all duration-300">
-            <div class="flex justify-between items-start gap-2">
+        <!-- 1. Hero Notice Banner (Same Exterior Size + Thinner Padding for Larger Default Writing Space) -->
+        <div id="noticeCard" class="bg-white border border-zinc-200/80 px-3.5 py-3 rounded-[28px] shadow-xs space-y-1.5 relative overflow-hidden transition-all duration-300">
+            <div class="flex justify-between items-start gap-2 px-0.5">
                 <div>
-                    <span class="notice-label text-[10px] font-extrabold uppercase tracking-widest opacity-60">School Notice Board</span>
-                    <h2 class="notice-label text-xl font-extrabold tracking-tight leading-snug mt-0.5">Daily Notice</h2>
+                    <span class="notice-label text-[10px] font-extrabold uppercase tracking-widest opacity-60 block leading-none">School Notice Board</span>
+                    <h2 class="notice-label text-lg font-extrabold tracking-tight leading-snug mt-0.5">Daily Notice</h2>
                 </div>
-                <div class="flex items-center gap-1.5">
-                    <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="saveNoticeBoard(true)" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">Save</button>
-                    <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="trashNoticeBoard()" class="notice-sub-btn touch-item h-8 px-3 rounded-full bg-white/75 text-zinc-900 text-xs font-bold shadow-2xs" title="Move to Trash">Clear</button>
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="saveNoticeBoard(true)" class="touch-item h-7 px-3 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">Save</button>
+                    <button type="button" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="trashNoticeBoard()" class="notice-sub-btn touch-item h-7 px-2.5 rounded-full bg-white/75 text-zinc-900 text-xs font-bold shadow-2xs" title="Move to Trash">Clear</button>
                 </div>
             </div>
-            <textarea id="noticeBoardInput" onblur="if(!skipNoteBlur) saveNoticeBoard(); skipNoteBlur=false;" rows="2" class="w-full bg-white/55 backdrop-blur-xs border-0 rounded-2xl p-3 text-zinc-900 text-xs font-medium leading-relaxed placeholder-zinc-500 focus:ring-0" placeholder="Tap to write announcements, book orders, or reminders..."></textarea>
-            <div class="flex justify-between items-center pt-0.5">
+            <textarea id="noticeBoardInput" onblur="if(!skipNoteBlur) saveNoticeBoard(); skipNoteBlur=false;" rows="3" class="w-full bg-white/55 backdrop-blur-xs border-0 rounded-2xl px-3 py-2 text-zinc-900 font-medium placeholder-zinc-500 focus:ring-0" placeholder="Tap to write announcements, book orders, or reminders..."></textarea>
+            <div class="flex justify-between items-center px-0.5">
                 <span class="notice-label text-[10px] font-semibold opacity-55">Locked height · Tap to expand</span>
-                <button type="button" id="noticeExpandBtn" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="toggleNoticeBoardExpand(event)" class="notice-sub-btn touch-item h-7 px-3 rounded-full bg-white/75 text-zinc-900 text-[11px] font-bold flex items-center gap-1 shadow-2xs">
+                <button type="button" id="noticeExpandBtn" onpointerdown="armSkipNoteBlur()" ontouchstart="armSkipNoteBlur()" onmousedown="armSkipNoteBlur()" onclick="toggleNoticeBoardExpand(event)" class="notice-sub-btn touch-item h-6 px-2.5 rounded-full bg-white/75 text-zinc-900 text-[11px] font-bold flex items-center gap-1 shadow-2xs">
                     <span id="noticeExpandLabel">Expand</span>
                     <span id="noticeExpandIcon" class="text-[10px] leading-none">▾</span>
                 </button>
@@ -689,12 +691,12 @@
 
         <!-- 3. Bento Subjects Grid -->
         <div class="space-y-3">
-            <div class="flex justify-between items-center">
-                <div>
+            <div class="flex justify-between items-center gap-2">
+                <div class="min-w-0">
                     <h2 class="text-base font-extrabold text-zinc-900">Your Subjects</h2>
                     <p class="text-[11px] text-zinc-400">Tap to open · Hold or ⋮ to rename/delete</p>
                 </div>
-                <button type="button" onclick="openAddSubjectModal()" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold flex items-center gap-1 shadow-2xs">
+                <button type="button" onclick="openAddSubjectModal()" class="touch-item h-8 px-3.5 rounded-full bg-zinc-900 text-white text-xs font-bold flex items-center gap-1 shadow-2xs shrink-0 whitespace-nowrap">
                     <span>＋</span> Add Subject
                 </button>
             </div>
@@ -718,7 +720,7 @@
                 <h2 class="text-xl font-extrabold text-zinc-900">Students <span class="text-zinc-400 font-semibold">(<span id="stuCount">0</span>)</span></h2>
                 <p class="text-xs text-zinc-400">Tap a student to view profile</p>
             </div>
-            <button type="button" onclick="openStudentModal()" class="touch-item h-10 px-4 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">
+            <button type="button" onclick="openStudentModal()" class="touch-item h-10 px-4 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs shrink-0 whitespace-nowrap">
                 ＋ New Student
             </button>
         </div>
