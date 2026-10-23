@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JSM APP - Joy's School Of Music</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -404,7 +404,7 @@
             box-shadow: 0 0 0 3px rgba(216, 200, 150, 0.16) !important;
         }
 
-        /* ================= THEME 3: NEON PULSE (WITH HIGH-CONTRAST PILL FIXES) ================= */
+        /* ================= THEME 3: NEON PULSE ================= */
         body[data-theme="neon"] {
             background-color: #0B0B0E !important;
             color: #F4F4F6 !important;
@@ -450,7 +450,6 @@
             background-color: #95F267 !important;
             color: #0B0B0E !important;
         }
-        /* Hero Notice Card in Electric Lime */
         body[data-theme="neon"] #noticeCard {
             background: linear-gradient(135deg, #95F267 0%, #7CE449 100%) !important;
             border-color: transparent !important;
@@ -470,14 +469,12 @@
             background-color: #0B0B0E !important;
             color: #FFFFFF !important;
         }
-        /* High-Contrast Fix for Notice Clear/Expand & Subject Card Badges/Menu Dots */
         body[data-theme="neon"] .notice-sub-btn,
         body[data-theme="neon"] .sub-badge-pill,
         body[data-theme="neon"] .sub-menu-btn {
             background-color: rgba(255, 255, 255, 0.82) !important;
             color: #0B0B0E !important;
         }
-        /* Quick Action Pills */
         body[data-theme="neon"] #qact-student {
             background-color: #95F267 !important;
             color: #0B0B0E !important;
@@ -492,7 +489,6 @@
             border-color: #2B2B36 !important;
             color: #F4F4F6 !important;
         }
-        /* Colorful Bento Subject Cards */
         body[data-theme="neon"] .mod-sub-0 {
             background-color: #8FB8FF !important;
             border-color: transparent !important;
@@ -519,7 +515,6 @@
         body[data-theme="neon"] .mod-sub-3 h3 {
             color: #0B0B0E !important;
         }
-        /* Profile Stat Pills */
         body[data-theme="neon"] .stat-pill-1 {
             background-color: #95F267 !important;
             color: #0B0B0E !important;
@@ -532,7 +527,6 @@
             background-color: #FAEA7F !important;
             color: #0B0B0E !important;
         }
-        /* Dark-Adapted Status Badges in Neon Mode */
         body[data-theme="neon"] .badge-paid {
             background-color: rgba(149, 242, 103, 0.16) !important;
             color: #95F267 !important;
@@ -548,7 +542,6 @@
             color: #FCA5A5 !important;
             border-color: rgba(239, 68, 68, 0.42) !important;
         }
-        /* Bottom Capsule Dock with Glowing Lime Active Bubble */
         body[data-theme="neon"] #bottomCapsuleDock {
             background-color: #181820 !important;
             border: 1px solid #2A2A36 !important;
@@ -560,7 +553,6 @@
         body[data-theme="neon"] .theme-btn-active {
             border-color: #95F267 !important;
         }
-        /* Keypad Backspace Button in Electric Violet */
         body[data-theme="neon"] #pinBackspaceBtn {
             background-color: #8E63F9 !important;
             color: #FFFFFF !important;
@@ -590,7 +582,7 @@
 </div>
 
 <!-- ================= MASTER PIN LOCK SCREEN (2-HOUR SESSION TIMEOUT) ================= -->
-<div id="pinLockScreen" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] z-[100] flex flex-col items-center justify-center p-6 select-none">
+<div id="pinLockScreen" role="dialog" aria-modal="true" aria-label="PIN Lock Screen" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] z-[100] flex flex-col items-center justify-center p-6 select-none">
     <div class="modal-sheet-box w-full max-w-xs text-center space-y-6 animate-view">
         <div class="w-16 h-16 rounded-full bg-white border border-zinc-200 mx-auto flex items-center justify-center overflow-hidden shadow-sm">
             <img id="lockLogoImg" referrerpolicy="no-referrer" class="w-full h-full object-contain" alt="JSM" onerror="handleLockLogoFallback(this)">
@@ -621,7 +613,7 @@
             <button type="button" onclick="pressPinDigit('9')" class="touch-item h-14 rounded-2xl bg-white border border-zinc-200/80 text-lg font-bold text-zinc-900 shadow-2xs">9</button>
             <button type="button" onclick="clearPinDigits()" class="touch-item h-14 rounded-2xl bg-zinc-100 text-xs font-semibold text-zinc-500">Clear</button>
             <button type="button" onclick="pressPinDigit('0')" class="touch-item h-14 rounded-2xl bg-white border border-zinc-200/80 text-lg font-bold text-zinc-900 shadow-2xs">0</button>
-            <button type="button" id="pinBackspaceBtn" onclick="backspacePinDigit()" class="touch-item h-14 rounded-2xl bg-zinc-100 text-base font-semibold text-zinc-700">⌫</button>
+            <button type="button" id="pinBackspaceBtn" aria-label="Backspace" onclick="backspacePinDigit()" class="touch-item h-14 rounded-2xl bg-zinc-100 text-base font-semibold text-zinc-700">⌫</button>
         </div>
 
         <p class="text-[11px] text-zinc-400 pt-2">Auto-locks after 2 hours of inactivity</p>
@@ -630,12 +622,12 @@
 
 <!-- CENTERED EDITORIAL HEADER -->
 <header class="w-full max-w-2xl mx-auto px-5 pt-4 pb-3 flex justify-between items-center sticky top-0 z-30">
-    <div onclick="showMainTab('home')" class="w-11 h-11 rounded-full bg-white border border-zinc-200/80 shadow-2xs flex items-center justify-center overflow-hidden cursor-pointer shrink-0 touch-item">
+    <div onclick="showMainTab('home')" role="button" aria-label="Go to Home" class="w-11 h-11 rounded-full bg-white border border-zinc-200/80 shadow-2xs flex items-center justify-center overflow-hidden cursor-pointer shrink-0 touch-item">
         <img id="headerLogoImg" referrerpolicy="no-referrer" class="w-full h-full object-contain" alt="JSM" onerror="handleLogoFallback(this)">
         <span id="headerLogoFallback" class="text-base hidden">🎼</span>
     </div>
 
-    <div class="text-center cursor-pointer touch-item px-3 py-1 rounded-2xl" onclick="triggerManualSyncAnimation()">
+    <div class="text-center cursor-pointer touch-item px-3 py-1 rounded-2xl" onclick="triggerManualSyncAnimation()" title="Tap to sync">
         <h1 id="dynamicGreeting" class="text-base font-extrabold tracking-tight text-zinc-900 leading-tight">Hello, Joy</h1>
         <div class="flex items-center justify-center gap-1.5 mt-0.5">
             <span id="syncDot" class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse transition-colors duration-300"></span>
@@ -643,7 +635,7 @@
         </div>
     </div>
 
-    <button type="button" onclick="openSideMenu()" class="touch-item w-11 h-11 rounded-full bg-white border border-zinc-200/80 shadow-2xs text-zinc-800 text-sm flex items-center justify-center shrink-0" title="Menu">
+    <button type="button" aria-label="Open Menu" onclick="openSideMenu()" class="touch-item w-11 h-11 rounded-full bg-white border border-zinc-200/80 shadow-2xs text-zinc-800 text-sm flex items-center justify-center shrink-0" title="Menu">
         ☰
     </button>
 </header>
@@ -654,7 +646,7 @@
     <!-- ================= TAB 1: HOME DASHBOARD ================= -->
     <div id="tab-home" class="space-y-6 animate-view">
 
-        <!-- 1. Hero Notice Banner (Same Exterior Size + Thinner Padding for Larger Default Writing Space) -->
+        <!-- 1. Hero Notice Banner -->
         <div id="noticeCard" class="bg-white border border-zinc-200/80 px-3.5 py-3 rounded-[28px] shadow-xs space-y-1.5 relative overflow-hidden transition-all duration-300">
             <div class="flex justify-between items-start gap-2 px-0.5">
                 <div>
@@ -727,7 +719,7 @@
 
         <div class="bg-white border border-zinc-200/80 rounded-full px-4 py-2.5 flex items-center gap-2.5 shadow-2xs">
             <span class="text-zinc-400 text-xs">🔍</span>
-            <input type="text" id="stuSearch" oninput="onSearchStudents()" placeholder="Search student name..." class="bg-transparent w-full text-sm text-zinc-900 placeholder-zinc-400 border-0 p-0 focus:shadow-none">
+            <input type="text" id="stuSearch" oninput="onSearchStudents()" placeholder="Search student name..." aria-label="Search student name" class="bg-transparent w-full text-sm text-zinc-900 placeholder-zinc-400 border-0 p-0 focus:shadow-none">
         </div>
 
         <div id="studentSubjectPills" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5"></div>
@@ -745,7 +737,7 @@
                 <button type="button" onclick="openQuickAttendanceModal()" class="touch-item h-10 px-4 rounded-full bg-zinc-900 text-white text-xs font-bold shadow-2xs">
                     ＋ Mark
                 </button>
-                <label class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center cursor-pointer relative text-xs shadow-2xs">
+                <label aria-label="Filter by date" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 flex items-center justify-center cursor-pointer relative text-xs shadow-2xs">
                     📅
                     <input type="date" id="regAttDate" onchange="onPickAttendanceDate(this.value)" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer">
                 </label>
@@ -797,13 +789,13 @@
     <!-- ================= STUDENT PROFILE SCREEN ================= -->
     <div id="profileScreen" class="hidden space-y-5 animate-view">
         <div class="flex justify-between items-center">
-            <button type="button" onclick="showMainTab('students', 'prev')" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 text-zinc-800 font-bold text-base flex items-center justify-center shadow-2xs">
+            <button type="button" aria-label="Back to Students" onclick="showMainTab('students', 'prev')" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 text-zinc-800 font-bold text-base flex items-center justify-center shadow-2xs">
                 ‹
             </button>
             <span class="text-sm font-extrabold text-zinc-900">Profile</span>
             <div class="flex items-center gap-2">
-                <button type="button" onclick="openEditStudentModal(currentStudentId)" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 text-zinc-700 text-xs flex items-center justify-center shadow-2xs" title="Edit">✎</button>
-                <button type="button" onclick="openStudentActionModal(currentStudentId)" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 text-red-500 text-xs flex items-center justify-center shadow-2xs" title="Trash">🗑️</button>
+                <button type="button" aria-label="Edit Student" onclick="openEditStudentModal(currentStudentId)" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 text-zinc-700 text-xs flex items-center justify-center shadow-2xs" title="Edit">✎</button>
+                <button type="button" aria-label="Student Options" onclick="openStudentActionModal(currentStudentId)" class="touch-item w-10 h-10 rounded-full bg-white border border-zinc-200 text-red-500 text-xs flex items-center justify-center shadow-2xs" title="Trash">🗑️</button>
             </div>
         </div>
 
@@ -905,15 +897,14 @@
     </div>
 
 </main>
-
 <!-- UNDO TOAST BAR -->
-<div id="undoToast" class="fixed bottom-24 left-5 right-5 max-w-md mx-auto bg-[#14141A] text-white px-4 py-3 rounded-2xl shadow-xl hidden justify-between items-center z-50 animate-sheet">
+<div id="undoToast" role="status" aria-live="polite" class="fixed bottom-24 left-5 right-5 max-w-md mx-auto bg-[#14141A] text-white px-4 py-3 rounded-2xl shadow-xl hidden justify-between items-center z-50 animate-sheet">
     <span id="undoText" class="text-xs font-medium truncate pr-3">Moved to Trash.</span>
     <button type="button" onclick="undoLastDelete()" class="touch-item text-xs font-extrabold text-amber-300 shrink-0">Undo</button>
 </div>
 
 <!-- INVERTED CAPSULE FLOATING BOTTOM DOCK -->
-<nav class="fixed bottom-3 left-4 right-4 max-w-md mx-auto z-40">
+<nav aria-label="Primary Navigation" class="fixed bottom-3 left-4 right-4 max-w-md mx-auto z-40">
     <div id="bottomCapsuleDock" class="bg-[#14141A] text-white rounded-full p-1.5 shadow-2xl grid grid-cols-5 items-center text-center">
         <button type="button" onclick="showMainTab('home')" id="bnav-home" class="dock-btn h-12 w-12 mx-auto rounded-full flex flex-col items-center justify-center bg-white text-zinc-900 font-extrabold shadow-md scale-105">
             <span class="text-sm leading-none">⌂</span>
@@ -939,12 +930,24 @@
     </div>
 </nav>
 
+<!-- CUSTOM NON-BLOCKING ALERT & CONFIRMATION MODAL -->
+<div id="appDialogModal" role="dialog" aria-modal="true" aria-labelledby="appDialogTitle" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-[90]" onclick="resolveAppDialog(false)">
+    <div id="appDialogSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-4 text-center animate-sheet" onclick="event.stopPropagation()">
+        <h3 id="appDialogTitle" class="font-extrabold text-base text-zinc-900">Notice</h3>
+        <p id="appDialogMessage" class="text-xs text-zinc-500 leading-relaxed"></p>
+        <div id="appDialogActions" class="grid grid-cols-2 gap-2 pt-1">
+            <button type="button" id="appDialogCancelBtn" onclick="resolveAppDialog(false)" class="touch-item h-11 rounded-2xl bg-zinc-100 text-zinc-700 font-bold text-xs">Cancel</button>
+            <button type="button" id="appDialogConfirmBtn" onclick="resolveAppDialog(true)" class="touch-item h-11 rounded-2xl bg-zinc-900 text-white font-bold text-xs">Confirm</button>
+        </div>
+    </div>
+</div>
+
 <!-- MODAL 0: ADD / RENAME SUBJECT -->
-<div id="addSubjectModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeAddSubjectModal()">
+<div id="addSubjectModal" role="dialog" aria-modal="true" aria-labelledby="addSubjectModalTitle" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeAddSubjectModal()">
     <div id="addSubjectSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 id="addSubjectModalTitle" class="font-extrabold text-base text-zinc-900">Add New Subject</h3>
-            <button type="button" onclick="closeAddSubjectModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
+            <button type="button" aria-label="Close" onclick="closeAddSubjectModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
         </div>
         <form onsubmit="saveNewSubject(event)" class="space-y-3.5">
             <input type="hidden" id="editSubjectIndexInput" value="">
@@ -961,11 +964,11 @@
 </div>
 
 <!-- MODAL 1: ADD / EDIT STUDENT -->
-<div id="studentModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentModal()">
+<div id="studentModal" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentModal()">
     <div id="studentModalSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 id="studentModalTitle" class="font-extrabold text-base text-zinc-900">New Student</h3>
-            <button type="button" onclick="closeStudentModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
+            <button type="button" aria-label="Close" onclick="closeStudentModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
         </div>
         <form id="addStudentForm" onsubmit="saveStudentForm(event)" class="space-y-3">
             <input type="hidden" id="editStuId">
@@ -990,11 +993,11 @@
 </div>
 
 <!-- MODAL 1B: QUICK ATTENDANCE -->
-<div id="quickAttModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeQuickAttendanceModal()">
+<div id="quickAttModal" role="dialog" aria-modal="true" aria-label="Mark Attendance" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeQuickAttendanceModal()">
     <div id="quickAttSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-4 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 class="font-extrabold text-base text-zinc-900">Mark Attendance</h3>
-            <button type="button" onclick="closeQuickAttendanceModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
+            <button type="button" aria-label="Close" onclick="closeQuickAttendanceModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
         </div>
         <form onsubmit="saveQuickAttendance(event)" class="space-y-3">
             <div>
@@ -1025,7 +1028,7 @@
 </div>
 
 <!-- MODAL 2: STUDENT OPTIONS -->
-<div id="studentActionModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentActionModal()">
+<div id="studentActionModal" role="dialog" aria-modal="true" aria-labelledby="actionStuName" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeStudentActionModal()">
     <div id="studentActionSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-2.5 text-center animate-sheet" onclick="event.stopPropagation()">
         <h3 id="actionStuName" class="font-extrabold text-base text-zinc-900"></h3>
         <p id="actionStuSub" class="text-xs text-zinc-400 pb-2"></p>
@@ -1035,8 +1038,8 @@
     </div>
 </div>
 
-<!-- MODAL 2B: SUBJECT OPTIONS (WITH RENAME & TRASH) -->
-<div id="subjectActionModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeSubjectActionModal()">
+<!-- MODAL 2B: SUBJECT OPTIONS -->
+<div id="subjectActionModal" role="dialog" aria-modal="true" aria-labelledby="actionSubTitle" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeSubjectActionModal()">
     <div id="subjectActionSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-sm w-full p-6 shadow-2xl space-y-2.5 text-center animate-sheet" onclick="event.stopPropagation()">
         <div id="actionSubIcon" class="text-3xl">🎵</div>
         <h3 id="actionSubTitle" class="font-extrabold text-base text-zinc-900"></h3>
@@ -1048,11 +1051,11 @@
 </div>
 
 <!-- MODAL 3: ALL-IN-ONE FEE FORM -->
-<div id="feeModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeFeeModal()">
+<div id="feeModal" role="dialog" aria-modal="true" aria-labelledby="feeModalTitle" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeFeeModal()">
     <div id="feeModalSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-lg w-full p-6 shadow-2xl space-y-3.5 max-h-[90vh] overflow-y-auto animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 id="feeModalTitle" class="font-extrabold text-base text-zinc-900">Record Fee</h3>
-            <button type="button" onclick="closeFeeModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
+            <button type="button" aria-label="Close" onclick="closeFeeModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-zinc-600 text-xs font-bold">✕</button>
         </div>
 
         <form id="addFeeForm" onsubmit="event.preventDefault();" class="space-y-3">
@@ -1131,11 +1134,11 @@
 </div>
 
 <!-- MODAL 4: EDIT ATTENDANCE -->
-<div id="editAttModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditAttModal()">
+<div id="editAttModal" role="dialog" aria-modal="true" aria-label="Edit Attendance" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditAttModal()">
     <div id="editAttSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-3 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 class="font-extrabold text-base text-zinc-900">Edit Attendance</h3>
-            <button type="button" onclick="closeEditAttModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-xs font-bold">✕</button>
+            <button type="button" aria-label="Close" onclick="closeEditAttModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-xs font-bold">✕</button>
         </div>
         <form onsubmit="saveEditedAttendance(event)" class="space-y-3">
             <input type="hidden" id="editAttStuId">
@@ -1157,11 +1160,11 @@
 </div>
 
 <!-- MODAL 5: EDIT DAILY CLASS -->
-<div id="editClassModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditClassModal()">
+<div id="editClassModal" role="dialog" aria-modal="true" aria-label="Edit Class Entry" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden items-end sm:items-center justify-center sm:p-4 z-50" onclick="closeEditClassModal()">
     <div id="editClassSheet" class="modal-sheet-box bg-white rounded-t-[28px] sm:rounded-[28px] max-w-md w-full p-6 shadow-2xl space-y-3 animate-sheet" onclick="event.stopPropagation()">
         <div class="flex justify-between items-center">
             <h3 class="font-extrabold text-base text-zinc-900">Edit Class Entry</h3>
-            <button type="button" onclick="closeEditClassModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-xs font-bold">✕</button>
+            <button type="button" aria-label="Close" onclick="closeEditClassModal()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 text-xs font-bold">✕</button>
         </div>
         <form onsubmit="saveEditedClass(event)" class="space-y-2.5">
             <input type="hidden" id="editClsStuId">
@@ -1178,8 +1181,8 @@
     </div>
 </div>
 
-<!-- 3-BAR SLIDE-OUT SIDE MENU (WITH 3 STREAMLINED THEMES) -->
-<div id="sideMenuModal" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden justify-end z-50 animate-backdrop-in" onclick="closeSideMenu()">
+<!-- 3-BAR SLIDE-OUT SIDE MENU -->
+<div id="sideMenuModal" role="dialog" aria-modal="true" aria-label="Menu and Themes" class="modal-backdrop fixed inset-0 bg-zinc-900/40 backdrop-blur-xs hidden justify-end z-50 animate-backdrop-in" onclick="closeSideMenu()">
     <div id="sideMenuPanel" class="modal-sheet-box bg-white w-72 max-w-[82vw] h-full p-6 shadow-2xl flex flex-col justify-between overflow-y-auto animate-drawer-in" onclick="event.stopPropagation()">
         <div class="space-y-6">
             <div class="flex justify-between items-center border-b border-zinc-100 pb-4">
@@ -1187,10 +1190,10 @@
                     <span class="text-[10px] font-bold uppercase tracking-widest text-zinc-400">JSM APP</span>
                     <h3 class="font-extrabold text-base text-zinc-900">Menu & Themes</h3>
                 </div>
-                <button type="button" onclick="closeSideMenu()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold">✕</button>
+                <button type="button" aria-label="Close Menu" onclick="closeSideMenu()" class="touch-item w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold">✕</button>
             </div>
 
-            <!-- APP THEME PALETTE SELECTOR (3 THEMES) -->
+            <!-- APP THEME PALETTE SELECTOR -->
             <div class="space-y-2.5">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-zinc-400">App Theme</span>
                 <div class="space-y-2">
@@ -1268,8 +1271,8 @@
     </div>
 </div>
 
-<!-- FULL-SCREEN NATIVE VIEW-ONLY DATABASE VIEWER (WITH 2D VERTICAL + HORIZONTAL SCROLLING) -->
-<div id="liveSheetModal" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] hidden flex-col z-50 animate-view">
+<!-- FULL-SCREEN NATIVE VIEW-ONLY DATABASE VIEWER -->
+<div id="liveSheetModal" role="dialog" aria-modal="true" aria-label="Live Sheet Database" class="modal-backdrop fixed inset-0 bg-[#F6F5FA] hidden flex-col z-50 animate-view">
     <div class="px-4 py-3 bg-white border-b border-zinc-200 flex justify-between items-center shadow-2xs shrink-0">
         <div class="flex items-center gap-2.5">
             <button type="button" onclick="closeLiveSheetViewer()" class="touch-item h-9 px-3.5 rounded-full bg-zinc-100 text-zinc-800 font-bold text-xs">← Back</button>
@@ -1308,7 +1311,8 @@
 
     // 2-Hour Session Timeout (in milliseconds)
     var SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000;
-    var PIN_CIPHER_SALT = "JSM_EST2022_KEY";
+    var OFFLINE_CACHE_KEY = "jsmOfflineDataCacheV2";
+    var OFFLINE_DIRTY_KEY = "jsmHasPendingCloudSync";
 
     var DRIVE_LOGO_ID = "1k0m6PTwF8_W-dVDrtp1Ru_71d_uO34Cl";
     var DRIVE_LOGO_URL_PRIMARY = "https://lh3.googleusercontent.com/d/" + DRIVE_LOGO_ID;
@@ -1320,13 +1324,15 @@
     var MAIN_TABS_ORDER = ['home', 'students', 'attendance', 'fees', 'trash'];
     var PROFILE_SECS_ORDER = ['att', 'cls', 'fee', 'not'];
     var THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    var REGISTER_PAGE_SIZE = 100;
 
     var appData = {
         theme: 'modern',
         subjects: DEFAULT_SUBJECTS.slice(),
         students: [],
         noticeBoard: '',
-        trash: []
+        trash: [],
+        serverTimestamp: 0
     };
 
     var sessionPin = '';
@@ -1342,9 +1348,12 @@
     var selectedSubjectFilter = '';
     var selectedAttDate = '';
     var selectedAttStatus = '';
+    var attVisibleLimit = REGISTER_PAGE_SIZE;
+    var feeVisibleLimit = REGISTER_PAGE_SIZE;
     var undoTimer = null;
     var saveDebounceTimer = null;
     var hasPendingSave = false;
+    var allowNextEmptyReset = false;
     var searchDebounceTimer = null;
     var pressTimer = null;
     var longPressTriggered = false;
@@ -1355,6 +1364,7 @@
     var isNoticeExpanded = false;
     var isFormSubmittingLock = false;
     var isHandlingPopState = false;
+    var pendingDialogCallback = null;
 
     // 60fps Pull-to-Refresh & Real-Time Interactive Swipe State
     var gestureStartX = 0;
@@ -1387,6 +1397,17 @@
             .replace(/'/g, '&#39;');
     }
 
+    // Safe JS string literal encoder for inline onclick handlers
+    function escJsArg(val) {
+        if (val === null || val === undefined) return "''";
+        return "'" + String(val)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'")
+            .replace(/"/g, '&quot;')
+            .replace(/\r/g, '')
+            .replace(/\n/g, '\\n') + "'";
+    }
+
     function formatMonthYear(ym) {
         if (!ym || typeof ym !== 'string' || ym.indexOf('-') === -1) return ym || '';
         var parts = ym.split('-');
@@ -1399,18 +1420,20 @@
         return ym;
     }
 
+    // Checks both active records AND Trash to guarantee zero ID collisions
     function generateUniqueId(prefix, existingList) {
         var candidate = '';
         var tries = 0;
+        var trashList = (appData && Array.isArray(appData.trash)) ? appData.trash : [];
         do {
             var nowPart = Date.now().toString().slice(-5);
             var randPart = Math.floor(10 + Math.random() * 90);
             candidate = prefix + nowPart + randPart;
             tries++;
         } while (
-            tries < 20 &&
-            Array.isArray(existingList) &&
-            existingList.some(function(item) { return item && item.id === candidate; })
+            tries < 30 &&
+            ((Array.isArray(existingList) && existingList.some(function(item) { return item && item.id === candidate; })) ||
+             trashList.some(function(t) { return t && t.data && t.data.id === candidate; }))
         );
         return candidate;
     }
@@ -1429,41 +1452,104 @@
         }
     }
 
-    // Scrambled PIN Storage Helpers
-    function encodePinForStorage(pinStr) {
-        try {
-            var out = [];
-            for (var i = 0; i < pinStr.length; i++) {
-                out.push(pinStr.charCodeAt(i) ^ PIN_CIPHER_SALT.charCodeAt(i % PIN_CIPHER_SALT.length));
-            }
-            return btoa(out.join('.'));
-        } catch (e) { return ''; }
+    // Custom Non-Blocking Bottom-Sheet Alert & Confirm Helpers
+    function showAppAlert(message, title) {
+        var modal = document.getElementById('appDialogModal');
+        var sheet = document.getElementById('appDialogSheet');
+        document.getElementById('appDialogTitle').textContent = title || 'Notice';
+        document.getElementById('appDialogMessage').textContent = message || '';
+        var cancelBtn = document.getElementById('appDialogCancelBtn');
+        var confirmBtn = document.getElementById('appDialogConfirmBtn');
+        var actionsBox = document.getElementById('appDialogActions');
+        cancelBtn.classList.add('hidden');
+        actionsBox.className = 'grid grid-cols-1 gap-2 pt-1';
+        confirmBtn.textContent = 'OK';
+        confirmBtn.className = 'touch-item h-11 rounded-2xl bg-zinc-900 text-white font-bold text-xs';
+        pendingDialogCallback = null;
+        modal.classList.remove('hidden', 'animate-backdrop-out');
+        modal.classList.add('flex', 'animate-backdrop-in');
+        sheet.classList.remove('animate-sheet-out');
+        sheet.classList.add('animate-sheet');
+        syncBodyScrollLock();
     }
 
-    function decodePinFromStorage(encoded) {
+    function showAppConfirm(message, onConfirm, confirmLabel, isDestructive) {
+        var modal = document.getElementById('appDialogModal');
+        var sheet = document.getElementById('appDialogSheet');
+        document.getElementById('appDialogTitle').textContent = 'Please Confirm';
+        document.getElementById('appDialogMessage').textContent = message || '';
+        var cancelBtn = document.getElementById('appDialogCancelBtn');
+        var confirmBtn = document.getElementById('appDialogConfirmBtn');
+        var actionsBox = document.getElementById('appDialogActions');
+        cancelBtn.classList.remove('hidden');
+        actionsBox.className = 'grid grid-cols-2 gap-2 pt-1';
+        confirmBtn.textContent = confirmLabel || 'Confirm';
+        confirmBtn.className = isDestructive
+            ? 'touch-item h-11 rounded-2xl bg-red-600 text-white font-bold text-xs'
+            : 'touch-item h-11 rounded-2xl bg-zinc-900 text-white font-bold text-xs';
+        pendingDialogCallback = onConfirm;
+        modal.classList.remove('hidden', 'animate-backdrop-out');
+        modal.classList.add('flex', 'animate-backdrop-in');
+        sheet.classList.remove('animate-sheet-out');
+        sheet.classList.add('animate-sheet');
+        syncBodyScrollLock();
+    }
+
+    function resolveAppDialog(confirmed) {
+        var modal = document.getElementById('appDialogModal');
+        var sheet = document.getElementById('appDialogSheet');
+        if (!modal || modal.classList.contains('hidden')) return;
+        var cb = pendingDialogCallback;
+        pendingDialogCallback = null;
+        modal.classList.remove('animate-backdrop-in');
+        modal.classList.add('animate-backdrop-out');
+        if (sheet) {
+            sheet.classList.remove('animate-sheet');
+            sheet.classList.add('animate-sheet-out');
+        }
+        setTimeout(function() {
+            modal.classList.replace('flex', 'hidden');
+            modal.classList.remove('animate-backdrop-out');
+            if (sheet) sheet.classList.remove('animate-sheet-out');
+            syncBodyScrollLock();
+            if (confirmed && typeof cb === 'function') cb();
+        }, 200);
+    }
+
+    // Session PIN Storage (kept in sessionStorage so closing browser clears plaintext PIN)
+    function saveSessionPinToken(pinStr) {
         try {
-            if (!encoded) return '';
-            var parts = atob(encoded).split('.');
-            var out = '';
-            for (var i = 0; i < parts.length; i++) {
-                out += String.fromCharCode(Number(parts[i]) ^ PIN_CIPHER_SALT.charCodeAt(i % PIN_CIPHER_SALT.length));
-            }
-            return /^\d{4}$/.test(out) ? out : '';
-        } catch (e) { return ''; }
+            sessionStorage.setItem('jsmActivePin', pinStr);
+            localStorage.setItem('jsmLastActiveMs', String(Date.now()));
+        } catch (e) {}
     }
 
     function getStoredSessionPin() {
         try {
-            var enc = localStorage.getItem('jsmSessionToken') || '';
-            if (enc) return decodePinFromStorage(enc);
-            var legacy = localStorage.getItem('jsmSessionPin') || '';
-            if (/^\d{4}$/.test(legacy)) {
-                localStorage.setItem('jsmSessionToken', encodePinForStorage(legacy));
-                localStorage.removeItem('jsmSessionPin');
-                return legacy;
+            var pin = sessionStorage.getItem('jsmActivePin') || '';
+            return /^\d{4}$/.test(pin) ? pin : '';
+        } catch (e) { return ''; }
+    }
+
+    // Offline Cache Persistence Helpers
+    function persistOfflineCache(markDirty) {
+        try {
+            if (sessionPin) {
+                localStorage.setItem(OFFLINE_CACHE_KEY, JSON.stringify(appData));
+            }
+            if (markDirty !== undefined) {
+                localStorage.setItem(OFFLINE_DIRTY_KEY, markDirty ? '1' : '0');
             }
         } catch (e) {}
-        return '';
+    }
+
+    function loadOfflineCache() {
+        try {
+            var raw = localStorage.getItem(OFFLINE_CACHE_KEY);
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            return (parsed && Array.isArray(parsed.students)) ? parsed : null;
+        } catch (e) { return null; }
     }
 
     function armSkipNoteBlur() {
@@ -1502,16 +1588,17 @@
         } catch (e) {}
         initDriveLogo();
         updateDynamicGreeting();
-        populateSubjectDropdowns();
-        renderCategories();
-        renderRecentActivity();
-        renderStudents();
-        updateTrashCount();
         initTouchGestures();
         initModalScrollGuard();
         initHistoryBackHandler();
         checkSessionOnStartup();
         setInterval(updateDynamicGreeting, 60000);
+        window.addEventListener('online', function() {
+            if (sessionPin && (hasPendingSave || localStorage.getItem(OFFLINE_DIRTY_KEY) === '1')) {
+                hasPendingSave = true;
+                flushPendingSaveNow(false);
+            }
+        });
     };
 
     // --- SAFE BACKGROUND SCROLL LOCK & 2D TABLE SCROLL SUPPORT ---
@@ -1522,11 +1609,9 @@
     }
 
     function initModalScrollGuard() {
-        var modalTouchStartX = 0;
         var modalTouchStartY = 0;
         document.addEventListener('touchstart', function(e) {
             if (e.touches && e.touches.length === 1) {
-                modalTouchStartX = e.touches[0].clientX;
                 modalTouchStartY = e.touches[0].clientY;
             }
         }, { passive: true });
@@ -1535,7 +1620,6 @@
             if (!isAnyOverlayModalOpen()) return;
             var target = e.target;
 
-            // Allow 2D (vertical + horizontal) scrolling inside the Live Sheet Viewer table & horizontal tab bars
             var box2d = target.closest('.modal-scroll-2d, .no-scrollbar');
             if (box2d) {
                 var canScrollY = box2d.scrollHeight > box2d.clientHeight + 1;
@@ -1566,12 +1650,39 @@
         }, { passive: false });
     }
 
-    // --- PHONE HARDWARE BACK BUTTON HANDLER ---
+    // --- PHONE HARDWARE BACK BUTTON & ESCAPE KEY HANDLER ---
     function pushAppHistoryState() {
         if (isHandlingPopState) return;
         try {
             history.pushState({ jsmNav: Date.now() }, '');
         } catch (e) {}
+    }
+
+    function closeTopmostOverlay() {
+        if (!document.getElementById('appDialogModal').classList.contains('hidden')) {
+            resolveAppDialog(false);
+            return true;
+        }
+        var closableModals = [
+            { id: 'editClassModal', close: closeEditClassModal },
+            { id: 'editAttModal', close: closeEditAttModal },
+            { id: 'feeModal', close: closeFeeModal },
+            { id: 'subjectActionModal', close: closeSubjectActionModal },
+            { id: 'studentActionModal', close: closeStudentActionModal },
+            { id: 'quickAttModal', close: closeQuickAttendanceModal },
+            { id: 'studentModal', close: closeStudentModal },
+            { id: 'addSubjectModal', close: closeAddSubjectModal },
+            { id: 'liveSheetModal', close: closeLiveSheetViewer },
+            { id: 'sideMenuModal', close: closeSideMenu }
+        ];
+        for (var i = 0; i < closableModals.length; i++) {
+            var m = document.getElementById(closableModals[i].id);
+            if (m && !m.classList.contains('hidden')) {
+                closableModals[i].close();
+                return true;
+            }
+        }
+        return false;
     }
 
     function initHistoryBackHandler() {
@@ -1585,25 +1696,7 @@
                     pushAppHistoryState();
                     return;
                 }
-                var closableModals = [
-                    { id: 'editClassModal', close: closeEditClassModal },
-                    { id: 'editAttModal', close: closeEditAttModal },
-                    { id: 'feeModal', close: closeFeeModal },
-                    { id: 'subjectActionModal', close: closeSubjectActionModal },
-                    { id: 'studentActionModal', close: closeStudentActionModal },
-                    { id: 'quickAttModal', close: closeQuickAttendanceModal },
-                    { id: 'studentModal', close: closeStudentModal },
-                    { id: 'addSubjectModal', close: closeAddSubjectModal },
-                    { id: 'liveSheetModal', close: closeLiveSheetViewer },
-                    { id: 'sideMenuModal', close: closeSideMenu }
-                ];
-                for (var i = 0; i < closableModals.length; i++) {
-                    var m = document.getElementById(closableModals[i].id);
-                    if (m && !m.classList.contains('hidden')) {
-                        closableModals[i].close();
-                        return;
-                    }
-                }
+                if (closeTopmostOverlay()) return;
                 if (currentStudentId && !document.getElementById('profileScreen').classList.contains('hidden')) {
                     showMainTab('students', 'prev');
                     return;
@@ -1669,7 +1762,7 @@
     }
 
     function closeAllTransientModals() {
-        var ids = ['addSubjectModal', 'studentModal', 'quickAttModal', 'studentActionModal', 'subjectActionModal', 'feeModal', 'editAttModal', 'editClassModal', 'sideMenuModal'];
+        var ids = ['appDialogModal', 'addSubjectModal', 'studentModal', 'quickAttModal', 'studentActionModal', 'subjectActionModal', 'feeModal', 'editAttModal', 'editClassModal', 'sideMenuModal'];
         ids.forEach(function(id) {
             var el = document.getElementById(id);
             if (el && !el.classList.contains('hidden')) {
@@ -1683,7 +1776,7 @@
     // --- GLOBAL 60FPS PULL-TO-REFRESH & REAL-TIME FINGER-FOLLOWING SWIPE ENGINE ---
     function isAnyOverlayModalOpen() {
         var modalIds = [
-            'pinLockScreen', 'addSubjectModal', 'studentModal', 'quickAttModal',
+            'pinLockScreen', 'appDialogModal', 'addSubjectModal', 'studentModal', 'quickAttModal',
             'studentActionModal', 'subjectActionModal', 'feeModal', 'editAttModal',
             'editClassModal', 'sideMenuModal', 'liveSheetModal'
         ];
@@ -1780,7 +1873,6 @@
                 cancelSubLongPress();
             }
 
-            // 1. Check for Real-Time Horizontal Finger-Following Swipe
             if (!isPtrDragging && isSwipeEligible) {
                 if (!isHorizontalDragging && Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.35) {
                     isHorizontalDragging = true;
@@ -1811,7 +1903,6 @@
                 }
             }
 
-            // 2. Check for Vertical Pull-to-Refresh
             if (!isPtrEligible) return;
 
             if (!isPtrDragging && (Math.abs(dx) > Math.abs(dy) || dy < 0)) {
@@ -1975,8 +2066,17 @@
         }
     });
 
-    document.addEventListener('keydown', function() {
-        if (!document.getElementById('pinLockScreen').classList.contains('hidden')) return;
+    document.addEventListener('keydown', function(e) {
+        var lockOpen = !document.getElementById('pinLockScreen').classList.contains('hidden');
+        if (lockOpen) {
+            if (e.key >= '0' && e.key <= '9') pressPinDigit(e.key);
+            else if (e.key === 'Backspace') backspacePinDigit();
+            else if (e.key === 'Escape') clearPinDigits();
+            return;
+        }
+        if (e.key === 'Escape') {
+            closeTopmostOverlay();
+        }
         recordUserActivityThrottled();
     });
 
@@ -2018,6 +2118,15 @@
             sessionPin = getStoredSessionPin();
             if (sessionPin) {
                 recordUserActivity();
+                var cached = loadOfflineCache();
+                if (cached) {
+                    appData = cached;
+                    normalizeAllStudentsData();
+                    refreshActiveViews();
+                }
+                if (localStorage.getItem(OFFLINE_DIRTY_KEY) === '1') {
+                    hasPendingSave = true;
+                }
                 document.getElementById('pinLockScreen').classList.add('hidden');
                 syncBodyScrollLock();
                 syncFromSheet();
@@ -2027,6 +2136,26 @@
         lockAppNow();
     }
 
+    // Wipes DOM and in-memory data when locked so DevTools cannot inspect student records
+    function clearRenderedWorkspaceForLock() {
+        appData = {
+            theme: appData.theme || 'modern',
+            subjects: DEFAULT_SUBJECTS.slice(),
+            students: [],
+            noticeBoard: '',
+            trash: [],
+            serverTimestamp: 0
+        };
+        currentStudentId = null;
+        var idsToClear = ['categoryGrid', 'recentActivityList', 'studentGrid', 'masterAttList', 'masterFeeList', 'trashList', 'stuAttList', 'stuClassList', 'stuFeeList', 'nativeSheetBody'];
+        idsToClear.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.innerHTML = '';
+        });
+        var nb = document.getElementById('noticeBoardInput');
+        if (nb) nb.value = '';
+    }
+
     function lockAppNow() {
         flushPendingSaveNow(true);
         dismissActiveKeyboard();
@@ -2034,13 +2163,18 @@
         enteredPinBuffer = '';
         isVerifyingPin = false;
         try {
+            sessionStorage.removeItem('jsmActivePin');
             localStorage.removeItem('jsmSessionToken');
             localStorage.removeItem('jsmSessionPin');
             localStorage.removeItem('jsmLastActiveMs');
+            if (!hasPendingSave) {
+                localStorage.removeItem(OFFLINE_CACHE_KEY);
+            }
         } catch (e) {}
         closeAllTransientModals();
         closeLiveSheetViewer();
         hidePullToRefresh();
+        clearRenderedWorkspaceForLock();
         updatePinDotsUI();
         var st = document.getElementById('pinStatusText');
         st.textContent = 'Enter your 4-digit Master PIN';
@@ -2092,9 +2226,41 @@
         });
     }
 
+    // Secure POST-based read so the PIN is never exposed in URLs
+    function fetchCloudStatePost(pinToUse) {
+        return fetch(SHEET_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'read', pin: pinToUse }),
+            redirect: 'follow'
+        }).then(function(res) { return res.json(); });
+    }
+
+    function applyRemoteState(remote) {
+        if (!remote || !Array.isArray(remote.students)) return;
+        appData = {
+            theme: remote.theme || appData.theme || 'modern',
+            subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
+            students: remote.students || [],
+            noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
+            trash: remote.trash || [],
+            serverTimestamp: Number(remote.serverTimestamp || 0)
+        };
+        applyThemeUI(appData.theme);
+        try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
+        purgeExpiredTrash();
+        normalizeAllStudentsData();
+        persistOfflineCache(false);
+        var nbEl = document.getElementById('noticeBoardInput');
+        if (nbEl && document.activeElement !== nbEl) {
+            nbEl.value = appData.noticeBoard || '';
+        }
+        refreshActiveViews();
+    }
+
     function verifyPinWithServer(candidatePin) {
         if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) {
-            alert('Please paste your SHEET_API_URL inside index.html first.');
+            showAppAlert('Please paste your SHEET_API_URL inside index.html first.');
             clearPinDigits();
             return;
         }
@@ -2103,17 +2269,15 @@
         st.textContent = 'Verifying PIN...';
         st.className = 'text-xs text-amber-600 font-semibold mt-1';
 
-        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(candidatePin) + '&t=' + Date.now(), {
-            method: 'GET',
-            redirect: 'follow'
-        })
-        .then(function(res) { return res.json(); })
+        fetchCloudStatePost(candidatePin)
         .then(function(remote) {
             isVerifyingPin = false;
             if (remote && remote.authError) {
                 enteredPinBuffer = '';
                 updatePinDotsUI();
-                st.textContent = 'Incorrect PIN. Please try again.';
+                st.textContent = remote.lockedOut
+                    ? (remote.message || 'Too many attempts. Locked for 15 minutes.')
+                    : 'Incorrect PIN. Please try again.';
                 st.className = 'text-xs text-red-600 font-bold mt-1';
                 var dotsBox = document.getElementById('pinDotsContainer');
                 if (dotsBox) {
@@ -2131,31 +2295,20 @@
                 return;
             }
             sessionPin = candidatePin;
-            try {
-                localStorage.setItem('jsmSessionToken', encodePinForStorage(sessionPin));
-                localStorage.removeItem('jsmSessionPin');
-                localStorage.setItem('jsmLastActiveMs', String(Date.now()));
-            } catch (e) {}
+            saveSessionPinToken(sessionPin);
 
-            if (remote && Array.isArray(remote.students)) {
-                appData = {
-                    theme: remote.theme || appData.theme || 'modern',
-                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
-                    students: remote.students || [],
-                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
-                    trash: remote.trash || []
-                };
-                applyThemeUI(appData.theme);
-                try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
+            var hadUnsyncedOfflineChanges = localStorage.getItem(OFFLINE_DIRTY_KEY) === '1';
+            var cachedOffline = loadOfflineCache();
+            if (hadUnsyncedOfflineChanges && cachedOffline) {
+                appData = cachedOffline;
+                hasPendingSave = true;
+                normalizeAllStudentsData();
+                refreshActiveViews();
+                flushPendingSaveNow(false);
+            } else {
+                applyRemoteState(remote);
+                setBadge('Synced', 'bg-emerald-500');
             }
-            purgeExpiredTrash();
-            normalizeAllStudentsData();
-            var nbEl = document.getElementById('noticeBoardInput');
-            if (nbEl && document.activeElement !== nbEl) {
-                nbEl.value = appData.noticeBoard || '';
-            }
-            refreshActiveViews();
-            setBadge('Synced', 'bg-emerald-500');
 
             var lockEl = document.getElementById('pinLockScreen');
             lockEl.classList.remove('animate-backdrop-in');
@@ -2175,7 +2328,7 @@
         });
     }
 
-    // --- APP THEME SWITCHER (3 THEMES: PASTEL BENTO / MIDNIGHT SLATE / NEON PULSE) ---
+    // --- APP THEME SWITCHER ---
     function applyThemeUI(themeName) {
         var valid = ['modern', 'dark', 'neon'];
         var chosen = valid.indexOf(themeName) !== -1 ? themeName : 'modern';
@@ -2270,29 +2423,14 @@
         if (st) st.textContent = '🔄 Fetching live data from Google Sheets...';
         if (icon) icon.classList.add('animate-spin');
 
-        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(sessionPin) + '&t=' + Date.now(), {
-            method: 'GET',
-            redirect: 'follow'
-        })
-        .then(function(res) { return res.json(); })
+        fetchCloudStatePost(sessionPin)
         .then(function(remote) {
             if (remote && remote.authError) return lockAppNow();
             if (remote && remote.status === 'error') {
                 if (st) st.textContent = '⚠️ Sheet busy — Showing cached data';
                 return;
             }
-            if (remote && Array.isArray(remote.students)) {
-                appData = {
-                    theme: remote.theme || appData.theme || 'modern',
-                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
-                    students: remote.students || [],
-                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
-                    trash: remote.trash || []
-                };
-            }
-            purgeExpiredTrash();
-            normalizeAllStudentsData();
-            refreshActiveViews();
+            applyRemoteState(remote);
             renderNativeSheetTable(currentNativeSheetTab);
             if (st) st.textContent = '🔒 View-Only · Verified Live from Google Sheets';
         })
@@ -2348,27 +2486,27 @@
                 ]);
             });
         } else if (tabName === 'Daily_Classes') {
-            headers = ['#', 'Date', 'Student Name', 'Technique', 'Lesson', 'Repertoire'];
+            headers = ['#', 'Date', 'Student ID', 'Student Name', 'Technique', 'Lesson', 'Repertoire'];
             var cIdx = 1;
             (appData.students || []).forEach(function(s) {
                 (s.classes || []).forEach(function(c) {
-                    rows.push([cIdx++, c.date, s.name, c.technique || '-', c.lesson || '-', c.repertoire || '-']);
+                    rows.push([cIdx++, c.date, s.id, s.name, c.technique || '-', c.lesson || '-', c.repertoire || '-']);
                 });
             });
         } else if (tabName === 'Attendance_Register') {
-            headers = ['#', 'Date', 'Student Name', 'Subject', 'Status', 'Remarks'];
+            headers = ['#', 'Date', 'Student ID', 'Student Name', 'Subject', 'Status', 'Remarks'];
             var aIdx = 1;
             (appData.students || []).forEach(function(s) {
                 (s.attendance || []).forEach(function(a) {
-                    rows.push([aIdx++, a.date, s.name, s.subject, a.status, a.remarks || '-']);
+                    rows.push([aIdx++, a.date, s.id, s.name, s.subject, a.status, a.remarks || '-']);
                 });
             });
         } else if (tabName === 'Fee_Register') {
-            headers = ['#', 'Receipt No', 'Date', 'Student Name', 'Fee Type', 'Month', 'Mode', 'Status', 'Paid (₹)', 'Due (₹)', 'Remarks'];
+            headers = ['#', 'Receipt No', 'Date', 'Student ID', 'Student Name', 'Subject', 'Fee Type', 'Month', 'Mode', 'Status', 'Paid (₹)', 'Due (₹)', 'Remarks'];
             var fIdx = 1;
             (appData.students || []).forEach(function(s) {
                 (s.fees || []).forEach(function(f) {
-                    rows.push([fIdx++, f.id, f.date, s.name, f.type, f.month || '-', f.mode, f.status || 'Paid', '₹' + f.amount, '₹' + (f.dueAmount || '0'), f.remarks || '-']);
+                    rows.push([fIdx++, f.id, f.date, s.id, s.name, s.subject, f.type, f.month || '-', f.mode, f.status || 'Paid', '₹' + f.amount, '₹' + (f.dueAmount || '0'), f.remarks || '-']);
                 });
             });
         } else if (tabName === 'Notice_Board') {
@@ -2471,7 +2609,7 @@
         return '🎵';
     }
 
-    // --- CLOUD SYNC & PENDING SAVE PROTECTION ---
+    // --- CLOUD SYNC, OFFLINE CACHE & CONFLICT PROTECTION ---
     function setBadge(text, dotColor) {
         var dot = document.getElementById('syncDot');
         if (dot) dot.className = 'w-1.5 h-1.5 rounded-full transition-colors duration-300 ' + dotColor;
@@ -2499,33 +2637,53 @@
         }
         clearTimeout(saveDebounceTimer);
         hasPendingSave = false;
+        persistOfflineCache(true);
+
         var payloadToSave = {
             pin: sessionPin,
             theme: appData.theme,
             subjects: appData.subjects,
             students: appData.students,
             noticeBoard: appData.noticeBoard,
-            trash: appData.trash
+            trash: appData.trash,
+            baseServerTimestamp: appData.serverTimestamp || 0,
+            allowEmptyReset: allowNextEmptyReset
         };
+        allowNextEmptyReset = false;
+
+        var bodyStr = JSON.stringify(payloadToSave);
+        // Avoid browser 64KB keepalive failure on large payloads; Offline Cache guarantees recovery on next open
+        var safeKeepAlive = !!useKeepAlive && bodyStr.length < 60000;
+
         fetch(SHEET_API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify(payloadToSave),
-            keepalive: !!useKeepAlive,
+            body: bodyStr,
+            keepalive: safeKeepAlive,
             redirect: 'follow'
         })
         .then(function(res) { return res.json(); })
         .then(function(resp) {
-            if (resp && resp.authError) lockAppNow();
-            else if (resp && resp.status === 'ok') setBadge('Synced', 'bg-emerald-500');
-            else {
+            if (resp && resp.authError) {
+                lockAppNow();
+            } else if (resp && resp.status === 'ok') {
+                if (resp.serverTimestamp) appData.serverTimestamp = Number(resp.serverTimestamp);
+                persistOfflineCache(false);
+                setBadge('Synced', 'bg-emerald-500');
+            } else if (resp && resp.status === 'conflict' && resp.latestData) {
+                applyRemoteState(resp.latestData);
+                setBadge('Synced', 'bg-emerald-500');
+                showAppAlert('Cloud database had newer changes from another session. Your view has been refreshed.');
+            } else {
                 hasPendingSave = true;
+                persistOfflineCache(true);
                 setBadge('Retry', 'bg-red-500');
             }
         })
         .catch(function() {
             hasPendingSave = true;
-            setBadge('Retry', 'bg-red-500');
+            persistOfflineCache(true);
+            setBadge('Offline', 'bg-red-500');
         })
         .finally(function() {
             if (typeof onFlushed === 'function') onFlushed();
@@ -2537,7 +2695,8 @@
             if (typeof doneCallback === 'function') doneCallback();
             return lockAppNow();
         }
-        if (hasPendingSave) {
+        if (hasPendingSave || localStorage.getItem(OFFLINE_DIRTY_KEY) === '1') {
+            hasPendingSave = true;
             flushPendingSaveNow(false, function() {
                 if (!hasPendingSave) {
                     syncFromSheet(doneCallback);
@@ -2553,11 +2712,7 @@
             return;
         }
         setBadge('Syncing', 'bg-amber-500 animate-pulse');
-        fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(sessionPin) + '&t=' + Date.now(), {
-            method: 'GET',
-            redirect: 'follow'
-        })
-        .then(function(res) { return res.json(); })
+        fetchCloudStatePost(sessionPin)
         .then(function(remote) {
             if (remote && remote.authError) {
                 lockAppNow();
@@ -2567,24 +2722,7 @@
                 setBadge('Retry', 'bg-amber-500');
                 return;
             }
-            if (remote && Array.isArray(remote.students)) {
-                appData = {
-                    theme: remote.theme || appData.theme || 'modern',
-                    subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
-                    students: remote.students || [],
-                    noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
-                    trash: remote.trash || []
-                };
-                applyThemeUI(appData.theme);
-                try { localStorage.setItem('jsmAppTheme', appData.theme); } catch (e) {}
-            }
-            purgeExpiredTrash();
-            normalizeAllStudentsData();
-            var nbEl = document.getElementById('noticeBoardInput');
-            if (nbEl && document.activeElement !== nbEl) {
-                nbEl.value = appData.noticeBoard || '';
-            }
-            refreshActiveViews();
+            applyRemoteState(remote);
             setBadge('Synced', 'bg-emerald-500');
         })
         .catch(function() {
@@ -2604,9 +2742,11 @@
         renderStudents();
         updateTrashCount();
 
+        hasPendingSave = true;
+        persistOfflineCache(true);
+
         if (!SHEET_API_URL || SHEET_API_URL.indexOf('http') !== 0) return;
         setBadge('Saving', 'bg-amber-500 animate-pulse');
-        hasPendingSave = true;
 
         clearTimeout(saveDebounceTimer);
         saveDebounceTimer = setTimeout(function() {
@@ -2614,7 +2754,7 @@
         }, 400);
     }
 
-    // --- NAVIGATION & CAPSULE DOCK (WITH DIRECTIONAL SWIPE & SPRING DOCK) ---
+    // --- NAVIGATION & CAPSULE DOCK ---
     function setDockActiveButton(tabName) {
         for (var i = 0; i < MAIN_TABS_ORDER.length; i++) {
             var t = MAIN_TABS_ORDER[i];
@@ -2823,7 +2963,7 @@
         }
 
         box.innerHTML = top5.map(function(ev) {
-            return '<div onclick="openStudentProfile(\'' + ev.stuId + '\')" class="touch-item px-4 py-3.5 flex items-center justify-between gap-3 cursor-pointer">' +
+            return '<div onclick="openStudentProfile(' + escJsArg(ev.stuId) + ')" class="touch-item px-4 py-3.5 flex items-center justify-between gap-3 cursor-pointer">' +
                 '<div class="min-w-0">' +
                     '<h4 class="text-xs font-bold text-zinc-900 truncate">' + escHtml(ev.title) + '</h4>' +
                     '<p class="text-[11px] text-zinc-400 truncate mt-0.5">' + escHtml(ev.sub) + '</p>' +
@@ -2832,8 +2972,7 @@
             '</div>';
         }).join('');
     }
-
-    // --- SUBJECTS (WITH RENAME & CASE-INSENSITIVE DUPLICATE CHECK) ---
+// --- SUBJECTS (WITH RENAME & CASE-INSENSITIVE DUPLICATE CHECK) ---
     function openAddSubjectModal() {
         document.getElementById('editSubjectIndexInput').value = '';
         document.getElementById('newSubjectNameInput').value = '';
@@ -2879,7 +3018,7 @@
                 return;
             }
             if (duplicateIdx !== -1 && duplicateIdx !== editIdx) {
-                alert('A subject with this name already exists.');
+                showAppAlert('A subject with this name already exists.');
                 return;
             }
             appData.subjects[editIdx] = sub;
@@ -2907,19 +3046,16 @@
     }
 
     function getAllKnownSubjects() {
-        var list = (appData.subjects || []).slice();
-        (appData.students || []).forEach(function(s) {
-            if (s.subject && !list.some(function(x) { return x.toLowerCase() === s.subject.toLowerCase(); })) {
-                list.push(s.subject);
-            }
-        });
-        return list;
+        return (appData.subjects || []).slice();
     }
 
-    function populateSubjectDropdowns() {
+    function populateSubjectDropdowns(extraSubject) {
         var modalSel = document.getElementById('newStuSubject');
         if (!modalSel) return;
         var list = getAllKnownSubjects();
+        if (extraSubject && !list.some(function(x) { return x.toLowerCase() === extraSubject.toLowerCase(); })) {
+            list.push(extraSubject);
+        }
         if (!list.length) {
             modalSel.innerHTML = '<option value="General Music">General Music</option>';
             return;
@@ -3014,7 +3150,7 @@
                 'class="touch-item ' + modClass + ' bg-white border border-zinc-200/80 p-4 rounded-[26px] cursor-pointer flex flex-col justify-between min-h-[122px] shadow-2xs">' +
                 '<div class="flex justify-between items-center gap-1">' +
                     '<span class="sub-badge-pill px-2.5 py-0.5 rounded-full bg-white/75 text-[10px] font-bold text-zinc-900">' + count + ' ' + (count === 1 ? 'Student' : 'Students') + '</span>' +
-                    '<button type="button" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="sub-menu-btn touch-item w-7 h-7 rounded-full bg-white/75 text-zinc-900 flex items-center justify-center text-xs font-bold">⋮</button>' +
+                    '<button type="button" aria-label="Subject options" onclick="event.stopPropagation(); openSubjectActionModal(' + idx + ');" class="sub-menu-btn touch-item w-7 h-7 rounded-full bg-white/75 text-zinc-900 flex items-center justify-center text-xs font-bold">⋮</button>' +
                 '</div>' +
                 '<div class="mt-3 flex items-end justify-between gap-2">' +
                     '<h3 class="font-extrabold text-zinc-900 text-base leading-snug truncate">' + escHtml(sub) + '</h3>' +
@@ -3058,10 +3194,7 @@
         if (!s) return;
         document.getElementById('editStuId').value = s.id;
         document.getElementById('newStuName').value = s.name;
-        if (appData.subjects.indexOf(s.subject) === -1) {
-            appData.subjects.push(s.subject);
-        }
-        populateSubjectDropdowns();
+        populateSubjectDropdowns(s.subject);
         document.getElementById('newStuSubject').value = s.subject;
         document.getElementById('newStuBook').value = s.book === 'None' ? '' : s.book;
         document.getElementById('studentModalTitle').textContent = 'Edit Student';
@@ -3111,10 +3244,10 @@
     }
 
     function openQuickAttendanceModal() {
-        if (!appData.students.length) return alert('Please add a student first.');
+        if (!appData.students.length) return showAppAlert('Please add a student first.');
         var sel = document.getElementById('quickAttStuSelect');
         sel.innerHTML = appData.students.map(function(s) {
-            return '<option value="' + s.id + '">' + formatStudentOptionLabel(s) + '</option>';
+            return '<option value="' + escHtml(s.id) + '">' + formatStudentOptionLabel(s) + '</option>';
         }).join('');
         document.getElementById('quickAttDate').value = todayStr;
         selectQuickAttPill('Present');
@@ -3270,8 +3403,7 @@
                 filterSubjects.map(function(sub) {
                     var isAct = selectedSubjectFilter === sub;
                     var cls = isAct ? 'bg-zinc-900 text-white font-bold' : 'bg-white border border-zinc-200 text-zinc-600 font-semibold';
-                    var safeArg = JSON.stringify(sub).replace(/"/g, '&quot;');
-                    return '<button type="button" onclick="setSubjectFilter(' + safeArg + ')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + cls + '">' + escHtml(sub) + '</button>';
+                    return '<button type="button" onclick="setSubjectFilter(' + escJsArg(sub) + ')" class="touch-item h-8 px-3.5 rounded-full text-xs shrink-0 ' + cls + '">' + escHtml(sub) + '</button>';
                 }).join('');
         }
 
@@ -3285,13 +3417,14 @@
         }
 
         grid.innerHTML = filtered.map(function(s) {
+            var safeStuId = escJsArg(s.id);
             return '<div ' +
-                'onclick="handleStuCardClick(\'' + s.id + '\')" ' +
-                'oncontextmenu="event.preventDefault(); openStudentActionModal(\'' + s.id + '\');" ' +
-                'onmousedown="startStuLongPress(\'' + s.id + '\')" ' +
+                'onclick="handleStuCardClick(' + safeStuId + ')" ' +
+                'oncontextmenu="event.preventDefault(); openStudentActionModal(' + safeStuId + ');" ' +
+                'onmousedown="startStuLongPress(' + safeStuId + ')" ' +
                 'onmouseup="cancelStuLongPress()" ' +
                 'onmouseleave="cancelStuLongPress()" ' +
-                'ontouchstart="startStuLongPress(\'' + s.id + '\')" ' +
+                'ontouchstart="startStuLongPress(' + safeStuId + ')" ' +
                 'ontouchend="cancelStuLongPress()" ' +
                 'ontouchcancel="cancelStuLongPress()" ' +
                 'ontouchmove="cancelStuLongPress()" ' +
@@ -3303,7 +3436,7 @@
                     '</div>' +
                     '<p class="text-xs text-zinc-400 truncate mt-0.5">' + escHtml(s.subject) + ' · Book: ' + escHtml(s.book) + '</p>' +
                 '</div>' +
-                '<button type="button" onclick="event.stopPropagation(); openStudentActionModal(\'' + s.id + '\');" class="touch-item w-8 h-8 rounded-full text-zinc-400 flex items-center justify-center text-sm shrink-0">⋮</button>' +
+                '<button type="button" aria-label="Student options" onclick="event.stopPropagation(); openStudentActionModal(' + safeStuId + ');" class="touch-item w-8 h-8 rounded-full text-zinc-400 flex items-center justify-center text-sm shrink-0">⋮</button>' +
             '</div>';
         }).join('');
     }
@@ -3392,11 +3525,12 @@
         var s = getActiveStudent();
         if (!s) return;
         var val = document.getElementById('stuNotes').value.trim();
-        if (!val) return alert('Notes box is already empty.');
-        if (!confirm('Move Class Notes for ' + s.name + ' to the 30-Day Trash?')) return;
-        document.getElementById('stuNotes').value = '';
-        s.notes = '';
-        moveToTrash('Class Note', s.id, s.name, val.slice(0, 80), val);
+        if (!val) return showAppAlert('Notes box is already empty.');
+        showAppConfirm('Move Class Notes for ' + s.name + ' to the 30-Day Trash?', function() {
+            document.getElementById('stuNotes').value = '';
+            s.notes = '';
+            moveToTrash('Class Note', s.id, s.name, val.slice(0, 80), val);
+        }, 'Move to Trash', true);
     }
 
     function saveNoticeBoard(force) {
@@ -3410,11 +3544,12 @@
     function trashNoticeBoard() {
         skipNoteBlur = false;
         var val = document.getElementById('noticeBoardInput').value.trim();
-        if (!val) return alert('Notice Board is already empty.');
-        if (!confirm('Move Notice Board content to the 30-Day Trash?')) return;
-        document.getElementById('noticeBoardInput').value = '';
-        appData.noticeBoard = '';
-        moveToTrash('Notice', null, 'Notice Board', val.slice(0, 80), val);
+        if (!val) return showAppAlert('Notice Board is already empty.');
+        showAppConfirm('Move Notice Board content to the 30-Day Trash?', function() {
+            document.getElementById('noticeBoardInput').value = '';
+            appData.noticeBoard = '';
+            moveToTrash('Notice', null, 'Notice Board', val.slice(0, 80), val);
+        }, 'Move to Trash', true);
     }
 
     // --- 30-DAY TRASH ---
@@ -3502,7 +3637,7 @@
         } else {
             var stu = appData.students.find(function(s) { return s.id === item.studentId; });
             if (!stu) {
-                alert('Please restore the student profile first.');
+                showAppAlert('Please restore the student profile first.');
                 appData.trash.unshift(item);
                 return;
             }
@@ -3525,18 +3660,26 @@
     }
 
     function deleteTrashPermanently(trashId) {
-        if (!confirm('PERMANENTLY delete this item from the app and Google Sheets? This cannot be undone.')) return;
-        appData.trash = appData.trash.filter(function(t) { return t.trashId !== trashId; });
-        saveAllData();
-        renderTrash();
+        showAppConfirm('PERMANENTLY delete this item from the app and Google Sheets? This cannot be undone.', function() {
+            appData.trash = appData.trash.filter(function(t) { return t.trashId !== trashId; });
+            if (appData.students.length === 0 && appData.trash.length === 0) {
+                allowNextEmptyReset = true;
+            }
+            saveAllData();
+            renderTrash();
+        }, 'Delete Forever', true);
     }
 
     function emptyAllTrash() {
-        if (!appData.trash || !appData.trash.length) return alert('Trash is already empty.');
-        if (!confirm('PERMANENTLY delete ALL items in Trash from Google Sheets? This cannot be undone.')) return;
-        appData.trash = [];
-        saveAllData();
-        renderTrash();
+        if (!appData.trash || !appData.trash.length) return showAppAlert('Trash is already empty.');
+        showAppConfirm('PERMANENTLY delete ALL items in Trash from Google Sheets? This cannot be undone.', function() {
+            appData.trash = [];
+            if (appData.students.length === 0) {
+                allowNextEmptyReset = true;
+            }
+            saveAllData();
+            renderTrash();
+        }, 'Empty All', true);
     }
 
     function renderTrash() {
@@ -3549,6 +3692,7 @@
         }
         emptyBtn.classList.remove('hidden');
         box.innerHTML = appData.trash.map(function(t) {
+            var safeTrashId = escJsArg(t.trashId);
             return '<div class="p-4 flex justify-between items-center gap-3">' +
                 '<div class="min-w-0 flex-1">' +
                     '<div class="flex items-center gap-2">' +
@@ -3559,8 +3703,8 @@
                     '<p class="text-[10px] text-zinc-400 mt-0.5">Expires ' + escHtml(t.expiresDate) + '</p>' +
                 '</div>' +
                 '<div class="flex items-center gap-1.5 shrink-0">' +
-                    '<button type="button" onclick="restoreTrashItem(\'' + t.trashId + '\')" class="touch-item h-8 bg-zinc-900 text-white px-3 rounded-full text-xs font-bold">Restore</button>' +
-                    '<button type="button" onclick="deleteTrashPermanently(\'' + t.trashId + '\')" class="touch-item h-8 bg-red-50 text-red-600 px-2.5 rounded-full text-xs font-bold">✕</button>' +
+                    '<button type="button" onclick="restoreTrashItem(' + safeTrashId + ')" class="touch-item h-8 bg-zinc-900 text-white px-3 rounded-full text-xs font-bold">Restore</button>' +
+                    '<button type="button" aria-label="Delete permanently" onclick="deleteTrashPermanently(' + safeTrashId + ')" class="touch-item h-8 bg-red-50 text-red-600 px-2.5 rounded-full text-xs font-bold">✕</button>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -3569,25 +3713,26 @@
     function removeSubRecord(stuId, col, id) {
         var s = appData.students.find(function(x) { return x.id === stuId; });
         if (!s) return;
-        var item = s[col].find(function(x) { return x.id == id; });
+        var item = s[col].find(function(x) { return String(x.id) === String(id); });
         if (!item) return;
-        if (!confirm('Move this entry to the 30-Day Trash?')) return;
-        s[col] = s[col].filter(function(x) { return x.id != id; });
+        showAppConfirm('Move this entry to the 30-Day Trash?', function() {
+            s[col] = s[col].filter(function(x) { return String(x.id) !== String(id); });
 
-        if (col === 'fees') syncStudentFeeSummary(s);
+            if (col === 'fees') syncStudentFeeSummary(s);
 
-        var kindMap = { attendance: 'Attendance', classes: 'Class', fees: 'Fee' };
-        var sum = col === 'attendance' ? (item.date + ' - ' + item.status) :
-                  col === 'classes' ? (item.date + ' - ' + (item.lesson || item.repertoire || 'Class')) :
-                  (item.date + ' - ' + item.type + ' (Paid: ₹' + item.amount + ')');
+            var kindMap = { attendance: 'Attendance', classes: 'Class', fees: 'Fee' };
+            var sum = col === 'attendance' ? (item.date + ' - ' + item.status) :
+                      col === 'classes' ? (item.date + ' - ' + (item.lesson || item.repertoire || 'Class')) :
+                      (item.date + ' - ' + item.type + ' (Paid: ₹' + item.amount + ')');
 
-        moveToTrash(kindMap[col], s.id, s.name, sum, item);
-        if (currentStudentId === stuId) {
-            refreshStudentProfileData(stuId);
-        } else {
-            renderMasterAttendance();
-            renderMasterFees();
-        }
+            moveToTrash(kindMap[col], s.id, s.name, sum, item);
+            if (currentStudentId === stuId) {
+                refreshStudentProfileData(stuId);
+            } else {
+                renderMasterAttendance();
+                renderMasterFees();
+            }
+        }, 'Move to Trash', true);
     }
 
     // --- ATTENDANCE & PILL CALENDAR STRIP ---
@@ -3610,7 +3755,7 @@
 
             if (isSelected) {
                 html.push(
-                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md scale-105">' +
+                    '<button type="button" onclick="onPickAttendanceDate(' + escJsArg(iso) + ')" class="touch-item bg-zinc-900 text-white rounded-full py-2.5 flex flex-col items-center gap-1 shadow-md scale-105">' +
                         '<span class="w-1 h-1 rounded-full bg-current"></span>' +
                         '<span class="text-[10px] opacity-80">' + dayNames[d.getDay()] + '</span>' +
                         '<span class="text-xs font-extrabold">' + d.getDate() + '</span>' +
@@ -3618,7 +3763,7 @@
                 );
             } else {
                 html.push(
-                    '<button type="button" onclick="onPickAttendanceDate(\'' + iso + '\')" class="touch-item bg-white border border-zinc-200/80 rounded-full py-2.5 flex flex-col items-center gap-1 text-zinc-500">' +
+                    '<button type="button" onclick="onPickAttendanceDate(' + escJsArg(iso) + ')" class="touch-item bg-white border border-zinc-200/80 rounded-full py-2.5 flex flex-col items-center gap-1 text-zinc-500">' +
                         '<span class="w-1 h-1 rounded-full bg-zinc-300"></span>' +
                         '<span class="text-[10px]">' + dayNames[d.getDay()] + '</span>' +
                         '<span class="text-xs font-bold text-zinc-900">' + d.getDate() + '</span>' +
@@ -3631,6 +3776,7 @@
 
     function onPickAttendanceDate(dateVal) {
         selectedAttDate = dateVal;
+        attVisibleLimit = REGISTER_PAGE_SIZE;
         document.getElementById('regAttDate').value = dateVal;
         renderWeekStrip();
         var list = document.getElementById('masterAttList');
@@ -3644,6 +3790,7 @@
 
     function clearAttDateFilter() {
         selectedAttDate = '';
+        attVisibleLimit = REGISTER_PAGE_SIZE;
         document.getElementById('regAttDate').value = '';
         renderWeekStrip();
         renderMasterAttendance();
@@ -3651,6 +3798,7 @@
 
     function setAttStatusFilter(st) {
         selectedAttStatus = st;
+        attVisibleLimit = REGISTER_PAGE_SIZE;
         ['ALL', 'Present', 'Absent', 'Tardy', 'Rescheduled'].forEach(function(k) {
             var btn = document.getElementById('afilt-' + k);
             if (!btn) return;
@@ -3665,6 +3813,11 @@
             void list.offsetWidth;
             list.classList.add('animate-view');
         }
+        renderMasterAttendance();
+    }
+
+    function loadMoreMasterAttendance() {
+        attVisibleLimit += REGISTER_PAGE_SIZE;
         renderMasterAttendance();
     }
 
@@ -3689,7 +3842,7 @@
 
     function openEditAttendanceModal(stuId, attId) {
         var s = appData.students.find(function(x) { return x.id === stuId; });
-        var a = (s ? s.attendance || [] : []).find(function(x) { return x.id == attId; });
+        var a = (s ? s.attendance || [] : []).find(function(x) { return String(x.id) === String(attId); });
         if (!a) return;
         document.getElementById('editAttStuId').value = stuId;
         document.getElementById('editAttId').value = a.id;
@@ -3709,7 +3862,7 @@
         var stuId = document.getElementById('editAttStuId').value;
         var attId = document.getElementById('editAttId').value;
         var s = appData.students.find(function(x) { return x.id === stuId; });
-        var a = (s ? s.attendance || [] : []).find(function(x) { return x.id == attId; });
+        var a = (s ? s.attendance || [] : []).find(function(x) { return String(x.id) === String(attId); });
         if (a) {
             a.date = document.getElementById('editAttDate').value;
             a.status = document.getElementById('editAttStatus').value;
@@ -3730,8 +3883,10 @@
         if (!(s.attendance || []).length) {
             list.innerHTML = '<div class="p-6 text-center text-xs text-zinc-400">No attendance logged yet.</div>';
         } else {
+            var safeStuId = escJsArg(s.id);
             list.innerHTML = (s.attendance || []).map(function(a) {
                 counts[a.status] = (counts[a.status] || 0) + 1;
+                var safeAttId = escJsArg(a.id);
                 return '<div class="px-4 py-3 flex justify-between items-center text-xs">' +
                     '<div>' +
                         '<div class="flex items-center gap-2">' +
@@ -3741,8 +3896,8 @@
                         (a.remarks ? '<p class="text-zinc-400 mt-0.5">' + escHtml(a.remarks) + '</p>' : '') +
                     '</div>' +
                     '<div class="flex items-center gap-1">' +
-                        '<button type="button" onclick="openEditAttendanceModal(\'' + s.id + '\', ' + a.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
-                        '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'attendance\', ' + a.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
+                        '<button type="button" aria-label="Edit attendance" onclick="openEditAttendanceModal(' + safeStuId + ', ' + safeAttId + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
+                        '<button type="button" aria-label="Delete attendance" onclick="removeSubRecord(' + safeStuId + ', \'attendance\', ' + safeAttId + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
                     '</div>' +
                 '</div>';
             }).join('');
@@ -3772,9 +3927,12 @@
             return;
         }
 
-        list.innerHTML = rows.slice(0, 100).map(function(r) {
+        var visibleRows = rows.slice(0, attVisibleLimit);
+        var html = visibleRows.map(function(r) {
+            var safeStuId = escJsArg(r.stuId);
+            var safeAttId = escJsArg(r.id);
             return '<div class="px-4 py-3.5 flex justify-between items-center gap-3">' +
-                '<div onclick="openStudentProfile(\'' + r.stuId + '\')" class="touch-item cursor-pointer min-w-0 flex-1">' +
+                '<div onclick="openStudentProfile(' + safeStuId + ')" class="touch-item cursor-pointer min-w-0 flex-1">' +
                     '<div class="flex items-center gap-2">' +
                         '<h4 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(r.stuName) + '</h4>' +
                         statusBadge(r.status) +
@@ -3782,11 +3940,20 @@
                     '<p class="text-xs text-zinc-400 mt-0.5">' + escHtml(r.date) + ' · ' + escHtml(r.stuSub) + (r.remarks ? ' · ' + escHtml(r.remarks) : '') + '</p>' +
                 '</div>' +
                 '<div class="flex items-center gap-1 shrink-0">' +
-                    '<button type="button" onclick="openEditAttendanceModal(\'' + r.stuId + '\', ' + r.id + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
-                    '<button type="button" onclick="removeSubRecord(\'' + r.stuId + '\', \'attendance\', ' + r.id + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
+                    '<button type="button" aria-label="Edit attendance" onclick="openEditAttendanceModal(' + safeStuId + ', ' + safeAttId + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
+                    '<button type="button" aria-label="Delete attendance" onclick="removeSubRecord(' + safeStuId + ', \'attendance\', ' + safeAttId + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
                 '</div>' +
             '</div>';
         }).join('');
+
+        if (rows.length > attVisibleLimit) {
+            var remaining = rows.length - attVisibleLimit;
+            html += '<div class="p-3 text-center">' +
+                '<button type="button" onclick="loadMoreMasterAttendance()" class="touch-item h-9 px-4 rounded-full bg-zinc-100 text-zinc-700 font-bold text-xs">Load More (' + remaining + ' remaining)</button>' +
+            '</div>';
+        }
+
+        list.innerHTML = html;
     }
 
     // --- DAILY CLASSES ---
@@ -3814,7 +3981,7 @@
 
     function openEditClassModal(stuId, clsId) {
         var s = appData.students.find(function(x) { return x.id === stuId; });
-        var c = (s ? s.classes || [] : []).find(function(x) { return x.id == clsId; });
+        var c = (s ? s.classes || [] : []).find(function(x) { return String(x.id) === String(clsId); });
         if (!c) return;
         document.getElementById('editClsStuId').value = stuId;
         document.getElementById('editClsId').value = c.id;
@@ -3835,7 +4002,7 @@
         var stuId = document.getElementById('editClsStuId').value;
         var clsId = document.getElementById('editClsId').value;
         var s = appData.students.find(function(x) { return x.id === stuId; });
-        var c = (s ? s.classes || [] : []).find(function(x) { return x.id == clsId; });
+        var c = (s ? s.classes || [] : []).find(function(x) { return String(x.id) === String(clsId); });
         if (c) {
             c.date = document.getElementById('editClsDate').value;
             c.technique = document.getElementById('editClsTech').value.trim();
@@ -3855,13 +4022,15 @@
             box.innerHTML = '<div class="p-6 text-center text-zinc-400 text-xs">No classes logged yet.</div>';
             return;
         }
+        var safeStuId = escJsArg(s.id);
         box.innerHTML = (s.classes || []).map(function(c) {
+            var safeClsId = escJsArg(c.id);
             return '<div class="p-4 text-xs space-y-1">' +
                 '<div class="flex justify-between items-center font-bold text-zinc-900 pb-1">' +
                     '<span>' + escHtml(c.date) + '</span>' +
                     '<div class="flex items-center gap-1">' +
-                        '<button type="button" onclick="openEditClassModal(\'' + s.id + '\', ' + c.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
-                        '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'classes\', ' + c.id + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
+                        '<button type="button" aria-label="Edit class" onclick="openEditClassModal(' + safeStuId + ', ' + safeClsId + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
+                        '<button type="button" aria-label="Delete class" onclick="removeSubRecord(' + safeStuId + ', \'classes\', ' + safeClsId + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
                     '</div>' +
                 '</div>' +
                 '<div class="text-zinc-600"><span class="text-zinc-400">Technique:</span> ' + escHtml(c.technique || '-') + '</div>' +
@@ -3873,15 +4042,15 @@
 
     // --- FEES ---
     function openFeeModal(preselectedStuId, editFeeId) {
-        if (!appData.students.length) return alert('Please add a student first.');
+        if (!appData.students.length) return showAppAlert('Please add a student first.');
         var sel = document.getElementById('feeStuSelect');
         sel.innerHTML = appData.students.map(function(s) {
-            return '<option value="' + s.id + '" ' + (s.id === preselectedStuId ? 'selected' : '') + '>' + formatStudentOptionLabel(s) + '</option>';
+            return '<option value="' + escHtml(s.id) + '" ' + (s.id === preselectedStuId ? 'selected' : '') + '>' + formatStudentOptionLabel(s) + '</option>';
         }).join('');
 
         if (editFeeId && preselectedStuId) {
             var s = appData.students.find(function(x) { return x.id === preselectedStuId; });
-            var f = (s ? s.fees || [] : []).find(function(x) { return x.id === editFeeId; });
+            var f = (s ? s.fees || [] : []).find(function(x) { return String(x.id) === String(editFeeId); });
             if (f) {
                 document.getElementById('feeModalTitle').textContent = 'Edit Fee';
                 document.getElementById('editFeeId').value = f.id;
@@ -3937,7 +4106,7 @@
         var stuId = document.getElementById('feeStuSelect').value;
         var rawAmt = document.getElementById('feeAmountInput').value;
         var date = document.getElementById('feeDateInput').value;
-        if (!stuId || rawAmt === '' || !date) return alert('Please fill in Student, Date, and Amount Paid.');
+        if (!stuId || rawAmt === '' || !date) return showAppAlert('Please fill in Student, Date, and Amount Paid.');
 
         var numAmt = Math.max(0, Number(rawAmt || 0));
         var amount = String(Math.round(numAmt * 100) / 100);
@@ -3961,7 +4130,7 @@
         var targetFeeId = editFeeId;
 
         if (editFeeId) {
-            var existing = (s.fees || []).find(function(x) { return x.id === editFeeId; });
+            var existing = (s.fees || []).find(function(x) { return String(x.id) === String(editFeeId); });
             if (existing) {
                 existing.type = type;
                 existing.status = status;
@@ -4014,7 +4183,9 @@
         }
 
         var box = document.getElementById('stuFeeList');
+        var safeStuId = escJsArg(s.id);
         box.innerHTML = (s.fees || []).map(function(f) {
+            var safeFeeId = escJsArg(f.id);
             var subText = f.type === 'Monthly Fee' && f.month ? (f.type + ' (' + formatMonthYear(f.month) + ')') : f.type;
             var dueLine = f.dueAmount && Number(f.dueAmount) > 0 ? ' · <span class="text-red-500 font-bold">Due ₹' + escHtml(f.dueAmount) + '</span>' : '';
             return '<div class="p-4 flex justify-between items-center gap-3 text-xs">' +
@@ -4024,12 +4195,17 @@
                     (f.remarks ? '<div class="text-zinc-400 mt-0.5">' + escHtml(f.remarks) + '</div>' : '') +
                 '</div>' +
                 '<div class="flex items-center gap-1.5 shrink-0">' +
-                    '<button type="button" onclick="downloadReceipt(\'' + s.id + '\', \'' + f.id + '\')" class="touch-item h-7 px-3 rounded-full bg-zinc-100 text-zinc-800 text-[11px] font-bold">Share PDF</button>' +
-                    '<button type="button" onclick="openFeeModal(\'' + s.id + '\', \'' + f.id + '\')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
-                    '<button type="button" onclick="removeSubRecord(\'' + s.id + '\', \'fees\', \'' + f.id + '\')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
+                    '<button type="button" onclick="downloadReceipt(' + safeStuId + ', ' + safeFeeId + ')" class="touch-item h-7 px-3 rounded-full bg-zinc-100 text-zinc-800 text-[11px] font-bold">Share PDF</button>' +
+                    '<button type="button" aria-label="Edit fee" onclick="openFeeModal(' + safeStuId + ', ' + safeFeeId + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✎</button>' +
+                    '<button type="button" aria-label="Delete fee" onclick="removeSubRecord(' + safeStuId + ', \'fees\', ' + safeFeeId + ')" class="touch-item w-7 h-7 rounded-lg text-zinc-400">✕</button>' +
                 '</div>' +
             '</div>';
         }).join('');
+    }
+
+    function loadMoreMasterFees() {
+        feeVisibleLimit += REGISTER_PAGE_SIZE;
+        renderMasterFees();
     }
 
     function renderMasterFees() {
@@ -4051,11 +4227,14 @@
             return;
         }
 
-        box.innerHTML = allFees.slice(0, 100).map(function(f) {
+        var visibleFees = allFees.slice(0, feeVisibleLimit);
+        var html = visibleFees.map(function(f) {
+            var safeStuId = escJsArg(f.stuId);
+            var safeFeeId = escJsArg(f.id);
             var subText = f.type === 'Monthly Fee' && f.month ? (f.type + ' (' + formatMonthYear(f.month) + ')') : f.type;
             var dueLine = f.dueAmount && Number(f.dueAmount) > 0 ? ' · <span class="text-red-500 font-bold">Due ₹' + escHtml(f.dueAmount) + '</span>' : '';
             return '<div class="p-4 flex justify-between items-center gap-3">' +
-                '<div onclick="openStudentProfile(\'' + f.stuId + '\')" class="touch-item cursor-pointer min-w-0 flex-1">' +
+                '<div onclick="openStudentProfile(' + safeStuId + ')" class="touch-item cursor-pointer min-w-0 flex-1">' +
                     '<div class="flex items-center gap-2">' +
                         '<h4 class="font-bold text-zinc-900 text-sm truncate">' + escHtml(f.stuName) + '</h4>' +
                         feeStatusBadge(f.status || 'Paid', f.dueAmount) +
@@ -4064,23 +4243,32 @@
                     '<p class="text-[11px] text-zinc-400 mt-0.5">' + escHtml(f.id) + ' · ' + escHtml(f.date) + '</p>' +
                 '</div>' +
                 '<div class="flex items-center gap-1 shrink-0">' +
-                    '<button type="button" onclick="downloadReceipt(\'' + f.stuId + '\', \'' + f.id + '\')" class="touch-item h-8 bg-zinc-900 text-white px-3.5 rounded-full text-xs font-bold">Share</button>' +
-                    '<button type="button" onclick="openFeeModal(\'' + f.stuId + '\', \'' + f.id + '\')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
-                    '<button type="button" onclick="removeSubRecord(\'' + f.stuId + '\', \'fees\', \'' + f.id + '\')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
+                    '<button type="button" onclick="downloadReceipt(' + safeStuId + ', ' + safeFeeId + ')" class="touch-item h-8 bg-zinc-900 text-white px-3.5 rounded-full text-xs font-bold">Share</button>' +
+                    '<button type="button" aria-label="Edit fee" onclick="openFeeModal(' + safeStuId + ', ' + safeFeeId + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✎</button>' +
+                    '<button type="button" aria-label="Delete fee" onclick="removeSubRecord(' + safeStuId + ', \'fees\', ' + safeFeeId + ')" class="touch-item w-8 h-8 rounded-lg text-zinc-400 text-xs">✕</button>' +
                 '</div>' +
             '</div>';
         }).join('');
+
+        if (allFees.length > feeVisibleLimit) {
+            var remaining = allFees.length - feeVisibleLimit;
+            html += '<div class="p-3 text-center">' +
+                '<button type="button" onclick="loadMoreMasterFees()" class="touch-item h-9 px-4 rounded-full bg-zinc-100 text-zinc-700 font-bold text-xs">Load More (' + remaining + ' remaining)</button>' +
+            '</div>';
+        }
+
+        box.innerHTML = html;
     }
 
-    // --- PDF RECEIPT GENERATOR (CUMULATIVE DEBT, FORMATTED MONTH, SAFE BOUNDS) ---
+    // --- PDF RECEIPT GENERATOR (CUMULATIVE DEBT, FORMATTED MONTH, SANITIZED FILENAME) ---
     function downloadReceipt(stuId, feeId) {
         if (!window.jspdf || !window.jspdf.jsPDF) {
-            alert('PDF library is still loading. Please check your internet connection and try again.');
+            showAppAlert('PDF library is still loading. Please check your internet connection and try again.');
             return;
         }
         var s = appData.students.find(function(st) { return st.id === stuId; });
         if (!s) return;
-        var f = (s.fees || []).find(function(item) { return item.id === feeId; });
+        var f = (s.fees || []).find(function(item) { return String(item.id) === String(feeId); });
         if (!f) return;
 
         syncStudentFeeSummary(s);
@@ -4183,7 +4371,10 @@
         doc.setTextColor(130, 130, 130);
         doc.text("Thank you! — JSM APP (An Official App For Joy's School Of Music)", 105, 134, { align: 'center' });
 
-        var fileName = 'JSM_Receipt_' + s.name.replace(/\s+/g, '_') + '_' + f.date + '.pdf';
+        var safeName = String(s.name || 'Student').replace(/[^a-zA-Z0-9_-]+/g, '_').replace(/^_+|_+$/g, '') || 'Student';
+        var safeDate = String(f.date || todayStr).replace(/[^0-9-]+/g, '');
+        var fileName = 'JSM_Receipt_' + safeName + '_' + safeDate + '.pdf';
+
         if (typeof AndroidPDF !== 'undefined' && AndroidPDF.sharePDF) {
             AndroidPDF.sharePDF(doc.output('datauristring'), fileName);
         } else {
