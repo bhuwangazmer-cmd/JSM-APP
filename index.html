@@ -1304,13 +1304,13 @@
         </div>
     </div>
 </div>
-
 <script>
     // GOOGLE APPS SCRIPT /exec LINK:
     var SHEET_API_URL = "https://script.google.com/macros/s/AKfycbyNo6KRKNTGP8d0A-If4p7w9ZKWcNNXbCZ6Aduh2rnkwpScI3K8ApEcmjxLWqyHJ5IwtQ/exec";
 
     // 2-Hour Session Timeout (in milliseconds)
     var SESSION_TIMEOUT_MS = 2 * 60 * 60 * 1000;
+    var PIN_CIPHER_SALT = "JSM_EST2022_KEY";
     var OFFLINE_CACHE_KEY = "jsmOfflineDataCacheV2";
     var OFFLINE_DIRTY_KEY = "jsmHasPendingCloudSync";
 
@@ -1397,15 +1397,20 @@
             .replace(/'/g, '&#39;');
     }
 
-    // Safe JS string literal encoder for inline onclick handlers
+    // Safe JS string literal encoder for double-quoted inline onclick="..." handlers
     function escJsArg(val) {
         if (val === null || val === undefined) return "''";
-        return "'" + String(val)
+        var jsEscaped = String(val)
             .replace(/\\/g, '\\\\')
             .replace(/'/g, "\\'")
-            .replace(/"/g, '&quot;')
             .replace(/\r/g, '')
-            .replace(/\n/g, '\\n') + "'";
+            .replace(/\n/g, '\\n');
+        var attrSafe = jsEscaped
+            .replace(/&/g, '&amp;')
+            .replace(/"/g, '&quot;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
+        return "'" + attrSafe + "'";
     }
 
     function formatMonthYear(ym) {
@@ -1454,6 +1459,7 @@
 
     // Custom Non-Blocking Bottom-Sheet Alert & Confirm Helpers
     function showAppAlert(message, title) {
+        dismissActiveKeyboard();
         var modal = document.getElementById('appDialogModal');
         var sheet = document.getElementById('appDialogSheet');
         document.getElementById('appDialogTitle').textContent = title || 'Notice';
@@ -1474,6 +1480,7 @@
     }
 
     function showAppConfirm(message, onConfirm, confirmLabel, isDestructive) {
+        dismissActiveKeyboard();
         var modal = document.getElementById('appDialogModal');
         var sheet = document.getElementById('appDialogSheet');
         document.getElementById('appDialogTitle').textContent = 'Please Confirm';
@@ -1516,19 +1523,42 @@
         }, 200);
     }
 
-    // Session PIN Storage (kept in sessionStorage so closing browser clears plaintext PIN)
+    // Scrambled 2-Hour Session Token Helpers
+    function encodePinForStorage(pinStr) {
+        try {
+            var out = [];
+            for (var i = 0; i < pinStr.length; i++) {
+                out.push(pinStr.charCodeAt(i) ^ PIN_CIPHER_SALT.charCodeAt(i % PIN_CIPHER_SALT.length));
+            }
+            return btoa(out.join('.'));
+        } catch (e) { return ''; }
+    }
+
+    function decodePinFromStorage(encoded) {
+        try {
+            if (!encoded) return '';
+            var parts = atob(encoded).split('.');
+            var out = '';
+            for (var i = 0; i < parts.length; i++) {
+                out += String.fromCharCode(Number(parts[i]) ^ PIN_CIPHER_SALT.charCodeAt(i % PIN_CIPHER_SALT.length));
+            }
+            return /^\d{4}$/.test(out) ? out : '';
+        } catch (e) { return ''; }
+    }
+
     function saveSessionPinToken(pinStr) {
         try {
-            sessionStorage.setItem('jsmActivePin', pinStr);
+            localStorage.setItem('jsmSessionToken', encodePinForStorage(pinStr));
             localStorage.setItem('jsmLastActiveMs', String(Date.now()));
         } catch (e) {}
     }
 
     function getStoredSessionPin() {
         try {
-            var pin = sessionStorage.getItem('jsmActivePin') || '';
-            return /^\d{4}$/.test(pin) ? pin : '';
-        } catch (e) { return ''; }
+            var enc = localStorage.getItem('jsmSessionToken') || '';
+            if (enc) return decodePinFromStorage(enc);
+        } catch (e) {}
+        return '';
     }
 
     // Offline Cache Persistence Helpers
@@ -1585,6 +1615,7 @@
             var savedTheme = localStorage.getItem('jsmAppTheme');
             if (savedTheme) applyThemeUI(savedTheme);
             else applyThemeUI('modern');
+            hasPendingSave = (localStorage.getItem(OFFLINE_DIRTY_KEY) === '1');
         } catch (e) {}
         initDriveLogo();
         updateDynamicGreeting();
@@ -2107,7 +2138,12 @@
             var savedPin = getStoredSessionPin();
             var lastMs = Number(localStorage.getItem('jsmLastActiveMs') || '0');
             if (!savedPin || !lastMs) return true;
-            return (Date.now() - lastMs) > SESSION_TIMEOUT_MS;
+            var expired = (Date.now() - lastMs) > SESSION_TIMEOUT_MS;
+            if (expired) {
+                localStorage.removeItem('jsmSessionToken');
+                localStorage.removeItem('jsmLastActiveMs');
+            }
+            return expired;
         } catch (e) {
             return true;
         }
@@ -2122,6 +2158,8 @@
                 if (cached) {
                     appData = cached;
                     normalizeAllStudentsData();
+                    refreshActiveViews();
+                } else {
                     refreshActiveViews();
                 }
                 if (localStorage.getItem(OFFLINE_DIRTY_KEY) === '1') {
@@ -2167,7 +2205,7 @@
             localStorage.removeItem('jsmSessionToken');
             localStorage.removeItem('jsmSessionPin');
             localStorage.removeItem('jsmLastActiveMs');
-            if (!hasPendingSave) {
+            if (!hasPendingSave && localStorage.getItem(OFFLINE_DIRTY_KEY) !== '1') {
                 localStorage.removeItem(OFFLINE_CACHE_KEY);
             }
         } catch (e) {}
@@ -2226,24 +2264,22 @@
         });
     }
 
-    // Secure POST-based read so the PIN is never exposed in URLs
-    function fetchCloudStatePost(pinToUse) {
-        return fetch(SHEET_API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'read', pin: pinToUse }),
+    // Compatible with both original and upgraded code.gs (never triggers an accidental write)
+    function fetchCloudState(pinToUse) {
+        return fetch(SHEET_API_URL + '?pin=' + encodeURIComponent(pinToUse) + '&t=' + Date.now(), {
+            method: 'GET',
             redirect: 'follow'
         }).then(function(res) { return res.json(); });
     }
 
     function applyRemoteState(remote) {
-        if (!remote || !Array.isArray(remote.students)) return;
+        if (!remote || typeof remote !== 'object') return;
         appData = {
             theme: remote.theme || appData.theme || 'modern',
             subjects: Array.isArray(remote.subjects) ? remote.subjects : DEFAULT_SUBJECTS.slice(),
-            students: remote.students || [],
+            students: Array.isArray(remote.students) ? remote.students : [],
             noticeBoard: remote.noticeBoard !== undefined ? remote.noticeBoard : (remote.generalNotes || ''),
-            trash: remote.trash || [],
+            trash: Array.isArray(remote.trash) ? remote.trash : [],
             serverTimestamp: Number(remote.serverTimestamp || 0)
         };
         applyThemeUI(appData.theme);
@@ -2251,10 +2287,6 @@
         purgeExpiredTrash();
         normalizeAllStudentsData();
         persistOfflineCache(false);
-        var nbEl = document.getElementById('noticeBoardInput');
-        if (nbEl && document.activeElement !== nbEl) {
-            nbEl.value = appData.noticeBoard || '';
-        }
         refreshActiveViews();
     }
 
@@ -2269,7 +2301,7 @@
         st.textContent = 'Verifying PIN...';
         st.className = 'text-xs text-amber-600 font-semibold mt-1';
 
-        fetchCloudStatePost(candidatePin)
+        fetchCloudState(candidatePin)
         .then(function(remote) {
             isVerifyingPin = false;
             if (remote && remote.authError) {
@@ -2423,7 +2455,7 @@
         if (st) st.textContent = '🔄 Fetching live data from Google Sheets...';
         if (icon) icon.classList.add('animate-spin');
 
-        fetchCloudStatePost(sessionPin)
+        fetchCloudState(sessionPin)
         .then(function(remote) {
             if (remote && remote.authError) return lockAppNow();
             if (remote && remote.status === 'error') {
@@ -2616,6 +2648,10 @@
     }
 
     function refreshActiveViews() {
+        var nbEl = document.getElementById('noticeBoardInput');
+        if (nbEl && document.activeElement !== nbEl) {
+            nbEl.value = appData.noticeBoard || '';
+        }
         populateSubjectDropdowns();
         renderCategories();
         renderRecentActivity();
@@ -2652,7 +2688,6 @@
         allowNextEmptyReset = false;
 
         var bodyStr = JSON.stringify(payloadToSave);
-        // Avoid browser 64KB keepalive failure on large payloads; Offline Cache guarantees recovery on next open
         var safeKeepAlive = !!useKeepAlive && bodyStr.length < 60000;
 
         fetch(SHEET_API_URL, {
@@ -2712,7 +2747,7 @@
             return;
         }
         setBadge('Syncing', 'bg-amber-500 animate-pulse');
-        fetchCloudStatePost(sessionPin)
+        fetchCloudState(sessionPin)
         .then(function(remote) {
             if (remote && remote.authError) {
                 lockAppNow();
@@ -2972,6 +3007,7 @@
             '</div>';
         }).join('');
     }
+
 // --- SUBJECTS (WITH RENAME & CASE-INSENSITIVE DUPLICATE CHECK) ---
     function openAddSubjectModal() {
         document.getElementById('editSubjectIndexInput').value = '';
